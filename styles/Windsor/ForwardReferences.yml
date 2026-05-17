@@ -1,0 +1,15 @@
+extends: existence
+message: "'%s' assumes the reader is reading the whole page top-to-bottom. Rewrite so the paragraph stands alone — agents and search results fetch single sections, not whole pages."
+level: warning
+ignorecase: true
+tokens:
+  - as we (will|'ll) see
+  - as (we|you) saw (above|below|earlier)
+  - as (mentioned|discussed|noted) (above|below|earlier|later)
+  - (described|covered|explained) (above|below|earlier|later)
+  - see (above|below)
+  - in the (next|previous) section
+  - earlier in (this|the) (page|document)
+  - later in (this|the) (page|document)
+  - the section (above|below)
+  - we('ll| will) come back to

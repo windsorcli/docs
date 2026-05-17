@@ -1,0 +1,109 @@
+version: "3"
+
+# Local docs-quality runner. Mirrors what .github/workflows/docs-quality.yml
+# runs in CI so contributors can catch issues before pushing.
+#
+#   task install   – install all linters (brew + npm globals)
+#   task sync      – `vale sync` to download Microsoft style pack
+#   task lint      – run every linter in sequence (fails fast)
+#   task lint:<x>  – run a single linter
+#   task fmt       – auto-fix what can be auto-fixed (markdownlint)
+#
+# Pinned versions match what CI installs. Bumping them is a single-PR
+# change here + the matching pin in .github/workflows/docs-quality.yml.
+
+vars:
+  MARKDOWNLINT_VERSION: 0.14.0
+  CSPELL_VERSION: 8.14.4
+  ALEX_VERSION: 11.0.1
+
+tasks:
+
+  default:
+    desc: "Show available tasks"
+    cmds:
+      - task --list
+
+  install:
+    desc: "Install all docs-quality tools (brew + npm globals)"
+    cmds:
+      - task: install:brew
+      - task: install:npm
+      - task: sync
+      - echo "✓ all tools installed. Run 'task lint' to validate."
+
+  install:brew:
+    desc: "Install Vale and lychee via Homebrew"
+    cmds:
+      - brew list vale &>/dev/null || brew install vale
+      - brew list lychee &>/dev/null || brew install lychee
+    status:
+      - brew list vale &>/dev/null
+      - brew list lychee &>/dev/null
+
+  install:npm:
+    desc: "Install Node-based linters as global npm packages"
+    cmds:
+      - npm install -g markdownlint-cli2@{{.MARKDOWNLINT_VERSION}}
+      - npm install -g cspell@{{.CSPELL_VERSION}}
+      - npm install -g alex@{{.ALEX_VERSION}}
+
+  sync:
+    desc: "Download Vale style packs (Microsoft) into styles/"
+    cmds:
+      - vale sync
+
+  lint:
+    desc: "Run every docs-quality check (the full CI suite)"
+    cmds:
+      - task: lint:markdown
+      - task: lint:vale
+      - task: lint:spell
+      - task: lint:links
+      - task: lint:alex
+      - task: lint:frontmatter
+
+  lint:markdown:
+    desc: "markdownlint — structural + formatting rules"
+    cmds:
+      - markdownlint-cli2 "**/*.md" "#node_modules"
+
+  lint:vale:
+    desc: "Vale — prose, voice, terminology"
+    cmds:
+      - vale .
+
+  lint:spell:
+    desc: "cspell — spelling against Windsor.dic"
+    cmds:
+      - cspell --no-progress "**/*.md"
+
+  lint:links:
+    desc: "lychee — link checker (skips /docs/* per lychee.toml)"
+    cmds:
+      - lychee --config lychee.toml --no-progress '**/*.md'
+
+  lint:alex:
+    desc: "alex — inclusive language"
+    cmds:
+      - alex --quiet '**/*.md'
+
+  lint:frontmatter:
+    desc: "Every page has title + description (≤160 chars)"
+    cmds:
+      - ./scripts/check-frontmatter.sh
+
+  fmt:
+    desc: "Auto-fix markdownlint issues in place"
+    cmds:
+      - markdownlint-cli2 --fix "**/*.md" "#node_modules"
+
+  sweep:
+    desc: "Tear down any active windsor lifecycle and remove its artifacts"
+    cmds:
+      # Best-effort teardown: if no context is active or windsor isn't on
+      # PATH, `windsor down` errors — that's fine, keep going.
+      - cmd: windsor down
+        ignore_error: true
+      - rm -rf .scratch .windsor contexts
+      - rm -f windsor.yaml

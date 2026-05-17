@@ -1,0 +1,26 @@
+extends: existence
+message: "Drop '%s' — Windsor docs avoid marketing words. Show, don't tell."
+level: warning
+ignorecase: true
+tokens:
+  - blazingly
+  - cutting-edge
+  - effortless(ly)?
+  - epic
+  - first-class
+  - game-?changer
+  - leverages?
+  - magical
+  - magic
+  - next-generation
+  - powerful
+  - revolutionary
+  - robust
+  - seamless(ly)?
+  - simple
+  - simply
+  - state-of-the-art
+  - super
+  - turn-key
+  - utili[sz]es?
+  - world-class

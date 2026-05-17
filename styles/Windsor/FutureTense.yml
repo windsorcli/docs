@@ -1,0 +1,11 @@
+extends: existence
+message: "'%s' suggests future tense — describe what the docs cover now, link an issue for what's coming."
+level: suggestion
+ignorecase: true
+tokens:
+  - will be added
+  - will support
+  - will eventually
+  - coming soon
+  - in a future release
+  - in the future

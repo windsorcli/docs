@@ -1,0 +1,19 @@
+extends: existence
+message: "'%s' weakens the claim — be specific or remove."
+level: suggestion
+ignorecase: true
+tokens:
+  - basically
+  - clearly
+  - essentially
+  - just
+  - kind of
+  - might want to
+  - obviously
+  - of course
+  - perhaps
+  - quite
+  - really
+  - simply
+  - sort of
+  - very

@@ -1,0 +1,20 @@
+extends: substitution
+message: "Use '%s' (Windsor convention), not '%s'."
+level: error
+ignorecase: false
+swap:
+  '\bWindsorCLI\b': Windsor CLI
+  '\bwindsor cli\b': Windsor CLI
+  '\bWindsor cli\b': Windsor CLI
+  '\bK8s\b': Kubernetes
+  '\bk8s\b': Kubernetes
+  '\bkubernetes\b': Kubernetes
+  # 'github' (lowercase) is correct in URLs and paths — github.com,
+  # github.io, repo paths — so we only flag the wrong-cap variant.
+  '\bGithub\b': GitHub
+  '\bMacOS\b': macOS
+  '\bMac OS\b': macOS
+  '\bmac os\b': macOS
+  '\bjavascript\b': JavaScript
+  '\bopen ?source\b': open-source
+  '\bcommand-line\b': command line

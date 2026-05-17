@@ -1,0 +1,20 @@
+{
+  "noBinary": true,
+  "allow": [
+    "clearly",
+    "destroy",
+    "easy",
+    "hang",
+    "hook",
+    "host-hostess",
+    "hostesses-hosts",
+    "invalid",
+    "just",
+    "obvious",
+    "period",
+    "premature",
+    "rejects",
+    "simple",
+    "simply"
+  ]
+}

@@ -1,0 +1,60 @@
+# Project-specific dictionary for cspell. One word per line. Keep sorted
+# within sections so merges stay clean.
+
+# --- Brand / product names ---
+windsorcli
+Windsor
+goreleaser
+chocolatey
+gosec
+prosumer
+prosumers
+
+# --- Ecosystem / tooling ---
+Astro
+Argo
+Colima
+CoreDNS
+Flux
+GitOps
+Hyper-V
+Incus
+Kustomize
+Kustomization
+kustomizations
+mDNS
+OpenTofu
+Renovate
+sops
+Talos
+Taskfile
+yamllint
+shellcheck
+markdownlint
+
+# --- Kubernetes / cloud ---
+kubectl
+kubelet
+namespace
+namespaces
+
+# --- Docs / writing ---
+frontmatter
+hoster
+llms
+pasteable
+substitution
+
+# --- General ---
+backend
+backends
+hostname
+hostnames
+metadata
+runtime
+runtimes
+toolchain
+toolchains
+upserts
+upsert
+walkthroughs
