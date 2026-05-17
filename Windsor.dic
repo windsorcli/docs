@@ -9,6 +9,7 @@ chocolatey
 gosec
 prosumer
 prosumers
+Sidero
 
 # --- Ecosystem / tooling ---
 Astro
@@ -33,10 +34,15 @@ shellcheck
 markdownlint
 
 # --- Kubernetes / cloud ---
+controlplane
+hostports
+Kubeconfig
 kubectl
 kubelet
 namespace
 namespaces
+schedulable
+virt
 
 # --- Docs / writing ---
 frontmatter
@@ -53,6 +59,7 @@ hostnames
 metadata
 runtime
 runtimes
+tfvars
 toolchain
 toolchains
 upserts

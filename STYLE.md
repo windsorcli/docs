@@ -58,8 +58,8 @@ Common failure modes. Each entry: symptom, cause, fix.
 
 ## Where to next
 
-- [Related page](/docs/related)
-- [Reference](/docs/reference/cli/...)
+- [Related page](/related)
+- [Reference](/reference/cli/...)
 ````
 
 Reference pages (precise behavior, every flag, every field) belong in
@@ -83,9 +83,9 @@ truncate at that point.
 
 ## 4. Links
 
-- **Internal links use site paths** (`/docs/blueprints/schema`), not
+- **Internal links use site paths** (`/blueprints/schema`), not
   relative `.md` paths. The site flattens content from this repo,
-  `cli/`, and `core/` side-by-side.
+  `cli/`, and `core/` side-by-side at the root.
 - **External links are bare URLs only inside code blocks.** Elsewhere,
   use `[label](https://...)` so the link text reads naturally.
 - **Don't link to a page just because it exists.** Each link should
@@ -103,7 +103,7 @@ truncate at that point.
 ## 6. Mermaid
 
 Workstation and platform pages use mermaid to show the host/container/
-cluster boundary. Existing example: `workstation/overview.md`.
+cluster boundary. Existing example: `content/workstation/overview.md`.
 
 Conventions:
 
@@ -130,7 +130,7 @@ arrives via a deep link.
   fetched in isolation.
 - **Link instead of cross-referencing.** If a concept is defined
   elsewhere, link to it. Don't write `the schema (covered earlier)`;
-  write `the [schema](/docs/blueprints/schema)`.
+  write `the [schema](/blueprints/schema)`.
 - **Headings are stable.** Don't rename `## Anatomy` to
   `## How it works` casually — every link an agent or human has
   memorized to `#anatomy` breaks. Treat heading text as part of
@@ -168,11 +168,13 @@ time and Vale stays quiet:
 
 ## 10. File naming and IA
 
-- Page filenames are kebab-case: `getting-started/first-project.md`.
+- All pages live under `content/`. Filenames are kebab-case:
+  `content/getting-started/first-project.md`.
 - Each section has an `overview.md` that establishes the section's
   scope and links to its children.
-- Don't duplicate a name across sections. `workstation/overview.md`
-  and `blueprints/overview.md` is fine; two `setup.md` files isn't.
+- Don't duplicate a name across sections.
+  `content/workstation/overview.md` and `content/blueprints/overview.md`
+  is fine; two `setup.md` files isn't.
 
 ## 11. What goes elsewhere
 

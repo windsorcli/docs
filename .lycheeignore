@@ -4,11 +4,6 @@
 # Add an explanation comment above each entry so the next reviewer
 # knows why it's here.
 
-# Site-relative paths resolve only on the live windsorcli.github.io
-# (Astro flattens this repo's content alongside cli/core reference docs).
-# Skip them here.
-^/docs/
-
 # windsorcli.github.io is the website repo; not public yet, so the
 # URL 404s from GitHub's public API. Remove this once the repo is
 # published.

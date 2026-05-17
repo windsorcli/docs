@@ -7,8 +7,10 @@ and rendered as the public docs site. Low-level CLI and blueprint
 repos under `docs/reference/`. This repo holds the **general** docs:
 concepts, how-tos, getting-started, and platform overviews.
 
-Skills live in `.agent/skills/` and are discovered automatically by
-Claude Code, Cursor, and other adopting tools.
+Skills live in `.claude/skills/`, which Claude Code discovers
+automatically. Other tools (Cursor, agent SDKs) can be pointed at the
+same files; the directory is plain markdown with no Claude-specific
+metadata.
 
 ## What good looks like
 
@@ -18,9 +20,11 @@ Claude Code, Cursor, and other adopting tools.
    snippets, and `llms.txt`.
 
 2. **Internal links use site paths**, not relative `.md` paths.
-   Write `[the up command](/docs/reference/cli/commands/up)`, not
-   `[the up command](../cli/docs/reference/...)`. Pages from different
-   source repos are flattened side-by-side at build time.
+   Write `[the up command](/reference/cli/commands/up)`, not
+   `[the up command](../cli/docs/reference/...)`. Paths are rooted at
+   the live site; this repo's `content/` mounts at `/` and the
+   `windsorcli/cli` / `windsorcli/core` reference docs mount alongside
+   it.
 
 3. **Pages stand alone.** Agents, search results, and `Open in
    Claude`-style links fetch single pages. No `as we'll see below`
@@ -48,20 +52,25 @@ commands.
 
 ## Skills
 
-- [`docs-style`](.agent/skills/docs-style/SKILL.md) — voice, structure,
+- [`docs-style`](.claude/skills/docs-style/SKILL.md) — voice, structure,
   frontmatter, link conventions, mermaid usage. Read before writing.
-- [`docs-review`](.agent/skills/docs-review/SKILL.md) — pre-PR pass
+- [`docs-review`](.claude/skills/docs-review/SKILL.md) — pre-PR pass
   over a page or diff.
-- [`docs-validation`](.agent/skills/docs-validation/SKILL.md) — run
+- [`docs-validation`](.claude/skills/docs-validation/SKILL.md) — run
   real `windsor` commands against documented scenarios. Batch
   assertions inside one lifecycle; use before publishing a how-to.
+- [`upstream-history`](.claude/skills/upstream-history/SKILL.md) —
+  investigate `windsorcli/cli` and `windsorcli/core` history before
+  writing or revising claims about behavior.
 
 ## Downstream flow
 
 When this repo's `main` is tagged, the website's
 [vendor-docs](https://github.com/windsorcli/windsorcli.github.io/blob/main/scripts/vendor-docs.mjs)
-script downloads the tarball and copies pages into
-`src/content/docs/`. For local development, the website's
+script downloads the tarball and mounts these pages into its content
+collections. The website owns the final URL scheme — pages from this
+repo's `content/` tree land at the site root, alongside reference docs
+from the `cli/` and `core/` repos. For local development, the website's
 `npm run dev` symlinks straight into this repo so edits show up
 immediately.
 

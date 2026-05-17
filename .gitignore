@@ -6,13 +6,13 @@ styles/Microsoft/
 # lychee link-check cache
 .lycheecache
 
-# docs-validation skill runs real windsor commands in the repo root.
-# These are the artifacts windsor creates — ignore so they never get
-# committed.
+# Runtime artifacts from running `windsor` at the repo root (see the
+# docs-validation skill). Docs live under content/; the paths below
+# only ever contain windsor state.
 .scratch/
 .windsor/
 windsor.yaml
-contexts/*/
+contexts/
 
 # Local toolchain
 node_modules/

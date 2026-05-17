@@ -94,12 +94,14 @@ PR or include a screenshot of the rendered page.
 ## Working with Claude Code
 
 The [CLAUDE.md](CLAUDE.md) at the repo root sets the context. Skills
-in [.agent/skills/](.agent/skills/) cover the editorial and validation
-workflows:
+in [.claude/skills/](.claude/skills/) cover the editorial and
+validation workflows:
 
 - `docs-style` — voice, frontmatter, link conventions
 - `docs-review` — pre-PR pass over a page or diff
 - `docs-validation` — run real `windsor` commands against documented
   scenarios. Cleans up with `task sweep`.
+- `upstream-history` — investigate `windsorcli/cli` and
+  `windsorcli/core` history before writing or revising behavior claims
 
 Invoke them with `/<skill-name>` in Claude Code.

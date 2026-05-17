@@ -16,7 +16,10 @@ editing a page in this repo.
 - Reviewing a draft for tone before opening a PR
 
 For a *pre-PR pass* (check frontmatter, links, terminology, render),
-use [`docs-review`](../docs-review/SKILL.md) instead.
+use [`docs-review`](../docs-review/SKILL.md) instead. If the page
+describes cli or core behavior, ground the prose first with
+[`upstream-history`](../upstream-history/SKILL.md) — docs drift
+silently when the code moves underneath them.
 
 ## The 30-second model
 
@@ -111,17 +114,18 @@ for the full list.
 
 ## Where to next
 
-- [Related page](/docs/...)
-- [Reference](/docs/reference/cli/...)
+- [Related page](/related)
+- [Reference](/reference/cli/...)
 ````
 
 Drop a section if a page genuinely doesn't need it. Don't pad.
 
 ## Link conventions
 
-- Internal links use **site paths**: `/docs/blueprints/schema`. Not
-  relative `.md` paths. Content from this repo, `cli/`, and `core/`
-  is flattened side-by-side at build.
+- Internal links use **site paths**: `/blueprints/schema`,
+  `/reference/cli/commands/up`. No `/docs/` prefix. Not relative
+  `.md` paths. Content from this repo, `cli/`, and `core/` is
+  flattened side-by-side at the site root at build time.
 - External links: `[label](https://...)`. Bare URLs only inside code
   blocks.
 - Every link should pay rent — what does the reader learn by
@@ -156,7 +160,7 @@ Conventions:
 - One `subgraph` per boundary
 - `TB` for hierarchy, `LR` for pipelines
 - Each node has a name and a one-line role
-- Reference: `workstation/overview.md`
+- Reference: `content/workstation/overview.md`
 
 ## Terminology
 
@@ -172,6 +176,8 @@ Vale's `Windsor.Spelling` rule auto-swaps these.
 
 ## File naming and IA
 
+- All pages live under `content/` — for example,
+  `content/workstation/overview.md`
 - Filenames: kebab-case (`first-project.md`)
 - Each section has an `overview.md` that establishes scope and links
   to children
