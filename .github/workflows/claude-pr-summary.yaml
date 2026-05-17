@@ -1,0 +1,144 @@
+name: Claude PR Summary
+
+# Generates a one-shot prose summary block at the bottom of the PR
+# description on open (and when a draft goes ready-for-review). It does
+# NOT re-run on every push — `synchronize` is intentionally excluded so
+# the summary captures the PR's *intent*, not the last force-push.
+#
+# If the author wants a fresh summary later, delete the marked block
+# from the PR body and re-trigger via /summary in a comment.
+
+on:
+  pull_request:
+    types: [opened, ready_for_review]
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: read
+  pull-requests: write
+  id-token: write
+
+jobs:
+  summary:
+    name: Write PR summary
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    if: >-
+      (
+        github.event_name == 'pull_request' &&
+        github.event.pull_request.user.type != 'Bot' &&
+        !github.event.pull_request.draft &&
+        !contains(github.event.pull_request.labels.*.name, 'dependencies')
+      ) || (
+        github.event_name == 'issue_comment' &&
+        github.event.issue.pull_request &&
+        contains(github.event.comment.body, '/summary')
+      )
+    steps:
+      - name: Resolve PR ref
+        id: pr
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if [ "${{ github.event_name }}" = "issue_comment" ]; then
+            PR_JSON=$(gh api repos/${{ github.repository }}/pulls/${{ github.event.issue.number }})
+            echo "number=${{ github.event.issue.number }}" >> "$GITHUB_OUTPUT"
+            echo "head_sha=$(echo "$PR_JSON" | jq -r .head.sha)" >> "$GITHUB_OUTPUT"
+            echo "base_ref=$(echo "$PR_JSON" | jq -r .base.ref)" >> "$GITHUB_OUTPUT"
+            echo "head_ref=$(echo "$PR_JSON" | jq -r .head.ref)" >> "$GITHUB_OUTPUT"
+          else
+            echo "number=${{ github.event.pull_request.number }}" >> "$GITHUB_OUTPUT"
+            echo "head_sha=${{ github.event.pull_request.head.sha }}" >> "$GITHUB_OUTPUT"
+            echo "base_ref=${{ github.base_ref }}" >> "$GITHUB_OUTPUT"
+            echo "head_ref=${{ github.event.pull_request.head.ref }}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          ref: ${{ steps.pr.outputs.head_ref }}
+          fetch-depth: 0
+
+      - name: Fetch base ref
+        run: git fetch --depth=1 origin ${{ steps.pr.outputs.base_ref }}
+
+      - uses: anthropics/claude-code-action@51ea8ea73a139f2a74ff649e3092c25a904aed7e # v1.0.123
+        env:
+          PR_NUMBER: ${{ steps.pr.outputs.number }}
+          PR_HEAD_SHA: ${{ steps.pr.outputs.head_sha }}
+          BASE_REF: ${{ steps.pr.outputs.base_ref }}
+          GH_REPO: ${{ github.repository }}
+          STICKY_MARKER: "<!-- claude-pr-summary -->"
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          prompt: |
+            Write a single sticky summary block at the bottom of this
+            PR's description. Do NOT post inline comments. Do NOT post
+            top-level conversation comments. Do NOT review the code —
+            just describe what the PR does.
+
+            ## Block shape
+
+            Append exactly this structure (preserving any author prose
+            already in the body, replacing only an existing block with
+            the same marker):
+
+              > [!NOTE]
+              >
+              > **{Low|Medium|High} Risk**
+              >
+              > {One sentence: what the change affects and why this
+              > risk level is appropriate.}
+              >
+              > **Overview**
+              >
+              > {2-3 sentences on what the PR does at the highest level.}
+              >
+              > {Optional second paragraph on notable behavioral or
+              > structural detail.}
+              >
+              > Summarized by Claude for commit `<first 7 chars of PR_HEAD_SHA>`.
+
+              <!-- /claude-pr-summary -->
+
+            Hard rules: prose paragraphs only, no bullet lists, no file
+            enumerations, under ~150 words. Calm and specific. No
+            emojis. The summary should let a reviewer scan in ~15
+            seconds and know the shape of the change.
+
+            Risk level: Low for isolated, reversible changes; Medium
+            for changes to shared infra/CI/conventions or to the
+            published URL scheme; High for security, data-loss, or
+            cross-cutting changes.
+
+            ## Upsert logic
+
+            Preserve the author's prose. Replace only the marked block.
+
+              gh pr view "$PR_NUMBER" --json body --jq .body > /tmp/pr-body.md
+
+              python3 - <<'PY'
+              import os, re, pathlib
+              marker = os.environ["STICKY_MARKER"]
+              end    = "<!-- /claude-pr-summary -->"
+              body   = pathlib.Path("/tmp/pr-body.md").read_text()
+              block  = pathlib.Path("/tmp/summary-block.md").read_text().rstrip() + "\n"
+              pattern = re.compile(
+                  re.escape(marker) + r".*?" + re.escape(end) + r"\s*",
+                  re.DOTALL,
+              )
+              body = pattern.sub("", body).rstrip()
+              new  = (body + "\n\n" + block) if body else block
+              pathlib.Path("/tmp/pr-body.new.md").write_text(new)
+              PY
+
+              gh pr edit "$PR_NUMBER" --body-file /tmp/pr-body.new.md
+
+            Use `git diff "origin/$BASE_REF"...HEAD --stat` and a
+            targeted look at the diff (not the full files) to ground
+            the summary in real changes.
+          claude_args: |
+            --model claude-sonnet-4-6
+            --max-turns 15
+            --allowedTools Read,Grep,Glob,Bash(git:*),Bash(gh pr view:*),Bash(gh pr edit:*),Bash(gh pr diff:*),Bash(gh api:*),Bash(jq:*),Bash(cat:*),Bash(tee:*),Bash(mktemp:*),Bash(head:*),Bash(python3:*),Write
+            --disallowedTools WebSearch,WebFetch
