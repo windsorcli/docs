@@ -15,6 +15,10 @@ this one is for *checking*.
 - After a substantial rewrite of a page
 - When asked to review someone else's draft
 
+If the diff touches behavior the docs describe — commands, flags,
+file layouts, output — run [`upstream-history`](../upstream-history/SKILL.md)
+first to confirm the claims still hold against cli/core HEAD.
+
 ## What to review
 
 Review the **diff**, not the whole page, unless the page is new.
@@ -107,7 +111,7 @@ Don't open the PR with red on any of these.
 Report findings as a checklist. Group by file. For each finding give:
 
 - **One-line title** (what's wrong)
-- **Path and line** (`workstation/overview.md:42`)
+- **Path and line** (`content/workstation/overview.md:42`)
 - **Brief explanation** (1-2 sentences — what, why it matters, how to fix)
 - **Severity**: `must-fix` (CI will reject or the page is broken),
   `should-fix` (style/voice problem worth a round-trip), or
@@ -116,17 +120,18 @@ Report findings as a checklist. Group by file. For each finding give:
 Example:
 
 ```markdown
-### blueprints/overview.md
+### content/blueprints/overview.md
 
-- **must-fix** · blueprints/overview.md:12 — Internal link uses
-  relative path. Replace `../cli/up.md` with `/docs/reference/cli/commands/up`.
+- **must-fix** · content/blueprints/overview.md:12 — Internal link
+  uses relative path. Replace `../cli/up.md` with
+  `/docs/reference/cli/commands/up`.
 
-- **should-fix** · blueprints/overview.md:34 — "seamlessly integrates"
-  trips Vale's MarketingWords rule. Describe what the integration
-  actually does.
+- **should-fix** · content/blueprints/overview.md:34 — `seamlessly
+  integrates` trips Vale's MarketingWords rule. Describe what the
+  integration actually does.
 
-- **consider** · blueprints/overview.md:1 — Description is 174 chars;
-  the OG tag truncates around 160.
+- **consider** · content/blueprints/overview.md:1 — Description is
+  174 chars; the OG tag truncates around 160.
 ```
 
 End with one sentence on overall readiness: "Ready to merge after

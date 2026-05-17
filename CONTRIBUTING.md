@@ -101,5 +101,7 @@ workflows:
 - `docs-review` — pre-PR pass over a page or diff
 - `docs-validation` — run real `windsor` commands against documented
   scenarios. Cleans up with `task sweep`.
+- `upstream-history` — investigate `windsorcli/cli` and
+  `windsorcli/core` history before writing or revising behavior claims
 
 Invoke them with `/<skill-name>` in Claude Code.

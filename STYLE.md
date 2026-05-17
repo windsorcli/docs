@@ -103,7 +103,7 @@ truncate at that point.
 ## 6. Mermaid
 
 Workstation and platform pages use mermaid to show the host/container/
-cluster boundary. Existing example: `workstation/overview.md`.
+cluster boundary. Existing example: `content/workstation/overview.md`.
 
 Conventions:
 
@@ -168,11 +168,13 @@ time and Vale stays quiet:
 
 ## 10. File naming and IA
 
-- Page filenames are kebab-case: `getting-started/first-project.md`.
+- All pages live under `content/`. Filenames are kebab-case:
+  `content/getting-started/first-project.md`.
 - Each section has an `overview.md` that establishes the section's
   scope and links to its children.
-- Don't duplicate a name across sections. `workstation/overview.md`
-  and `blueprints/overview.md` is fine; two `setup.md` files isn't.
+- Don't duplicate a name across sections.
+  `content/workstation/overview.md` and `content/blueprints/overview.md`
+  is fine; two `setup.md` files isn't.
 
 ## 11. What goes elsewhere
 

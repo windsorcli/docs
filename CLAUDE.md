@@ -55,6 +55,9 @@ commands.
 - [`docs-validation`](.agent/skills/docs-validation/SKILL.md) — run
   real `windsor` commands against documented scenarios. Batch
   assertions inside one lifecycle; use before publishing a how-to.
+- [`upstream-history`](.agent/skills/upstream-history/SKILL.md) —
+  investigate `windsorcli/cli` and `windsorcli/core` history before
+  writing or revising claims about behavior.
 
 ## Downstream flow
 

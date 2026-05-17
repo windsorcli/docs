@@ -2,10 +2,8 @@
 #
 # Enforce required YAML frontmatter on every documentation page.
 #
-# A "page" is a markdown file vendored into windsorcli.github.io as a
-# content page — pages in the IA directories (blueprints/, contexts/,
-# deployment/, getting-started/, workstation/) and the root index page
-# (overview.md). Every page must declare:
+# A "page" is a markdown file under content/, vendored into
+# windsorcli.github.io as a content page. Every page must declare:
 #   - title:        non-empty, becomes the H1 and browser tab
 #   - description:  non-empty, ≤160 chars, used for OG tags, search
 #                   snippets, and the site's llms.txt index
@@ -32,10 +30,8 @@ emit() {
 
 is_page() {
   case "$1" in
-    ./blueprints/*.md|./contexts/*.md|./deployment/*.md|./getting-started/*.md|./workstation/*.md|./overview.md)
-      return 0 ;;
-    *)
-      return 1 ;;
+    ./content/*.md) return 0 ;;
+    *)              return 1 ;;
   esac
 }
 

@@ -139,10 +139,9 @@ Run `task sweep` from the repo root. It runs `windsor down`
 (best-effort — no-op if no context is active) and then removes
 `windsor.yaml`, `contexts/`, `.windsor/`, and `.scratch/`.
 
-`task sweep` is destructive on `contexts/`: it removes the whole
-directory. If you have committed docs in `contexts/*.md` (added by
-the content PR), restore them with `git restore contexts/` after a
-sweep.
+`task sweep` removes the top-level `contexts/` directory entirely.
+That's safe because all docs live under `content/` — the only thing
+at top-level `contexts/` is windsor runtime state.
 
 ## When validation surfaces a docs bug
 

@@ -16,7 +16,10 @@ editing a page in this repo.
 - Reviewing a draft for tone before opening a PR
 
 For a *pre-PR pass* (check frontmatter, links, terminology, render),
-use [`docs-review`](../docs-review/SKILL.md) instead.
+use [`docs-review`](../docs-review/SKILL.md) instead. If the page
+describes cli or core behavior, ground the prose first with
+[`upstream-history`](../upstream-history/SKILL.md) — docs drift
+silently when the code moves underneath them.
 
 ## The 30-second model
 
@@ -156,7 +159,7 @@ Conventions:
 - One `subgraph` per boundary
 - `TB` for hierarchy, `LR` for pipelines
 - Each node has a name and a one-line role
-- Reference: `workstation/overview.md`
+- Reference: `content/workstation/overview.md`
 
 ## Terminology
 
@@ -172,6 +175,8 @@ Vale's `Windsor.Spelling` rule auto-swaps these.
 
 ## File naming and IA
 
+- All pages live under `content/` — for example,
+  `content/workstation/overview.md`
 - Filenames: kebab-case (`first-project.md`)
 - Each section has an `overview.md` that establishes scope and links
   to children
