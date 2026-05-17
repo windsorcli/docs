@@ -1,0 +1,29 @@
+{
+  "$schema": "https://raw.githubusercontent.com/streetsidesoftware/cspell/main/cspell.schema.json",
+  "version": "0.2",
+  "language": "en",
+  "dictionaryDefinitions": [
+    {
+      "name": "windsor",
+      "path": "./Windsor.dic",
+      "addWords": true
+    }
+  ],
+  "dictionaries": ["windsor", "softwareTerms", "companies", "fonts", "filetypes", "node", "html", "css", "typescript", "go", "bash", "misc"],
+  "ignorePaths": [
+    "node_modules/**",
+    "vendor/**",
+    "styles/**",
+    ".github/**",
+    "LICENSE*",
+    "*.dic"
+  ],
+  "ignoreRegExpList": [
+    "/^---[\\s\\S]*?^---/m",
+    "/```[\\s\\S]*?```/g",
+    "/`[^`\\n]+`/g",
+    "/\\bhttps?:\\/\\/\\S+/g",
+    "/\\b[A-Z]{2,}\\b/g"
+  ],
+  "useGitignore": true
+}

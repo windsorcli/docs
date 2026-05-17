@@ -1,0 +1,44 @@
+{
+  // Windsor docs follow a relaxed sentence-case prose style with tables,
+  // mermaid diagrams, and frequent `inline-code` for CLI flags and file
+  // paths. Rules below are tuned to match what's already in the tree
+  // (see workstation/overview.md, blueprints/overview.md). Tighten as
+  // patterns settle.
+  "default": true,
+
+  // Headings
+  "MD003": { "style": "atx" },
+  "MD025": { "front_matter_title": "^\\s*title\\s*[:=]" },
+  "MD024": { "siblings_only": true },
+  "MD026": { "punctuation": ".,;:!" },
+
+  // Lists
+  "MD004": { "style": "dash" },
+  "MD007": { "indent": 2 },
+  "MD029": { "style": "ordered" },
+
+  // Line length: prose pages use long lines (mermaid, tables, frontmatter
+  // descriptions). Disable hard wrap enforcement — Vale flags real prose
+  // problems, this rule mostly fights tables and links.
+  "MD013": false,
+
+  // Code blocks must declare a language so the site's syntax highlighter
+  // picks the right grammar. Bare ``` is a frequent miss.
+  "MD040": true,
+
+  // Allow raw HTML for the callout patterns used by the website (`<details>`,
+  // `<kbd>`, `<sup>`).
+  "MD033": {
+    "allowed_elements": ["details", "summary", "kbd", "sup", "sub", "br", "img"]
+  },
+
+  // Bare URLs render fine on the website but read worse than a labeled
+  // link. Keep on so reviewers nudge toward labeled links.
+  "MD034": true,
+
+  // First line doesn't need to be a heading — frontmatter is first.
+  "MD041": false,
+
+  // Allow inline emphasis (`*foo*`) and code spans inside link text.
+  "MD036": false
+}

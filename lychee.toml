@@ -1,0 +1,39 @@
+# lychee config — link checker for the docs repo.
+#
+# This repo's markdown is vendored into windsorcli.github.io, so a number
+# of links resolve only at the website level (`/docs/...`). Those can't
+# be checked from this repo in isolation — we skip them here and rely on
+# the website's own build to validate them.
+
+cache = true
+max_cache_age = "1d"
+
+# One-off URL exclusions live in .lycheeignore (auto-detected by lychee
+# in the current directory; no config entry needed).
+
+# Skip site-relative paths (resolved by the Astro site, not this repo)
+# and common false-positive patterns.
+exclude = [
+  '^/docs/',                  # resolved by windsorcli.github.io
+  '^https?://localhost',
+  '^https?://127\.',
+  '^https?://example\.(com|invalid)',
+  '^https?://.*\.test(/|$)',  # windsor-local *.test hostnames
+]
+
+# Treat these status codes as success — common bot-deflection responses
+# from sites that the link is still real.
+accept = [200, 206, 429]
+
+# A short retry survives transient flakes without slowing the suite.
+max_retries = 2
+retry_wait_time = 2
+
+# A small concurrency cap is friendlier to rate-limited hosts.
+max_concurrency = 16
+
+# User agent — some sites 403 on the default.
+user_agent = "lychee/windsorcli-docs"
+
+# Don't try to verify mailto: links.
+include_mail = false

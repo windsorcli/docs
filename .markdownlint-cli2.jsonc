@@ -1,0 +1,8 @@
+{
+  "config": ".markdownlint.jsonc",
+  "ignores": [
+    "node_modules",
+    "vendor"
+  ],
+  "globs": ["**/*.md"]
+}

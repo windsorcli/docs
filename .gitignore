@@ -1,0 +1,24 @@
+# Vale downloads style packs into styles/Microsoft on `vale sync`.
+# The custom Windsor styles in styles/Windsor are tracked; Microsoft
+# is reproducible from .vale.ini, so don't commit it.
+styles/Microsoft/
+
+# lychee link-check cache
+.lycheecache
+
+# docs-validation skill runs real windsor commands in the repo root.
+# These are the artifacts windsor creates — ignore so they never get
+# committed.
+.scratch/
+.windsor/
+windsor.yaml
+contexts/*/
+
+# Local toolchain
+node_modules/
+
+# macOS / IDE noise
+.DS_Store
+.idea/
+.vscode/
+*.swp
