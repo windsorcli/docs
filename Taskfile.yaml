@@ -79,7 +79,7 @@ tasks:
       - cspell --no-progress "**/*.md"
 
   lint:links:
-    desc: "lychee — link checker (skips /docs/* per lychee.toml)"
+    desc: "lychee — link checker (skips site-relative paths per lychee.toml)"
     cmds:
       - lychee --config lychee.toml --no-progress '**/*.md'
 

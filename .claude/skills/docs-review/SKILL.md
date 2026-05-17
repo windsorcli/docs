@@ -44,8 +44,8 @@ CI rejects pages without `title:` via the frontmatter check in
 
 ### Pass 2 — Links
 
-Internal links must use site paths (`/docs/...`), not relative
-`.md` paths. Grep the diff:
+Internal links must use site paths (root-relative, no `/docs/`
+prefix), not relative `.md` paths. Grep the diff:
 
 ```bash
 git diff origin/main...HEAD -- '*.md' | grep -E '\]\(\.\.?/[^)]+\.md\)'
@@ -54,10 +54,11 @@ git diff origin/main...HEAD -- '*.md' | grep -E '\]\(\.\.?/[^)]+\.md\)'
 External links must be `[label](url)`, not bare. Markdownlint MD034
 catches the latter.
 
-Cross-repo links (`/docs/reference/cli/...`, `/docs/reference/core/...`)
-resolve only on the live site — lychee skips them per `lychee.toml`.
-If the page leans heavily on cross-repo links, sanity-check the
-target paths manually against the website's content tree.
+Cross-repo links (`/reference/cli/...`, `/reference/core/...`,
+`/cli/...`) resolve only on the live site — lychee skips them via the
+website-origin exclude in `lychee.toml`. If the page leans heavily on
+cross-repo links, sanity-check the target paths manually against the
+website's content tree.
 
 ### Pass 3 — Voice and terminology
 
@@ -124,7 +125,7 @@ Example:
 
 - **must-fix** · content/blueprints/overview.md:12 — Internal link
   uses relative path. Replace `../cli/up.md` with
-  `/docs/reference/cli/commands/up`.
+  `/reference/cli/commands/up`.
 
 - **should-fix** · content/blueprints/overview.md:34 — `seamlessly
   integrates` trips Vale's MarketingWords rule. Describe what the

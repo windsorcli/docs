@@ -114,17 +114,18 @@ for the full list.
 
 ## Where to next
 
-- [Related page](/docs/...)
-- [Reference](/docs/reference/cli/...)
+- [Related page](/related)
+- [Reference](/reference/cli/...)
 ````
 
 Drop a section if a page genuinely doesn't need it. Don't pad.
 
 ## Link conventions
 
-- Internal links use **site paths**: `/docs/blueprints/schema`. Not
-  relative `.md` paths. Content from this repo, `cli/`, and `core/`
-  is flattened side-by-side at build.
+- Internal links use **site paths**: `/blueprints/schema`,
+  `/reference/cli/commands/up`. No `/docs/` prefix. Not relative
+  `.md` paths. Content from this repo, `cli/`, and `core/` is
+  flattened side-by-side at the site root at build time.
 - External links: `[label](https://...)`. Bare URLs only inside code
   blocks.
 - Every link should pay rent — what does the reader learn by
