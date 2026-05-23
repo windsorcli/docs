@@ -45,7 +45,7 @@ export ARCH="metal-amd64"
 
 ### Download and decompress
 
-Download the compressed raw image from the factory URL, then decompress it. You should end with `metal-amd64.raw` in the current directory.
+Download the compressed raw image from Image Factory, then decompress it. You should end with `metal-amd64.raw` in the current directory.
 
 ```bash
 curl -fL -o "${ARCH}.raw.xz" \
@@ -149,7 +149,7 @@ ASUS publishes step-by-step guides with firmware screenshots: [Disable Secure Bo
 
 #### Enable Secure Boot for Talos
 
-Use this path only when booting a [Talos Secure Boot ISO](https://www.talos.dev/latest/talos-guides/install/bare-metal-platforms/secureboot/) or installing with `factory.talos.dev/installer-secureboot/...`. Do **not** enable Secure Boot for the unsigned **metal-amd64** raw image from the earlier steps.
+Use this path only when booting a [Talos Secure Boot ISO](https://www.talos.dev/latest/talos-guides/install/bare-metal-platforms/secureboot/) or installing with an `installer-secureboot` image from Image Factory. Do **not** enable Secure Boot for the unsigned **metal-amd64** raw image from the earlier steps.
 
 Talos requires UEFI Secure Boot **enabled** and the firmware in **Setup Mode** on the first boot so Talos can enroll the [Sidero Labs signing key](https://factory.talos.dev/secureboot/signing-cert.pem).
 
@@ -158,7 +158,7 @@ Talos requires UEFI Secure Boot **enabled** and the firmware in **Setup Mode** o
 3. Set **Secure Boot** to **Enabled**.
 4. Check **Secure Boot Mode** on screen:
    - **Setup Mode** (or **Platform Key: Not Installed**) — ready for Talos key enrollment on first boot
-   - **Standard Mode** with keys already installed — you may need to clear platform keys first (see below)
+   - **Standard Mode** with keys already installed — clear platform keys with **Clear Secure Boot Data** on the Secure Boot page before enrolling Talos keys
 5. Press **F10** to save and exit.
 6. Boot the Talos Secure Boot ISO from the one-time boot menu (**F10**).
 7. If automatic enrollment does not start, press **Esc** at the boot menu and choose **Enroll Secure Boot keys: auto** (wording varies by firmware).
@@ -206,7 +206,7 @@ talosctl version --nodes <node-ip>
 
 **Cause:** USB boot disabled, wrong boot order, or Secure Boot rejecting the stick.
 
-**Fix:** Enable USB boot and set boot order as in [Set USB as the boot device](#set-usb-as-the-boot-device). For the standard **metal-amd64** raw image, [disable Secure Boot](#disable-secure-boot-standard-metal-amd64-usb). Re-flash the stick if the image write failed.
+**Fix:** Enable USB boot and set boot order as in [Set USB as the boot device](#set-usb-as-the-boot-device). For the standard **metal-amd64** raw image, [disable Secure Boot](#disable-secure-boot-standard-metal-amd64-usb). Re-flash the stick if the image write did not complete.
 
 ### Secure Boot blocks the USB stick
 
