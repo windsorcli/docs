@@ -8,11 +8,12 @@ styles/Microsoft/
 
 # Runtime artifacts from running `windsor` at the repo root (see the
 # docs-validation skill). Docs live under content/; the paths below
-# only ever contain windsor state.
-.scratch/
-.windsor/
-windsor.yaml
-contexts/
+# only ever contain windsor state. Anchored to the repo root with a
+# leading slash so they never shadow real docs (e.g. content/contexts/).
+/.scratch/
+/.windsor/
+/windsor.yaml
+/contexts/
 
 # Local toolchain
 node_modules/
