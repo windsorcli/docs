@@ -25,6 +25,12 @@ windsor init local --vm-driver colima
 windsor up
 ```
 
+Colima is VM-backed, so cluster reachability needs a host route and a `*.test` resolver entry. `up` defers that elevated step and prints a follow-up — run it once:
+
+```bash
+windsor configure network        # prompts for sudo; --dry-run previews, --revert removes
+```
+
 See [First project — VM driver](/getting-started/first-project) for other drivers.
 
 ## DNS

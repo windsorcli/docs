@@ -63,6 +63,8 @@ windsor up --wait
 
 `--wait` blocks until every Kustomization reports ready. Expect roughly 5 minutes on a fast Mac.
 
+If `up` finishes by printing a `windsor configure network` command, run it once — VM-backed runtimes (Colima) need a host route and DNS resolver entry for cluster reachability, and that step prompts for sudo. Docker Desktop usually does not need it.
+
 While it runs, watch progress in another shell. These `kubectl` commands use your context's `KUBECONFIG`, so either prefix each with `windsor exec --` or set up the [shell hook](/contexts/environment-injection) once so it's exported automatically:
 
 ```bash
