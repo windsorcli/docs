@@ -14,6 +14,25 @@ This page groups the lifecycle commands into the phases they represent. Knowing 
 | Inspect | [`plan`](/reference/cli/commands/plan) / [`show`](/reference/cli/commands/show) / [`explain`](/reference/cli/commands/explain) | Previews changes, prints rendered resources, traces values. |
 | Tear down | [`destroy`](/reference/cli/commands/destroy) | Destroys live infrastructure (Terraform + Flux). |
 
+The path splits after `init` on whether the context runs a local workstation:
+
+```mermaid
+flowchart TB
+  Init["windsor init<br/>scaffold the context"] --> Q{workstation<br/>context?}
+  subgraph WS["Workstation (local)"]
+    direction LR
+    Up["up<br/>VM + Terraform + Flux"] --> CN["configure network<br/>host route + DNS"] --> Down["down<br/>stop VM, keep state"]
+  end
+  subgraph Cloud["Non-workstation (cloud / metal)"]
+    direction LR
+    Boot["bootstrap<br/>first run + backend"] --> Apply["apply<br/>reconcile"]
+  end
+  Q -->|yes| Up
+  Q -->|no| Boot
+  WS --> Destroy["destroy<br/>remove infrastructure"]
+  Cloud --> Destroy
+```
+
 ## Workstation contexts
 
 A workstation context (typically `local`) runs a VM-backed Kubernetes cluster on your machine. It uses `up` and `down`.

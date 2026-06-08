@@ -94,6 +94,14 @@ See [Facets](/blueprints/facets) for the full authoring model — `when` express
 
 ## Composition order
 
+```mermaid
+flowchart LR
+  OCI["OCI sources<br/>deploy: true"] --> Base["base template<br/>_template/blueprint.yaml"]
+  Base --> Facets["facets<br/>ordinal order, when-gated"]
+  Facets --> User["context blueprint<br/>user overrides"]
+  User --> Result["composed blueprint<br/>windsor show blueprint"]
+```
+
 When Windsor builds the final blueprint:
 
 1. **OCI sources with `deploy: true`** — components from these sources are merged. Sources with `deploy: false` are index-only — their components aren't merged but components elsewhere can reference them via `source: <name>`. Non-OCI sources (Git URLs) are always index-only.

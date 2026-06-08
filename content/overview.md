@@ -16,4 +16,5 @@ Blueprint authorship is key to this project's success. Most of the documentation
 - [Blueprints](/blueprints/overview) — how a stack is composed, customized, and shared
 - [Workstation](/workstation/overview) — running a blueprint locally in dev mode
 - [Deployment](/deployment/overview) — bootstrapping infrastructure on AWS, Azure, or bare metal you own
+- [Troubleshooting](/troubleshooting/overview) — common failure modes and their fixes
 - [Reference](/reference/cli/configuration) — in-depth references for the CLI and `core` blueprint
