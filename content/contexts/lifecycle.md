@@ -71,6 +71,6 @@ For non-workstation contexts, `destroy` is the whole story.
 
 ## See also
 
-- [Contexts](/contexts/contexts) — workstation vs non-workstation, switching contexts
+- [Contexts](/contexts/overview) — workstation vs non-workstation, switching contexts
 - [Workstation overview](/workstation/overview) — VM driver options and topology
 - [`init`](/reference/cli/commands/init), [`bootstrap`](/reference/cli/commands/bootstrap), [`apply`](/reference/cli/commands/apply), [`destroy`](/reference/cli/commands/destroy), [`up`](/reference/cli/commands/up), [`down`](/reference/cli/commands/down)

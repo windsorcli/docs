@@ -55,7 +55,7 @@ Context-specific `blueprint.yaml` files (for example, `contexts/local/blueprint.
 JSON Schema that validates the user's `values.yaml` and supplies defaults for missing keys.
 
 ```yaml
-$schema: https://windsorcli.dev/draft/2026-02/schema
+$schema: https://json-schema.org/draft/2020-12/schema
 type: object
 properties:
   platform:
@@ -72,7 +72,7 @@ properties:
 additionalProperties: false
 ```
 
-Use `$schema: https://windsorcli.dev/draft/2026-02/schema` — the Windsor-published meta-schema. The standard `https://json-schema.org/draft/2020-12/schema` is also accepted. See [Schema](/blueprints/schema).
+Use `$schema: https://json-schema.org/draft/2020-12/schema`. The earlier `https://windsorcli.dev/draft/2026-02/schema` dialect was removed in v0.9.0; a schema still declaring it fails validation with a migration hint. See [Schema](/blueprints/schema).
 
 ## metadata.yaml
 

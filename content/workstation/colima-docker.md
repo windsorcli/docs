@@ -18,14 +18,14 @@ On macOS and Linux, [Colima](https://github.com/abiosoft/colima) wraps [Lima](ht
 
 ## Prerequisites
 
-Complete [Getting started](/cli/getting-started). Then (Apple silicon, Linux):
+Complete [First project](/getting-started/first-project). Then (Apple silicon, Linux):
 
 ```bash
 windsor init local --vm-driver colima
 windsor up
 ```
 
-See [Getting started — VM driver](/cli/getting-started#start-a-project) for other drivers.
+See [First project — VM driver](/getting-started/first-project) for other drivers.
 
 ## DNS
 

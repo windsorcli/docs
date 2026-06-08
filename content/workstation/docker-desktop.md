@@ -18,14 +18,14 @@ description: Run Windsor locally with Docker Desktop.
 
 ## Setup
 
-After [installing the CLI](/cli/installation) and [starting a project](/cli/getting-started), ensure Docker Desktop is running. Then:
+After [installing the CLI](/cli/installation) and [starting a project](/getting-started/first-project), ensure Docker Desktop is running. Then:
 
 ```bash
 windsor init local --vm-driver docker-desktop
-windsor up --deploy
+windsor up
 ```
 
-On Linux, `docker` is the default when `--vm-driver` is omitted; use `docker-desktop` if you run Docker Desktop there. See [Getting started — VM driver](/cli/getting-started#start-a-project) for all drivers.
+On Linux, `docker` is the default when `--vm-driver` is omitted; use `docker-desktop` if you run Docker Desktop there. See [First project — VM driver](/getting-started/first-project) for all drivers.
 
 ## DNS
 

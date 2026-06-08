@@ -96,6 +96,6 @@ windsor down
 
 ## Next steps
 
-- [Contexts](/contexts/contexts) — Multiple environments and switching
+- [Contexts](/contexts/overview) — Multiple environments and switching
 - [Workstation](/workstation/colima-docker) — Local virtualization (Colima, Docker Desktop)
 - [Blueprints](/blueprints/overview) and [Components](/blueprints/terraform) — Terraform and Kustomize

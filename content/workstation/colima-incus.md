@@ -32,10 +32,8 @@ windsor init local --vm-driver colima-incus
 windsor up
 ```
 
-Exact install steps depend on your Colima and Windsor version; refer to the [CLI repo](https://github.com/windsorcli/cli) and [Colima documentation](https://github.com/abiosoft/colima). See [Getting started — VM driver](/cli/getting-started#start-a-project) for all drivers.
+Exact install steps depend on your Colima and Windsor version; refer to the [CLI repo](https://github.com/windsorcli/cli) and [Colima documentation](https://github.com/abiosoft/colima). See [First project — VM driver](/getting-started/first-project) for all drivers.
 
 ## Differences from Colima + Docker
 
 Runtime and container semantics differ (LXC vs Docker). Registry usage, build ID, and Kubernetes behavior may vary. For the most common local-dev workflow (Docker images, local registry, Kubernetes), [Colima + Docker](/workstation/colima-docker) is the primary supported path.
-
-*This guide will be expanded as Colima + Incus support is documented.*
