@@ -16,6 +16,7 @@ Astro
 Argo
 Colima
 CoreDNS
+direnv
 Flux
 GitOps
 Hyper-V
@@ -62,6 +63,8 @@ runtimes
 tfvars
 toolchain
 toolchains
+unset
+unsets
 upserts
 upsert
 walkthroughs
