@@ -18,14 +18,18 @@ On macOS and Linux, [Colima](https://github.com/abiosoft/colima) wraps [Lima](ht
 
 ## Prerequisites
 
-Complete [Getting started](/cli/getting-started). Then (Apple silicon, Linux):
+Complete [First project](/getting-started/first-project). Then (Apple silicon, Linux):
 
 ```bash
 windsor init local --vm-driver colima
-windsor up
+windsor up                       # halts: "Run 'windsor configure network', then re-run 'windsor up'"
+windsor configure network        # host route + DNS (prompts for sudo)
+windsor up                       # re-run to install the blueprint
 ```
 
-See [Getting started — VM driver](/cli/getting-started#start-a-project) for other drivers.
+Colima is VM-backed, so cluster reachability needs a host route in addition to the `*.test` DNS resolver entry. Because both need elevation and `up` won't prompt for sudo, the first `up` provisions what it can and then **halts**. Run `configure network` to install the host route and resolver entry, then re-run `up` to finish the install. Subsequent `up` runs don't repeat the step. Use `--dry-run` to preview or `--revert` to remove it.
+
+See [First project — VM driver](/getting-started/first-project) for other drivers.
 
 ## DNS
 

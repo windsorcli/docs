@@ -63,6 +63,15 @@ windsor up --wait
 
 `--wait` blocks until every Kustomization reports ready. Expect roughly 5 minutes on a fast Mac.
 
+`up` does not prompt for elevation, so it defers host networking and DNS and prints a `windsor configure network` command (prompts for sudo on macOS/Linux; run from an Administrator PowerShell on Windows). On **Colima**, `up` halts until the host route is installed, so the first-run sequence is `up` → `configure network` → `up` again:
+
+```bash
+windsor configure network
+windsor up                      # re-run, if up halted asking for it
+```
+
+On **Docker Desktop** `up` completes without halting; run `configure network` once afterward to activate `*.test` resolution. Either way, writing the DNS resolver entry needs elevation.
+
 While it runs, watch progress in another shell. These `kubectl` commands use your context's `KUBECONFIG`, so either prefix each with `windsor exec --` or set up the [shell hook](/contexts/environment-injection) once so it's exported automatically:
 
 ```bash
@@ -96,6 +105,6 @@ windsor down
 
 ## Next steps
 
-- [Contexts](/contexts/contexts) — Multiple environments and switching
+- [Contexts](/contexts/overview) — Multiple environments and switching
 - [Workstation](/workstation/colima-docker) — Local virtualization (Colima, Docker Desktop)
 - [Blueprints](/blueprints/overview) and [Components](/blueprints/terraform) — Terraform and Kustomize

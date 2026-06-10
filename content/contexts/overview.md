@@ -49,6 +49,12 @@ The `WINDSOR_CONTEXT` environment variable also reflects the active context, and
 
 Contexts are generated from blueprint templates in `contexts/_template/`. Templates define the shared base blueprint, schema, and conditional facets for every context. See [Blueprint templates](/blueprints/templates).
 
+## In this section
+
+- [Lifecycle](/contexts/lifecycle) — how `init`, `up`, `bootstrap`, `apply`, `plan`, `destroy`, and `down` fit together
+- [Environment injection](/contexts/environment-injection) — per-context environment variables and the shell hook
+- [Trusted folders](/contexts/trusted-folders) — the trust gate that guards environment injection
+
 ## Reference
 
 - [`windsor init`](/reference/cli/commands/init), [`windsor set`](/reference/cli/commands/set), [`windsor get`](/reference/cli/commands/get)
