@@ -9,9 +9,9 @@ A context typically represents a single cloud role and a single cluster role; al
 
 ## Workstation vs non-workstation contexts
 
-Contexts named `local` or starting with `local-` are **workstation contexts**. They run a VM-backed Kubernetes cluster on your machine and use [`windsor up`](/reference/cli/commands/up) and [`windsor down`](/reference/cli/commands/down) for lifecycle. See [Workstation overview](/workstation/overview).
+Contexts named `local` or starting with `local-` are **workstation contexts**. They run a VM-backed Kubernetes cluster on your machine and use [`windsor up`](https://www.windsorcli.dev/reference/cli/commands/up) and [`windsor down`](https://www.windsorcli.dev/reference/cli/commands/down) for lifecycle. See [Workstation overview](../workstation/overview.md).
 
-Every other context is **non-workstation** — staging, production, anything that targets real cloud infrastructure. Non-workstation contexts use [`windsor apply`](/reference/cli/commands/apply) and [`windsor destroy`](/reference/cli/commands/destroy) directly; there is no VM to bring up.
+Every other context is **non-workstation** — staging, production, anything that targets real cloud infrastructure. Non-workstation contexts use [`windsor apply`](https://www.windsorcli.dev/reference/cli/commands/apply) and [`windsor destroy`](https://www.windsorcli.dev/reference/cli/commands/destroy) directly; there is no VM to bring up.
 
 ## Creating contexts
 
@@ -43,19 +43,19 @@ Show the current context:
 windsor get context
 ```
 
-The `WINDSOR_CONTEXT` environment variable also reflects the active context, and Windsor's shell hook updates the rest of the per-context environment variables (kubeconfig, cloud profile, Talos config, etc.) on every prompt — see [Environment injection](/contexts/environment-injection).
+The `WINDSOR_CONTEXT` environment variable also reflects the active context, and Windsor's shell hook updates the rest of the per-context environment variables (kubeconfig, cloud profile, Talos config, etc.) on every prompt — see [Environment injection](environment-injection.md).
 
 ## Blueprint templates
 
-Contexts are generated from blueprint templates in `contexts/_template/`. Templates define the shared base blueprint, schema, and conditional facets for every context. See [Blueprint templates](/blueprints/templates).
+Contexts are generated from blueprint templates in `contexts/_template/`. Templates define the shared base blueprint, schema, and conditional facets for every context. See [Blueprint templates](../blueprints/templates.md).
 
 ## In this section
 
-- [Lifecycle](/contexts/lifecycle) — how `init`, `up`, `bootstrap`, `apply`, `plan`, `destroy`, and `down` fit together
-- [Environment injection](/contexts/environment-injection) — per-context environment variables and the shell hook
-- [Trusted folders](/contexts/trusted-folders) — the trust gate that guards environment injection
+- [Lifecycle](lifecycle.md) — how `init`, `up`, `bootstrap`, `apply`, `plan`, `destroy`, and `down` fit together
+- [Environment injection](environment-injection.md) — per-context environment variables and the shell hook
+- [Trusted folders](trusted-folders.md) — the trust gate that guards environment injection
 
 ## Reference
 
-- [`windsor init`](/reference/cli/commands/init), [`windsor set`](/reference/cli/commands/set), [`windsor get`](/reference/cli/commands/get)
-- [Contexts reference](/reference/cli/contexts) — full schema for `windsor.yaml` and `values.yaml`
+- [`windsor init`](https://www.windsorcli.dev/reference/cli/commands/init), [`windsor set`](https://www.windsorcli.dev/reference/cli/commands/set), [`windsor get`](https://www.windsorcli.dev/reference/cli/commands/get)
+- [Contexts reference](https://www.windsorcli.dev/reference/cli/contexts) — full schema for `windsor.yaml` and `values.yaml`

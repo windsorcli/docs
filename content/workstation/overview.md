@@ -3,7 +3,7 @@ title: Workstation
 description: Run Windsor locally on your machine.
 ---
 
-A workstation context runs a VM-backed Kubernetes cluster on your machine, with DNS, container registries, and a local git mirror configured to mimic production. Workstation contexts are the only place [`windsor up`](/reference/cli/commands/up) and [`windsor down`](/reference/cli/commands/down) apply — every other context (`staging`, `prod`, etc.) uses [`apply`](/reference/cli/commands/apply) and [`destroy`](/reference/cli/commands/destroy) directly.
+A workstation context runs a VM-backed Kubernetes cluster on your machine, with DNS, container registries, and a local git mirror configured to mimic production. Workstation contexts are the only place [`windsor up`](https://www.windsorcli.dev/reference/cli/commands/up) and [`windsor down`](https://www.windsorcli.dev/reference/cli/commands/down) apply — every other context (`staging`, `prod`, etc.) uses [`apply`](https://www.windsorcli.dev/reference/cli/commands/apply) and [`destroy`](https://www.windsorcli.dev/reference/cli/commands/destroy) directly.
 
 ```bash
 git init
@@ -93,7 +93,7 @@ Keys inside `workstation.yaml`:
 
 ## Choose a driver
 
-| Feature | [Docker Desktop](/workstation/docker-desktop) | [Colima + Docker](/workstation/colima-docker) | [Colima + Incus](/workstation/colima-incus) |
+| Feature | [Docker Desktop](docker-desktop.md) | [Colima + Docker](colima-docker.md) | [Colima + Incus](colima-incus.md) |
 |---------|---------------------------------------------------|---------------------------------------------------|--------------------------------------------------|
 | Prod parity | ★ | ★★ | ★★★ |
 | Platform | macOS, Linux, Windows | macOS, Linux | macOS, Linux |
@@ -197,7 +197,7 @@ windsor build-id            # current
 windsor build-id --new      # rotate
 ```
 
-Format: `YYMMDD.RANDOM.#` — date, random suffix for collision avoidance, and a same-day sequence counter. See the [build-id reference](/workstation/build-id).
+Format: `YYMMDD.RANDOM.#` — date, random suffix for collision avoidance, and a same-day sequence counter. See the [build-id reference](build-id.md).
 
 ## Verifying
 
@@ -212,7 +212,7 @@ The default blueprint installs Istio's [BookInfo](https://istio.io/latest/docs/e
 
 ## See also
 
-- [Lifecycle](/contexts/lifecycle) — `up` / `down` phase boundaries
-- [Environment injection](/contexts/environment-injection), [Environment reference](/reference/cli/environment) — `DOCKER_HOST`, `KUBECONFIG`, `TALOSCONFIG`, `REGISTRY_URL`
-- [`up`](/reference/cli/commands/up), [`down`](/reference/cli/commands/down), [`configure`](/reference/cli/commands/configure), [`init`](/reference/cli/commands/init)
-- [Configuration reference](/reference/cli/configuration) — full schema for `workstation`, `cluster`, `dns`, `docker`
+- [Lifecycle](../contexts/lifecycle.md) — `up` / `down` phase boundaries
+- [Environment injection](../contexts/environment-injection.md) — `DOCKER_HOST`, `KUBECONFIG`, `TALOSCONFIG`, `REGISTRY_URL`
+- [`up`](https://www.windsorcli.dev/reference/cli/commands/up), [`down`](https://www.windsorcli.dev/reference/cli/commands/down), [`configure`](https://www.windsorcli.dev/reference/cli/commands/configure), [`init`](https://www.windsorcli.dev/reference/cli/commands/init)
+- [Configuration reference](https://www.windsorcli.dev/reference/cli/configuration) — full schema for `workstation`, `cluster`, `dns`, `docker`

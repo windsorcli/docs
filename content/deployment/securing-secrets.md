@@ -3,7 +3,7 @@ title: Securing secrets
 description: Best practices for managing secrets with Windsor.
 ---
 
-Windsor provides features and patterns for handling secrets safely. For setup and usage see [Secrets management](/deployment/secrets-management).
+Windsor provides features and patterns for handling secrets safely. For setup and usage see [Secrets management](secrets-management.md).
 
 ## Risks and mitigations
 

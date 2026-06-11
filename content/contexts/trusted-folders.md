@@ -5,7 +5,7 @@ description: Windsor only injects environment in folders you trust.
 
 A Windsor project drives Terraform, secrets backends, and shell environment injection from files in your repository. If you `cd` into a project you didn't author, those files would otherwise be evaluated automatically — a clear environment-injection vector.
 
-Windsor mitigates this by gating injection behind an explicit trust step. You must run `windsor init` in a project before [`windsor env`](/reference/cli/commands/env) (and the [shell hook](/reference/cli/commands/hook)) will load anything from it.
+Windsor mitigates this by gating injection behind an explicit trust step. You must run `windsor init` in a project before [`windsor env`](https://www.windsorcli.dev/reference/cli/commands/env) (and the [shell hook](https://www.windsorcli.dev/reference/cli/commands/hook)) will load anything from it.
 
 ## How trust is recorded
 
@@ -44,10 +44,10 @@ sed -i.bak '\|/path/to/project|d' ~/.config/windsor/.trusted
 
 ## What still works without trust
 
-Commands that don't inject environment variables — [`version`](/reference/cli/commands/version), [`hook`](/reference/cli/commands/hook), [`get`](/reference/cli/commands/get) — work in any directory. So does the shell hook itself; it emits nothing for untrusted directories.
+Commands that don't inject environment variables — [`version`](https://www.windsorcli.dev/reference/cli/commands/version), [`hook`](https://www.windsorcli.dev/reference/cli/commands/hook), [`get`](https://www.windsorcli.dev/reference/cli/commands/get) — work in any directory. So does the shell hook itself; it emits nothing for untrusted directories.
 
 ## See also
 
-- [Securing secrets](/deployment/securing-secrets)
-- [Environment injection](/contexts/environment-injection), [Environment reference](/reference/cli/environment)
-- [`init`](/reference/cli/commands/init), [`env`](/reference/cli/commands/env), [`hook`](/reference/cli/commands/hook)
+- [Securing secrets](../deployment/securing-secrets.md)
+- [Environment injection](environment-injection.md)
+- [`init`](https://www.windsorcli.dev/reference/cli/commands/init), [`env`](https://www.windsorcli.dev/reference/cli/commands/env), [`hook`](https://www.windsorcli.dev/reference/cli/commands/hook)

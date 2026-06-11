@@ -59,18 +59,18 @@ terraform:
     bucket_name: ${cluster.name}-state
 ```
 
-Components without a `source:` resolve to `terraform/<path>` in the project; with `source:`, they resolve into the named blueprint source. `inputs` accepts both literal values and `${...}` expressions evaluated at compose time. See the [blueprint reference](/reference/cli/blueprint) for the full schema.
+Components without a `source:` resolve to `terraform/<path>` in the project; with `source:`, they resolve into the named blueprint source. `inputs` accepts both literal values and `${...}` expressions evaluated at compose time. See the [blueprint reference](https://www.windsorcli.dev/reference/cli/blueprint) for the full schema.
 
 ## Lifecycle commands
 
 | Command | Effect |
 |---------|--------|
-| [`windsor plan terraform [component]`](/reference/cli/commands/plan) | `init` + `plan` for one component, or all if omitted. `--summary` prints a table; otherwise streams full output. New components show `(new)`. |
-| [`windsor apply terraform <component>`](/reference/cli/commands/apply) | `init` + `plan` + `apply` for the named component. |
-| [`windsor apply`](/reference/cli/commands/apply) | Apply every component in dependency order, then install the Flux blueprint. |
-| [`windsor destroy terraform [component]`](/reference/cli/commands/destroy) | Destroy one component, or all in reverse-topological order. `--confirm=<token>` skips the interactive prompt. |
-| [`windsor up`](/reference/cli/commands/up) / [`windsor down`](/reference/cli/commands/down) | Workstation contexts only. `up` drives Terraform + Flux for the workstation; `down` stops the VM. |
-| [`windsor bootstrap`](/reference/cli/commands/bootstrap) | First-run setup — see [Bootstrap](#bootstrap) below. |
+| [`windsor plan terraform [component]`](https://www.windsorcli.dev/reference/cli/commands/plan) | `init` + `plan` for one component, or all if omitted. `--summary` prints a table; otherwise streams full output. New components show `(new)`. |
+| [`windsor apply terraform <component>`](https://www.windsorcli.dev/reference/cli/commands/apply) | `init` + `plan` + `apply` for the named component. |
+| [`windsor apply`](https://www.windsorcli.dev/reference/cli/commands/apply) | Apply every component in dependency order, then install the Flux blueprint. |
+| [`windsor destroy terraform [component]`](https://www.windsorcli.dev/reference/cli/commands/destroy) | Destroy one component, or all in reverse-topological order. `--confirm=<token>` skips the interactive prompt. |
+| [`windsor up`](https://www.windsorcli.dev/reference/cli/commands/up) / [`windsor down`](https://www.windsorcli.dev/reference/cli/commands/down) | Workstation contexts only. `up` drives Terraform + Flux for the workstation; `down` stops the VM. |
+| [`windsor bootstrap`](https://www.windsorcli.dev/reference/cli/commands/bootstrap) | First-run setup — see [Bootstrap](#bootstrap) below. |
 
 From `apply`, Windsor runs `terraform apply <plan-file>` against a saved plan — Terraform never prompts and `-auto-approve` is not needed. From `destroy`, Windsor passes `-auto-approve` and owns the confirmation gate itself (`--confirm` or an interactive prompt). If you run `terraform destroy` directly inside a `windsor env`-managed shell, Windsor leaves `TF_CLI_ARGS_destroy` empty so Terraform's own prompt appears.
 
@@ -78,7 +78,7 @@ From `apply`, Windsor runs `terraform apply <plan-file>` against a saved plan �
 
 Windsor materializes inputs to a generated `terraform.tfvars` next to each module shim and points Terraform at the right plan/apply/destroy args via `TF_CLI_ARGS_*`. You don't pass `-var-file` yourself.
 
-Per-component `TF_VAR_<input>` variables are materialized from the component's evaluated `inputs:`. Windsor also injects `TF_VAR_context`, `TF_VAR_context_id`, `TF_VAR_context_path`, `TF_VAR_project_root`, `TF_VAR_os_type`, and `TF_VAR_operation` (set to `apply` or `destroy` so components can branch on lifecycle phase). For the full table see the [environment reference](/reference/cli/environment#terraform).
+Per-component `TF_VAR_<input>` variables are materialized from the component's evaluated `inputs:`. Windsor also injects `TF_VAR_context`, `TF_VAR_context_id`, `TF_VAR_context_path`, `TF_VAR_project_root`, `TF_VAR_os_type`, and `TF_VAR_operation` (set to `apply` or `destroy` so components can branch on lifecycle phase). For how these are emitted, see [environment injection](../contexts/environment-injection.md).
 
 To inspect what Windsor exports for the current context:
 
@@ -88,7 +88,7 @@ windsor env
 
 ## Cross-component outputs
 
-A component can read another component's outputs through the `terraform_output` expression helper, used inside [facet](/blueprints/facets) expressions:
+A component can read another component's outputs through the `terraform_output` expression helper, used inside [facet](facets.md) expressions:
 
 ```yaml
 terraform:
@@ -144,7 +144,7 @@ terraform:
     timeout: 10m
 ```
 
-This is separate from Windsor's own per-context [stack lock](/contexts/lifecycle#safety-and-concurrency), which serializes concurrent `windsor` commands before Terraform's state lock engages.
+This is separate from Windsor's own per-context [stack lock](../contexts/lifecycle.md#safety-and-concurrency), which serializes concurrent `windsor` commands before Terraform's state lock engages.
 
 ## Bootstrap
 
@@ -173,7 +173,7 @@ This is workstation-context behavior only; non-workstation contexts skip the cal
 
 ## See also
 
-- [Lifecycle](/contexts/lifecycle) — phase-by-phase command map
-- [Environment reference](/reference/cli/environment) — full env table including cloud providers
-- [Workstation overview](/workstation/overview) — workstation-specific Terraform components
-- [Blueprint reference](/reference/cli/blueprint) — `TerraformComponent` schema
+- [Lifecycle](../contexts/lifecycle.md) — phase-by-phase command map
+- [Environment injection](../contexts/environment-injection.md) — how context env vars are managed
+- [Workstation overview](../workstation/overview.md) — workstation-specific Terraform components
+- [Blueprint reference](https://www.windsorcli.dev/reference/cli/blueprint) — `TerraformComponent` schema

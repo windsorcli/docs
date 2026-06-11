@@ -7,12 +7,12 @@ This page groups the lifecycle commands into the phases they represent. Knowing 
 
 | Phase | Command | What it does |
 |---|---|---|
-| Scaffold | [`init`](/reference/cli/commands/init) | Creates the context, writes `windsor.yaml`, marks the directory trusted. |
-| Workstation | [`up`](/reference/cli/commands/up) / [`down`](/reference/cli/commands/down) | Starts/stops the local VM and container runtime. Workstation contexts only. |
-| First-run | [`bootstrap`](/reference/cli/commands/bootstrap) | End-to-end install for non-workstation contexts. Two-phase apply when a `backend` component is in play. |
-| Install | [`apply`](/reference/cli/commands/apply) | Runs Terraform components, then installs the Flux blueprint. |
-| Inspect | [`plan`](/reference/cli/commands/plan) / [`show`](/reference/cli/commands/show) / [`explain`](/reference/cli/commands/explain) | Previews changes, prints rendered resources, traces values. |
-| Tear down | [`destroy`](/reference/cli/commands/destroy) | Destroys live infrastructure (Terraform + Flux). |
+| Scaffold | [`init`](https://www.windsorcli.dev/reference/cli/commands/init) | Creates the context, writes `windsor.yaml`, marks the directory trusted. |
+| Workstation | [`up`](https://www.windsorcli.dev/reference/cli/commands/up) / [`down`](https://www.windsorcli.dev/reference/cli/commands/down) | Starts/stops the local VM and container runtime. Workstation contexts only. |
+| First-run | [`bootstrap`](https://www.windsorcli.dev/reference/cli/commands/bootstrap) | End-to-end install for non-workstation contexts. Two-phase apply when a `backend` component is in play. |
+| Install | [`apply`](https://www.windsorcli.dev/reference/cli/commands/apply) | Runs Terraform components, then installs the Flux blueprint. |
+| Inspect | [`plan`](https://www.windsorcli.dev/reference/cli/commands/plan) / [`show`](https://www.windsorcli.dev/reference/cli/commands/show) / [`explain`](https://www.windsorcli.dev/reference/cli/commands/explain) | Previews changes, prints rendered resources, traces values. |
+| Tear down | [`destroy`](https://www.windsorcli.dev/reference/cli/commands/destroy) | Destroys live infrastructure (Terraform + Flux). |
 
 The path splits after `init` on whether the context runs a local workstation:
 
@@ -48,7 +48,7 @@ windsor down                    # stop VM, clean up local artifacts
 
 `up` is workstation-only. It starts the configured VM driver, runs Terraform for the workstation infrastructure, and installs the blueprint via Flux. Pass `--wait` to block until kustomizations report ready.
 
-Host networking and DNS need elevation, which `up` does not request on its own — it defers them to [`configure network`](/reference/cli/commands/configure-network) (sudo on macOS/Linux, an Administrator PowerShell on Windows). How `up` defers depends on what's needed:
+Host networking and DNS need elevation, which `up` does not request on its own — it defers them to [`configure network`](https://www.windsorcli.dev/reference/cli/commands/configure-network) (sudo on macOS/Linux, an Administrator PowerShell on Windows). How `up` defers depends on what's needed:
 
 - **Cluster reachability (Colima's host route).** `up` provisions what it can, then **halts** and prints `Run 'windsor configure network' (sudo), then re-run 'windsor up'.` Run it and re-run `up` to finish the install.
 - **DNS only (Docker Desktop).** `up` completes; it prints `configure network` as a follow-up so `*.<domain>` resolves from your browser. Run it once — no re-run needed.
@@ -114,6 +114,6 @@ Terraform's own state lock is governed by `terraform.lock.timeout` (default `5m`
 
 ## See also
 
-- [Contexts](/contexts/overview) — workstation vs non-workstation, switching contexts
-- [Workstation overview](/workstation/overview) — VM driver options and topology
-- [`init`](/reference/cli/commands/init), [`bootstrap`](/reference/cli/commands/bootstrap), [`apply`](/reference/cli/commands/apply), [`destroy`](/reference/cli/commands/destroy), [`up`](/reference/cli/commands/up), [`down`](/reference/cli/commands/down)
+- [Contexts](overview.md) — workstation vs non-workstation, switching contexts
+- [Workstation overview](../workstation/overview.md) — VM driver options and topology
+- [`init`](https://www.windsorcli.dev/reference/cli/commands/init), [`bootstrap`](https://www.windsorcli.dev/reference/cli/commands/bootstrap), [`apply`](https://www.windsorcli.dev/reference/cli/commands/apply), [`destroy`](https://www.windsorcli.dev/reference/cli/commands/destroy), [`up`](https://www.windsorcli.dev/reference/cli/commands/up), [`down`](https://www.windsorcli.dev/reference/cli/commands/down)

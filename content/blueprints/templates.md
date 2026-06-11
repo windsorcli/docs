@@ -3,7 +3,7 @@ title: The _template folder
 description: Shared blueprint template structure and composition order.
 ---
 
-The `contexts/_template/` directory is the base every context in the project inherits from. It pairs a [`blueprint.yaml`](#blueprintyaml) with optional [`schema.yaml`](#schemayaml), [`metadata.yaml`](#metadatayaml), and a [`facets/`](/blueprints/facets) directory of conditional fragments. When you initialize a context, Windsor loads `_template/`, evaluates facets against the context's values, and merges the result into a context-specific blueprint.
+The `contexts/_template/` directory is the base every context in the project inherits from. It pairs a [`blueprint.yaml`](#blueprintyaml) with optional [`schema.yaml`](#schemayaml), [`metadata.yaml`](#metadatayaml), and a [`facets/`](facets.md) directory of conditional fragments. When you initialize a context, Windsor loads `_template/`, evaluates facets against the context's values, and merges the result into a context-specific blueprint.
 
 Run `windsor show blueprint` to see the result for the current context.
 
@@ -72,7 +72,7 @@ properties:
 additionalProperties: false
 ```
 
-Use `$schema: https://json-schema.org/draft/2020-12/schema`. The earlier `https://windsorcli.dev/draft/2026-02/schema` dialect was removed in v0.9.0; a schema still declaring it fails validation with a migration hint. See [Schema](/blueprints/schema).
+Use `$schema: https://json-schema.org/draft/2020-12/schema`. The earlier `https://windsorcli.dev/draft/2026-02/schema` dialect was removed in v0.9.0; a schema still declaring it fails validation with a migration hint. See [Schema](schema.md).
 
 ## metadata.yaml
 
@@ -90,7 +90,7 @@ Constraint forms: `">=0.9.0"`, `"~0.9.0"`, `">=0.9.0 <0.10.0"`. Always quote —
 
 A facet is a YAML file under `_template/facets/` that contributes to the composed blueprint when its `when` expression is true. Each facet can carry config blocks, conditional Terraform components, conditional Kustomizations, and common substitutions. Facets are evaluated by ordinal (ascending), then by name.
 
-See [Facets](/blueprints/facets) for the full authoring model — `when` expressions, ordinals, merge strategies, config blocks, and the `terraform_output()` substitution helper.
+See [Facets](facets.md) for the full authoring model — `when` expressions, ordinals, merge strategies, config blocks, and the `terraform_output()` substitution helper.
 
 ## Composition order
 
@@ -107,13 +107,13 @@ When Windsor builds the final blueprint:
 1. **OCI sources with `deploy: true`** — components from these sources are merged. Sources with `deploy: false` are index-only — their components aren't merged but components elsewhere can reference them via `source: <name>`. Non-OCI sources (Git URLs) are always index-only.
 2. **Base template** — `_template/blueprint.yaml` merges in full.
 3. **Facets** — processed in ordinal order, with strategies and `when` expressions applied.
-4. **User blueprint** — `contexts/<name>/blueprint.yaml` overrides without filtering. Components from earlier layers remain unless this layer sets `destroy: false` or omits them by name when the merge strategy is `replace`. See [Facets — merge strategies](/blueprints/facets).
+4. **User blueprint** — `contexts/<name>/blueprint.yaml` overrides without filtering. Components from earlier layers remain unless this layer sets `destroy: false` or omits them by name when the merge strategy is `replace`. See [Facets — merge strategies](facets.md).
 
 Only OCI sources can have their components merged; the `deploy` flag only applies to OCI sources and defaults to `true` when omitted.
 
 ## See also
 
-- [Schema](/blueprints/schema) — Validation and defaults.
-- [Facets](/blueprints/facets) — Conditional composition and expression authoring.
-- [Sharing blueprints](/blueprints/sharing) — Pushing and bundling.
-- [Blueprint testing](/blueprints/testing) — Static tests for blueprint composition.
+- [Schema](schema.md) — Validation and defaults.
+- [Facets](facets.md) — Conditional composition and expression authoring.
+- [Sharing blueprints](sharing.md) — Pushing and bundling.
+- [Blueprint testing](testing.md) — Static tests for blueprint composition.

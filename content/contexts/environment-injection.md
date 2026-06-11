@@ -7,7 +7,7 @@ The Windsor CLI manages your environment based on the active context and your cu
 
 ## How it works
 
-`windsor hook <shell>` emits a snippet you install into your `~/.zshrc`, `~/.bashrc`, or PowerShell profile (see [Installation](/cli/installation)). On every prompt, the hook calls `windsor env --hook` and the shell evaluates the output. The variables Windsor manages are listed in `WINDSOR_MANAGED_ENV`; on context switch the hook unsets stale variables before applying the new set.
+`windsor hook <shell>` emits a snippet you install into your `~/.zshrc`, `~/.bashrc`, or PowerShell profile (see [Installation](https://www.windsorcli.dev/cli/installation)). On every prompt, the hook calls `windsor env --hook` and the shell evaluates the output. The variables Windsor manages are listed in `WINDSOR_MANAGED_ENV`; on context switch the hook unsets stale variables before applying the new set.
 
 ```mermaid
 flowchart LR
@@ -17,7 +17,7 @@ flowchart LR
   Vars --> Prompt
 ```
 
-`windsor env` only emits variables when the current directory is **trusted** (recorded in `~/.config/windsor/.trusted` and added by `windsor init`). If a project hasn't been trusted, `windsor env` exits silently. See [Trusted folders](/contexts/trusted-folders).
+`windsor env` only emits variables when the current directory is **trusted** (recorded in `~/.config/windsor/.trusted` and added by `windsor init`). If a project hasn't been trusted, `windsor env` exits silently. See [Trusted folders](trusted-folders.md).
 
 The `--hook` flag puts `env` in non-fatal mode: warnings are suppressed and errors exit 0 so a misconfigured project never breaks your prompt. Run `windsor env` without `--hook` to see the full output and any errors.
 
@@ -52,7 +52,7 @@ WINDSOR_SESSION_TOKEN=ldC26Dp
 
 ## Reference
 
-For the full per-tool catalog — every variable Windsor emits for AWS, Azure, GCP, Docker, Kubernetes/Talos, and Terraform, plus the project/global suppression matrix — see the [environment reference](/reference/cli/environment).
+For the full per-tool catalog — every variable Windsor emits for AWS, Azure, GCP, Docker, Kubernetes/Talos, and Terraform, plus the project/global suppression matrix — run [`windsor env`](https://www.windsorcli.dev/reference/cli/commands/env) in the relevant context.
 
-- [`windsor env`](/reference/cli/commands/env), [`windsor hook`](/reference/cli/commands/hook)
-- [Trusted folders](/contexts/trusted-folders)
+- [`windsor env`](https://www.windsorcli.dev/reference/cli/commands/env), [`windsor hook`](https://www.windsorcli.dev/reference/cli/commands/hook)
+- [Trusted folders](trusted-folders.md)

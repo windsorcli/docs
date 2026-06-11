@@ -49,7 +49,7 @@ kustomize:
     - longhorn
 ```
 
-For the full Kustomization schema (every field, type, and default) see the [blueprint reference](/reference/cli/blueprint).
+For the full Kustomization schema (every field, type, and default) see the [blueprint reference](https://www.windsorcli.dev/reference/cli/blueprint).
 
 ## Namespace vs target namespace
 
@@ -114,7 +114,7 @@ kustomize:
 
 A manifest under `kustomize/my-app/` can then reference `${replicas}` and `${image_tag}` directly. Substitution values are converted to strings; complex types are JSON-encoded.
 
-`substitutions:` in the user-authored `blueprint.yaml` only accepts literal values. To produce dynamic substitutions — facet expressions, `terraform_output()` calls, anything resolved at compose time — declare them in a facet under `contexts/_template/facets/`. The composer evaluates them and merges the resulting string values into the kustomization's `substitutions` map. See [Blueprint templates](/blueprints/templates) and [Facets](/blueprints/facets).
+`substitutions:` in the user-authored `blueprint.yaml` only accepts literal values. To produce dynamic substitutions — facet expressions, `terraform_output()` calls, anything resolved at compose time — declare them in a facet under `contexts/_template/facets/`. The composer evaluates them and merges the resulting string values into the kustomization's `substitutions` map. See [Blueprint templates](templates.md) and [Facets](facets.md).
 
 ## Context-specific patches
 
@@ -176,7 +176,7 @@ Sources and kustomizations both live in the gitops namespace (default `system-gi
 
 ## See also
 
-- [`apply`](/reference/cli/commands/apply), [`destroy`](/reference/cli/commands/destroy), [`plan`](/reference/cli/commands/plan), [`show`](/reference/cli/commands/show)
-- [Blueprint reference](/reference/cli/blueprint) — full Kustomization schema
-- [Blueprint templates](/blueprints/templates) — facet-driven composition
+- [`apply`](https://www.windsorcli.dev/reference/cli/commands/apply), [`destroy`](https://www.windsorcli.dev/reference/cli/commands/destroy), [`plan`](https://www.windsorcli.dev/reference/cli/commands/plan), [`show`](https://www.windsorcli.dev/reference/cli/commands/show)
+- [Blueprint reference](https://www.windsorcli.dev/reference/cli/blueprint) — full Kustomization schema
+- [Blueprint templates](templates.md) — facet-driven composition
 - [Flux Kustomization docs](https://fluxcd.io/flux/components/kustomize/kustomizations/)

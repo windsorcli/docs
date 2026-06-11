@@ -82,4 +82,4 @@ Inspect a secret in the environment. On error it may appear as:
 
 ## Security
 
-See [Securing secrets](/deployment/securing-secrets) for best practices and Windsor's secret-handling features.
+See [Securing secrets](securing-secrets.md) for best practices and Windsor's secret-handling features.

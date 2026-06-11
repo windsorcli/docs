@@ -28,7 +28,7 @@ terraform:
     strategy: merge
 ```
 
-When `provider` is `aws`, the VPC Terraform component from `core` is included. Expressions can reference [schema](/blueprints/schema) properties and `terraform_output()` for cross-component values.
+When `provider` is `aws`, the VPC Terraform component from `core` is included. Expressions can reference [schema](schema.md) properties and `terraform_output()` for cross-component values.
 
 ## Ordinals
 
@@ -50,5 +50,5 @@ Paths in facets (for example, `jsonnet()`, `file()`) are relative to the facet f
 
 ## See also
 
-- [Blueprint templates](/blueprints/templates) — How the _template folder and composition order work.
-- [Blueprint testing](/blueprints/testing) — Testing facet conditions and expected components.
+- [Blueprint templates](templates.md) — How the _template folder and composition order work.
+- [Blueprint testing](testing.md) — Testing facet conditions and expected components.

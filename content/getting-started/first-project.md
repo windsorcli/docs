@@ -9,11 +9,11 @@ Recommended: 8 CPU cores, 8GB RAM, 60GB free storage.
 
 ## 1. Install the CLI
 
-[Install Windsor](/cli/installation).
+[Install Windsor](https://www.windsorcli.dev/cli/installation).
 
 ## 2. Terraform and a Docker runtime
 
-You need Terraform and a Docker runtime (Colima, Docker Desktop, or another [supported option](/workstation/colima-docker)). Install them however you prefer. When you run `windsor init`, it will tell you if a required tool is missing or needs upgrading.
+You need Terraform and a Docker runtime (Colima, Docker Desktop, or another [supported option](../workstation/colima-docker.md)). Install them however you prefer. When you run `windsor init`, it will tell you if a required tool is missing or needs upgrading.
 
 ## 3. Start a project
 
@@ -72,7 +72,7 @@ windsor up                      # re-run, if up halted asking for it
 
 On **Docker Desktop** `up` completes without halting; run `configure network` once afterward to activate `*.test` resolution. Either way, writing the DNS resolver entry needs elevation.
 
-While it runs, watch progress in another shell. These `kubectl` commands use your context's `KUBECONFIG`, so either prefix each with `windsor exec --` or set up the [shell hook](/contexts/environment-injection) once so it's exported automatically:
+While it runs, watch progress in another shell. These `kubectl` commands use your context's `KUBECONFIG`, so either prefix each with `windsor exec --` or set up the [shell hook](../contexts/environment-injection.md) once so it's exported automatically:
 
 ```bash
 kubectl get kustomizations -A --watch
@@ -105,6 +105,6 @@ windsor down
 
 ## Next steps
 
-- [Contexts](/contexts/overview) — Multiple environments and switching
-- [Workstation](/workstation/colima-docker) — Local virtualization (Colima, Docker Desktop)
-- [Blueprints](/blueprints/overview) and [Components](/blueprints/terraform) — Terraform and Kustomize
+- [Contexts](../contexts/overview.md) — Multiple environments and switching
+- [Workstation](../workstation/colima-docker.md) — Local virtualization (Colima, Docker Desktop)
+- [Blueprints](../blueprints/overview.md) and [Components](../blueprints/terraform.md) — Terraform and Kustomize

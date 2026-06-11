@@ -3,7 +3,7 @@ title: Build ID
 description: Generate image tags for local registry pushes and dev workflows.
 ---
 
-The **build ID** is a CLI-generated identifier (format `YYMMDD.RANDOM.#`) used as image tags when pushing to a local registry and deploying to a cluster. It applies on any [workstation](/workstation/overview) setup that provides a local registry (Docker Desktop, Colima + Docker, Colima + Incus).
+The **build ID** is a CLI-generated identifier (format `YYMMDD.RANDOM.#`) used as image tags when pushing to a local registry and deploying to a cluster. It applies on any [workstation](overview.md) setup that provides a local registry (Docker Desktop, Colima + Docker, Colima + Incus).
 
 ## Commands
 
