@@ -1,25 +1,14 @@
 {
   "noBinary": true,
+  "profanitySureness": 1,
   "allow": [
     "clearly",
-    "destroy",
     "easy",
-    "failure",
-    "failures",
-    "fight",
-    "fire",
-    "hang",
-    "hook",
     "host-hostess",
     "hostesses-hosts",
     "invalid",
     "just",
-    "killed",
     "obvious",
-    "period",
-    "premature",
-    "reject",
-    "rejects",
     "simple",
     "simply"
   ]
