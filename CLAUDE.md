@@ -19,12 +19,18 @@ metadata.
    with overlong descriptions — both feed into OG tags, search
    snippets, and `llms.txt`.
 
-2. **Internal links use site paths**, not relative `.md` paths.
-   Write `[the up command](/reference/cli/commands/up)`, not
-   `[the up command](../cli/docs/reference/...)`. Paths are rooted at
-   the live site; this repo's `content/` mounts at `/` and the
-   `windsorcli/cli` / `windsorcli/core` reference docs mount alongside
-   it.
+2. **Links follow the website's vendor-time transformation.** For
+   another page **in this repo**, use a **relative `.md` path** —
+   `[first project](../getting-started/first-project.md)`. It works in
+   GitHub's raw view and for agents fetching the raw file, and the
+   website rewrites it to a clean route (`/getting-started/first-project`)
+   when it vendors the docs. For a **reference page in the `cli`/`core`
+   repos** (or any cross-section link), use the **absolute site URL** —
+   `[the up command](https://www.windsorcli.dev/reference/cli/commands/up)`;
+   the website localizes it to a root-relative path at vendor time. Don't
+   use bare site paths (`/blueprints/schema`) for in-repo links — they're
+   dead links when the raw `.md` is read on its own. (The transform lives
+   in `windsorcli.github.io/scripts/vendor-docs.mjs`.)
 
 3. **Pages stand alone.** Agents, search results, and `Open in
    Claude`-style links fetch single pages. No `as we'll see below`

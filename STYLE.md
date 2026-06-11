@@ -58,8 +58,8 @@ Common failure modes. Each entry: symptom, cause, fix.
 
 ## Where to next
 
-- [Related page](/related)
-- [Reference](/reference/cli/...)
+- [Related page](../section/related.md)
+- [Reference](https://www.windsorcli.dev/reference/cli/...)
 ````
 
 Reference pages (precise behavior, every flag, every field) belong in
@@ -83,9 +83,15 @@ truncate at that point.
 
 ## 4. Links
 
-- **Internal links use site paths** (`/blueprints/schema`), not
-  relative `.md` paths. The site flattens content from this repo,
-  `cli/`, and `core/` side-by-side at the root.
+- **In-repo links use relative `.md` paths** (`[schema](../blueprints/schema.md)`),
+  not bare site paths. They resolve in GitHub's raw view and for agents
+  fetching the page on its own, and the website rewrites them to clean
+  routes (`/blueprints/schema`) when it vendors the docs. A bare site path
+  (`/blueprints/schema`) renders on the site but is a dead link in raw `.md`.
+- **Links to `cli`/`core` reference pages use the absolute site URL**
+  (`https://www.windsorcli.dev/reference/cli/commands/up`). Those pages live
+  in other repos, so a relative `.md` path can't reach them; the website
+  localizes the URL to a root-relative path at vendor time.
 - **External links are bare URLs only inside code blocks.** Elsewhere,
   use `[label](https://...)` so the link text reads naturally.
 - **Don't link to a page just because it exists.** Each link should
@@ -130,7 +136,7 @@ arrives via a deep link.
   fetched in isolation.
 - **Link instead of cross-referencing.** If a concept is defined
   elsewhere, link to it. Don't write `the schema (covered earlier)`;
-  write `the [schema](/blueprints/schema)`.
+  write `the [schema](../blueprints/schema.md)`.
 - **Headings are stable.** Don't rename `## Anatomy` to
   `## How it works` casually — every link an agent or human has
   memorized to `#anatomy` breaks. Treat heading text as part of

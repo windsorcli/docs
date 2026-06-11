@@ -114,18 +114,24 @@ for the full list.
 
 ## Where to next
 
-- [Related page](/related)
-- [Reference](/reference/cli/...)
+- [Related page](../section/related.md)
+- [Reference](https://www.windsorcli.dev/reference/cli/...)
 ````
 
 Drop a section if a page genuinely doesn't need it. Don't pad.
 
 ## Link conventions
 
-- Internal links use **site paths**: `/blueprints/schema`,
-  `/reference/cli/commands/up`. No `/docs/` prefix. Not relative
-  `.md` paths. Content from this repo, `cli/`, and `core/` is
-  flattened side-by-side at the site root at build time.
+- **In-repo links use relative `.md` paths**: `[schema](../blueprints/schema.md)`,
+  `[first project](../getting-started/first-project.md)`. They resolve in
+  GitHub's raw view and for agents fetching the raw page; the website
+  rewrites them to clean routes (`/blueprints/schema`) when it vendors the
+  docs. Don't use bare site paths (`/blueprints/schema`) for in-repo links —
+  they're dead when the raw `.md` is read on its own.
+- **Reference links (cli/core repos) use the absolute site URL**:
+  `[the up command](https://www.windsorcli.dev/reference/cli/commands/up)`.
+  Those pages live in other repos, so a relative `.md` can't reach them;
+  the website localizes the URL to a root-relative path at vendor time.
 - External links: `[label](https://...)`. Bare URLs only inside code
   blocks.
 - Every link should pay rent — what does the reader learn by
