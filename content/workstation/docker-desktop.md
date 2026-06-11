@@ -18,18 +18,24 @@ description: Run Windsor locally with Docker Desktop.
 
 ## Setup
 
-After [installing the CLI](/cli/installation) and [starting a project](/cli/getting-started), ensure Docker Desktop is running. Then:
+After [installing the CLI](/cli/installation) and [starting a project](/getting-started/first-project), ensure Docker Desktop is running. Then:
 
 ```bash
 windsor init local --vm-driver docker-desktop
-windsor up --deploy
+windsor up
+windsor configure network        # activates DNS — needs elevation (see DNS)
 ```
 
-On Linux, `docker` is the default when `--vm-driver` is omitted; use `docker-desktop` if you run Docker Desktop there. See [Getting started — VM driver](/cli/getting-started#start-a-project) for all drivers.
+On Linux, `docker` is the default when `--vm-driver` is omitted; use `docker-desktop` if you run Docker Desktop there. See [First project — VM driver](/getting-started/first-project) for all drivers.
 
 ## DNS
 
-The CLI configures your resolver so the reserved local domain (default `test`) points at a local CoreDNS container. With Docker Desktop, DNS typically resolves to 127.0.0.1. Test with:
+`up` does not prompt for elevation, so it defers DNS setup and prints a `windsor configure network` follow-up. That command points the reserved local domain (default `test`) at the cluster DNS — with Docker Desktop it resolves to 127.0.0.1. **Writing the rule always needs elevated privileges**, and the mechanism differs by OS:
+
+- **macOS / Linux:** run `windsor configure network` from a normal shell; it prompts for sudo per privileged step (cached after the first prompt) and writes `/etc/resolver/<domain>`.
+- **Windows:** the whole process must be elevated — open **PowerShell as Administrator** (right-click → Run as Administrator), `cd` to the project, then run `windsor configure network`. From a normal shell it fails fast with a "must be run from an Administrator PowerShell" error. It installs a per-domain **NRPT rule** rather than a resolver file; if a Group Policy manages NRPT it can shadow the rule, and the command warns when that happens (see [Troubleshooting](/troubleshooting/overview#workstation-and-networking)).
+
+Use `--dry-run` to preview or `--revert` to remove it. Unlike Colima, Docker Desktop needs no host route — only the DNS rule, so `up` completes without halting. Test resolution with:
 
 - **Windows:** `nslookup registry.test dns.test`
 - **macOS / Linux:** `dig @dns.test registry.test`

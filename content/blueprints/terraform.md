@@ -134,6 +134,18 @@ Default backend by `platform`, applied at `windsor init` / `windsor bootstrap` /
 
 Override at init time with `--backend`, via `--set terraform.backend.type=...` on `bootstrap`, or by editing `windsor.yaml` directly.
 
+## State locking
+
+Windsor passes `-lock-timeout` to every state-mutating Terraform command (and to `init`), so a contended remote state waits instead of failing immediately. The wait is set by `terraform.lock.timeout`, a Go duration string that defaults to `5m`:
+
+```yaml
+terraform:
+  lock:
+    timeout: 10m
+```
+
+This is separate from Windsor's own per-context [stack lock](/contexts/lifecycle#safety-and-concurrency), which serializes concurrent `windsor` commands before Terraform's state lock engages.
+
 ## Bootstrap
 
 `windsor bootstrap` handles the chicken-and-egg case where the configured remote backend lives in infrastructure that Terraform itself must create — for example, an S3 bucket for state, or an Azure Storage account.

@@ -36,6 +36,20 @@ sources:
 
 Windsor downloads the artifact, extracts the template, processes [facets](/blueprints/facets), and validates config and CLI version. OCI sources with `deploy: true` (default) have their Terraform and Kustomize components merged; with `deploy: false` the blueprint is index-only — components elsewhere can reference it via `source: <name>` but its own components don't get merged. See [Blueprint templates — Composition order](/blueprints/templates#composition-order).
 
+## Caching and private registries
+
+Downloaded artifacts are cached to disk and reused across commands, so a blueprint is fetched once and not re-downloaded on every `init` / `up` / `apply`. To force a fresh download, pass `--no-cache` on any command — it's a persistent flag that bypasses the cache for that invocation:
+
+```bash
+windsor up --no-cache
+```
+
+Private-registry pulls use your existing Docker credential chain (the same logins `docker login` writes). Authenticate once and Windsor reuses the keychain entry; public registries fall back to anonymous access:
+
+```bash
+docker login ghcr.io                       # then private oci:// sources resolve
+```
+
 ## Bundling
 
 Package a blueprint for pushing to OCI:

@@ -9,9 +9,12 @@ Currently, Windsor supports AWS, Azure, virtualized platforms (Hyper-V), and bar
 
 The goal is to enable anyone to operate secure, private, and reliable compute infrastructure on their own terms. Blueprints should be repeatable, testable, and offer a clean authorship contract for delivering high-fidelity self-hosted services from minimum prerequisites.
 
-Blueprint authorship is key to this project's success. Most of the current documentation covers the `core` blueprint. This provides the infrastructure bootstrapping, a properly configured Kubernetes cluster, and essential cloud services. More blueprints are coming. If you want to author one, read on, get in touch, and extend `core`.
+Blueprint authorship is key to this project's success. Most of the documentation covers the `core` blueprint, which provides the infrastructure bootstrapping, a properly configured Kubernetes cluster, and essential cloud services. `core` is the primary blueprint today, and the authorship contract is open — to write your own, read on, get in touch, and extend `core`.
 
-- [`cli/`](/cli/installation) - key concepts that are useful when running `windsor` commands
-- [`workstation/`](/workstation/overview) - how-tos for running a blueprint locally in 'dev' mode
-- [`deployment/`](/deployment/aws) - how-tos for bootstrapping your infrastructure on cloud (AWS, Azure), virtualized platforms (Hyper-V), or bare metal you own
-- [`reference/`](/reference/cli/configuration) - in-depth references for the CLI and core blueprint
+- [Getting started](/getting-started/first-project) — install the CLI and run your first local stack
+- [Contexts](/contexts/overview) — environments, lifecycle, and per-context configuration
+- [Blueprints](/blueprints/overview) — how a stack is composed, customized, and shared
+- [Workstation](/workstation/overview) — running a blueprint locally in dev mode
+- [Deployment](/deployment/overview) — bootstrapping infrastructure on AWS, Azure, or bare metal you own
+- [Troubleshooting](/troubleshooting/overview) — common failure modes and their fixes
+- [Reference](/reference/cli/configuration) — in-depth references for the CLI and `core` blueprint

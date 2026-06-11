@@ -9,6 +9,14 @@ The Windsor CLI manages your environment based on the active context and your cu
 
 `windsor hook <shell>` emits a snippet you install into your `~/.zshrc`, `~/.bashrc`, or PowerShell profile (see [Installation](/cli/installation)). On every prompt, the hook calls `windsor env --hook` and the shell evaluates the output. The variables Windsor manages are listed in `WINDSOR_MANAGED_ENV`; on context switch the hook unsets stale variables before applying the new set.
 
+```mermaid
+flowchart LR
+  Prompt["shell prompt"] --> Hook["hook runs<br/>windsor env --hook"]
+  Hook --> Eval["shell evals output"]
+  Eval --> Vars["context env applied<br/>KUBECONFIG, cloud profile, Talos"]
+  Vars --> Prompt
+```
+
 `windsor env` only emits variables when the current directory is **trusted** (recorded in `~/.config/windsor/.trusted` and added by `windsor init`). If a project hasn't been trusted, `windsor env` exits silently. See [Trusted folders](/contexts/trusted-folders).
 
 The `--hook` flag puts `env` in non-fatal mode: warnings are suppressed and errors exit 0 so a misconfigured project never breaks your prompt. Run `windsor env` without `--hook` to see the full output and any errors.
