@@ -1,10 +1,12 @@
 # lychee config — link checker for the docs repo.
 #
-# This repo's markdown is vendored into windsorcli.github.io, where every
-# root-relative link (`/workstation/...`, `/reference/cli/...`, etc.) is
-# resolved by the Astro site. Lychee can't reach them from this repo in
-# isolation — we skip all root-relative links here and let the website's
-# own build catch broken targets.
+# This repo's markdown is vendored into the windsorcli.github.io build and
+# published at www.windsorcli.dev. Site-internal links — whether written as
+# root-relative (`/workstation/...`) or as absolute prod URLs
+# (`https://www.windsorcli.dev/reference/cli/...`, which vendor-docs localizes
+# to root-relative) — only resolve on the built site, not from this repo in
+# isolation, and only once this content is released. We skip them here and let
+# the website's own build catch broken targets.
 #
 # `--base-url` is required so lychee treats `/foo` as a URL path rather
 # than a filesystem path before the `exclude` regex runs. The value is a
@@ -21,7 +23,8 @@ base_url = "https://windsorcli.github.io"
 # Skip site-relative paths (resolved by the Astro site, not this repo)
 # and common false-positive patterns.
 exclude = [
-  '^https://windsorcli\.github\.io/',  # resolved by the website itself
+  '^https?://(www\.)?windsorcli\.dev/',  # published site — resolved post-vendor, not from this repo
+  '^https://windsorcli\.github\.io/',    # the site's build repo
   '^https?://localhost',
   '^https?://127\.',
   '^https?://example\.(com|invalid)',

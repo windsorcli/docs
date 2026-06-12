@@ -19,18 +19,19 @@ metadata.
    with overlong descriptions — both feed into OG tags, search
    snippets, and `llms.txt`.
 
-2. **Links follow the website's vendor-time transformation.** For
-   another page **in this repo**, use a **relative `.md` path** —
-   `[first project](../getting-started/first-project.md)`. It works in
-   GitHub's raw view and for agents fetching the raw file, and the
-   website rewrites it to a clean route (`/getting-started/first-project`)
-   when it vendors the docs. For a **reference page in the `cli`/`core`
-   repos** (or any cross-section link), use the **absolute site URL** —
-   `[the up command](https://www.windsorcli.dev/reference/cli/commands/up)`;
-   the website localizes it to a root-relative path at vendor time. Don't
-   use bare site paths (`/blueprints/schema`) for in-repo links — they're
-   dead links when the raw `.md` is read on its own. (The transform lives
-   in `windsorcli.github.io/scripts/vendor-docs.mjs`.)
+2. **Link by whether the target file lives in this repo.** If the
+   page **is in this repo**, use a **relative `.md` path** —
+   `[first project](../getting-started/first-project.md)`. It resolves
+   on GitHub and for agents fetching the raw file, and the website
+   rewrites it to a clean route (`/getting-started/first-project`) when
+   it vendors the docs. If the page **isn't here** — `cli`/`core`
+   reference, or anything else off-repo — link the **`windsorcli.dev`
+   URL** directly: `[the up command](https://www.windsorcli.dev/reference/cli/commands/up)`.
+   It works on GitHub by going to the live site, and the website
+   localizes it to a root-relative path at vendor time. Don't use bare
+   site paths (`/blueprints/schema`) — they're dead links when the raw
+   `.md` is read on its own. (The transform lives in
+   `windsorcli.github.io/scripts/vendor-docs.mjs`.)
 
 3. **Pages stand alone.** Agents, search results, and `Open in
    Claude`-style links fetch single pages. No `as we'll see below`

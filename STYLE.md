@@ -83,15 +83,18 @@ truncate at that point.
 
 ## 4. Links
 
-- **In-repo links use relative `.md` paths** (`[schema](../blueprints/schema.md)`),
-  not bare site paths. They resolve in GitHub's raw view and for agents
-  fetching the page on its own, and the website rewrites them to clean
-  routes (`/blueprints/schema`) when it vendors the docs. A bare site path
-  (`/blueprints/schema`) renders on the site but is a dead link in raw `.md`.
-- **Links to `cli`/`core` reference pages use the absolute site URL**
-  (`https://www.windsorcli.dev/reference/cli/commands/up`). Those pages live
-  in other repos, so a relative `.md` path can't reach them; the website
-  localizes the URL to a root-relative path at vendor time.
+- **Pick the link form by where the target file lives.** If the page is
+  **in this repo**, use a **relative `.md` path** (`[schema](../blueprints/schema.md)`).
+  It resolves on GitHub and for agents fetching the page on its own, and
+  the website rewrites it to a clean route (`/blueprints/schema`) at vendor
+  time. Don't use a bare site path (`/blueprints/schema`) — it renders on
+  the site but is a dead link in raw `.md`.
+- **If the target isn't in this repo** — `cli`/`core` reference or anything
+  off-repo — link the **`windsorcli.dev` URL** directly
+  (`https://www.windsorcli.dev/reference/cli/commands/up`). There's no local
+  file to reach with a relative path; the URL works on GitHub by going to
+  the live site, and the website localizes it to a root-relative path at
+  vendor time.
 - **External links are bare URLs only inside code blocks.** Elsewhere,
   use `[label](https://...)` so the link text reads naturally.
 - **Don't link to a page just because it exists.** Each link should
