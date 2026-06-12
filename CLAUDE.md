@@ -30,7 +30,10 @@ metadata.
    It works on GitHub by going to the live site, and the website
    localizes it to a root-relative path at vendor time. Don't use bare
    site paths (`/blueprints/schema`) — they're dead links when the raw
-   `.md` is read on its own. (The transform lives in
+   `.md` is read on its own. Use the host exactly as
+   `https://www.windsorcli.dev` — that's the literal the vendor step
+   strips, defined once in `windsorcli.github.io/site.config.mjs`; a bare
+   `windsorcli.dev` won't localize. (The transform lives in
    `windsorcli.github.io/scripts/vendor-docs.mjs`.)
 
 3. **Pages stand alone.** Agents, search results, and `Open in

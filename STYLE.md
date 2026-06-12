@@ -94,7 +94,9 @@ truncate at that point.
   (`https://www.windsorcli.dev/reference/cli/commands/up`). There's no local
   file to reach with a relative path; the URL works on GitHub by going to
   the live site, and the website localizes it to a root-relative path at
-  vendor time.
+  vendor time. Write the host exactly as `https://www.windsorcli.dev` — that
+  literal is what the vendor step strips, and it's defined once in the
+  website's `site.config.mjs` (a bare `windsorcli.dev` won't be localized).
 - **External links are bare URLs only inside code blocks.** Elsewhere,
   use `[label](https://...)` so the link text reads naturally.
 - **Don't link to a page just because it exists.** Each link should

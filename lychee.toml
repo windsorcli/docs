@@ -23,7 +23,7 @@ base_url = "https://windsorcli.github.io"
 # Skip site-relative paths (resolved by the Astro site, not this repo)
 # and common false-positive patterns.
 exclude = [
-  '^https?://(www\.)?windsorcli\.dev/',  # published site — resolved post-vendor, not from this repo
+  '^https?://(www\.)?windsorcli\.dev/',  # published site (host is defined in windsorcli.github.io/site.config.mjs) — resolved post-vendor, not from this repo
   '^https://windsorcli\.github\.io/',    # the site's build repo
   '^https?://localhost',
   '^https?://127\.',
