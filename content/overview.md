@@ -11,10 +11,10 @@ The goal is to enable anyone to operate secure, private, and reliable compute in
 
 Blueprint authorship is key to this project's success. Most of the documentation covers the `core` blueprint, which provides the infrastructure bootstrapping, a properly configured Kubernetes cluster, and essential cloud services. `core` is the primary blueprint today, and the authorship contract is open — to write your own, read on, get in touch, and extend `core`.
 
-- [Getting started](/getting-started/first-project) — install the CLI and run your first local stack
-- [Contexts](/contexts/overview) — environments, lifecycle, and per-context configuration
-- [Blueprints](/blueprints/overview) — how a stack is composed, customized, and shared
-- [Workstation](/workstation/overview) — running a blueprint locally in dev mode
-- [Deployment](/deployment/overview) — bootstrapping infrastructure on AWS, Azure, or bare metal you own
-- [Troubleshooting](/troubleshooting/overview) — common failure modes and their fixes
-- [Reference](/reference/cli/configuration) — in-depth references for the CLI and `core` blueprint
+- [Getting started](getting-started/first-project.md) — install the CLI and run your first local stack
+- [Contexts](contexts/overview.md) — environments, lifecycle, and per-context configuration
+- [Blueprints](blueprints/overview.md) — how a stack is composed, customized, and shared
+- [Workstation](workstation/overview.md) — running a blueprint locally in dev mode
+- [Deployment](deployment/overview.md) — bootstrapping infrastructure on AWS, Azure, or bare metal you own
+- [Troubleshooting](troubleshooting/overview.md) — common failure modes and their fixes
+- [Reference](https://www.windsorcli.dev/reference/cli/configuration) — in-depth references for the CLI and `core` blueprint

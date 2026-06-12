@@ -3,7 +3,7 @@ title: Blueprint testing
 description: Static testing for blueprint composition.
 ---
 
-Windsor's `windsor test` command validates blueprint composition without provisioning infrastructure. You define input values and expected components in YAML; the CLI checks that [facets](/blueprints/facets) and composition behave as expected.
+Windsor's `windsor test` command validates blueprint composition without provisioning infrastructure. You define input values and expected components in YAML; the CLI checks that [facets](facets.md) and composition behave as expected.
 
 ## What is validated
 
@@ -41,7 +41,7 @@ Use the `.test.yaml` extension. Each case has `name`, `values`, and optionally `
 
 ## Mocking Terraform outputs
 
-When blueprints use `terraform_output()` in [facets](/blueprints/facets), provide mock outputs in the test:
+When blueprints use `terraform_output()` in [facets](facets.md), provide mock outputs in the test:
 
 ```yaml
 terraformOutputs:

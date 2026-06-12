@@ -22,8 +22,8 @@ Per-context customizations live in `contexts/<name>/`. Files there override or e
 
 ## Where to next
 
-- [Directory layout](/blueprints/templates)
-- [Schema dialect](/blueprints/schema)
-- [Facets and conditional fragments](/blueprints/facets)
-- [Sharing via OCI](/blueprints/sharing)
-- [Testing](/blueprints/testing)
+- [Directory layout](templates.md)
+- [Schema dialect](schema.md)
+- [Facets and conditional fragments](facets.md)
+- [Sharing via OCI](sharing.md)
+- [Testing](testing.md)

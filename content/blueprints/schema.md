@@ -39,4 +39,4 @@ additionalProperties: false
 
 ## Usage
 
-When a blueprint is loaded, the schema from `_template/schema.yaml` (if present) is applied to the context's configuration before [facets](/blueprints/facets) are evaluated. See [Blueprint templates](/blueprints/templates) for the full composition order.
+When a blueprint is loaded, the schema from `_template/schema.yaml` (if present) is applied to the context's configuration before [facets](facets.md) are evaluated. See [Blueprint templates](templates.md) for the full composition order.

@@ -3,7 +3,7 @@ title: Explain
 description: Trace blueprint values back to their sources to debug composition.
 ---
 
-A Windsor blueprint is composed from many places: facets, context values, deferred Terraform outputs, inline expressions. When a value isn't what you expected, [`windsor explain <path>`](/reference/cli/commands/explain) tells you where it actually came from and which other contributions were overridden.
+A Windsor blueprint is composed from many places: facets, context values, deferred Terraform outputs, inline expressions. When a value isn't what you expected, [`windsor explain <path>`](https://www.windsorcli.dev/reference/cli/commands/explain) tells you where it actually came from and which other contributions were overridden.
 
 ## The show → find → explain flow
 
@@ -99,6 +99,6 @@ Resolved values may include a marker after the path or inside an expression chai
 
 ## Reference
 
-- [`windsor explain`](/reference/cli/commands/explain) — full path syntax, output markers, and examples.
-- [`windsor show`](/reference/cli/commands/show) — render the blueprint, kustomization, or values for the current context — the natural starting point for a debugging session.
-- [Facets](/blueprints/facets) — where most contributions originate.
+- [`windsor explain`](https://www.windsorcli.dev/reference/cli/commands/explain) — full path syntax, output markers, and examples.
+- [`windsor show`](https://www.windsorcli.dev/reference/cli/commands/show) — render the blueprint, kustomization, or values for the current context — the natural starting point for a debugging session.
+- [Facets](facets.md) — where most contributions originate.

@@ -58,8 +58,8 @@ Common failure modes. Each entry: symptom, cause, fix.
 
 ## Where to next
 
-- [Related page](/related)
-- [Reference](/reference/cli/...)
+- [Related page](../section/related.md)
+- [Reference](https://www.windsorcli.dev/reference/cli/...)
 ````
 
 Reference pages (precise behavior, every flag, every field) belong in
@@ -83,9 +83,20 @@ truncate at that point.
 
 ## 4. Links
 
-- **Internal links use site paths** (`/blueprints/schema`), not
-  relative `.md` paths. The site flattens content from this repo,
-  `cli/`, and `core/` side-by-side at the root.
+- **Pick the link form by where the target file lives.** If the page is
+  **in this repo**, use a **relative `.md` path** (`[schema](../blueprints/schema.md)`).
+  It resolves on GitHub and for agents fetching the page on its own, and
+  the website rewrites it to a clean route (`/blueprints/schema`) at vendor
+  time. Don't use a bare site path (`/blueprints/schema`) — it renders on
+  the site but is a dead link in raw `.md`.
+- **If the target isn't in this repo** — `cli`/`core` reference or anything
+  off-repo — link the **`windsorcli.dev` URL** directly
+  (`https://www.windsorcli.dev/reference/cli/commands/up`). There's no local
+  file to reach with a relative path; the URL works on GitHub by going to
+  the live site, and the website localizes it to a root-relative path at
+  vendor time. Write the host exactly as `https://www.windsorcli.dev` — that
+  literal is what the vendor step strips, and it's defined once in the
+  website's `site.config.mjs` (a bare `windsorcli.dev` won't be localized).
 - **External links are bare URLs only inside code blocks.** Elsewhere,
   use `[label](https://...)` so the link text reads naturally.
 - **Don't link to a page just because it exists.** Each link should
@@ -130,7 +141,7 @@ arrives via a deep link.
   fetched in isolation.
 - **Link instead of cross-referencing.** If a concept is defined
   elsewhere, link to it. Don't write `the schema (covered earlier)`;
-  write `the [schema](/blueprints/schema)`.
+  write `the [schema](../blueprints/schema.md)`.
 - **Headings are stable.** Don't rename `## Anatomy` to
   `## How it works` casually — every link an agent or human has
   memorized to `#anatomy` breaks. Treat heading text as part of

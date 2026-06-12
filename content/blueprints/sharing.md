@@ -34,7 +34,7 @@ sources:
     deploy: true   # default for OCI sources; set false to reference without merging components
 ```
 
-Windsor downloads the artifact, extracts the template, processes [facets](/blueprints/facets), and validates config and CLI version. OCI sources with `deploy: true` (default) have their Terraform and Kustomize components merged; with `deploy: false` the blueprint is index-only — components elsewhere can reference it via `source: <name>` but its own components don't get merged. See [Blueprint templates — Composition order](/blueprints/templates#composition-order).
+Windsor downloads the artifact, extracts the template, processes [facets](facets.md), and validates config and CLI version. OCI sources with `deploy: true` (default) have their Terraform and Kustomize components merged; with `deploy: false` the blueprint is index-only — components elsewhere can reference it via `source: <name>` but its own components don't get merged. See [Blueprint templates — Composition order](templates.md#composition-order).
 
 ## Caching and private registries
 
@@ -88,7 +88,7 @@ version: 1.0.0
 cliVersion: ">=0.9.0"
 ```
 
-Common patterns: `">=0.9.0"`, `"~0.9.0"`, `">=0.9.0 <0.10.0"`. Always quote — unquoted `>` and `<` are YAML control characters. Validation runs when loading from OCI or a local archive — see the [metadata reference](/reference/cli/metadata) for the full field set.
+Common patterns: `">=0.9.0"`, `"~0.9.0"`, `">=0.9.0 <0.10.0"`. Always quote — unquoted `>` and `<` are YAML control characters. Validation runs when loading from OCI or a local archive — see the [metadata reference](https://www.windsorcli.dev/reference/cli/metadata) for the full field set.
 
 ## Best practices
 
