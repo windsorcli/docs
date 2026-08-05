@@ -148,8 +148,8 @@ sight:
   "the right/correct X." They flatter the tool instead of stating what
   it does. "`KUBECONFIG` is set for you" → "set automatically";
   "targets the right cluster" → "targets the new context's cluster."
-- **Vague list filler:** a trailing "and the rest," "and more," "and
-  other …," "and so on." Name the items or bound the set — don't wave
+- **Vague list filler:** a trailing `and the rest`, `and more`, `and
+  other …`, `and so on`. Name the items or bound the set — don't wave
   at it. "your `KUBECONFIG`, cloud profile, and the rest" → list them,
   or "the per-context variables."
 - **Definition-thesis openers:** opening a page or section by *defining
@@ -173,7 +173,7 @@ is a good running catalog of the tells.
 ## Techniques worth stealing
 
 The anti-voice list says what to cut. These are the moves the best
-slightly-technical docs — Django's tutorial, Stripe's quickstarts,
+slightly technical docs — Django's tutorial, Stripe's quickstarts,
 the Rails getting-started guide — actually make. They're checkable:
 
 - **Show the payoff before the prose.** Lead with the command that

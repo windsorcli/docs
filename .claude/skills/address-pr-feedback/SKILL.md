@@ -17,6 +17,7 @@ addressed and the author has approved each commit, run `create-pr`-shape
 behavior at the end (push + report) — but only after explicit go-ahead.
 
 ## Apply when
+
 - The user says "address PR feedback", "fix the PR comments", "go
   through the review", or "fix the CI failures."
 - The current branch has an open PR (`gh pr view` returns a PR).
@@ -24,6 +25,7 @@ behavior at the end (push + report) — but only after explicit go-ahead.
   checks are failing (`gh pr checks` non-zero), or both.
 
 ## Do not apply when
+
 - The branch has no open PR — direct the user to `create-pr` first.
 - The PR is on `main` directly — refuse; this skill operates on feature
   branches.
@@ -67,15 +69,16 @@ one-line summary. Ask the author to confirm the order and call out any
 findings they want to skip or defer.
 
 Group rules:
+
 - **Order by severity then file**: critical first, medium next, low
   last; within a tier sort by file path so changes to the same file
   cluster.
 - **De-duplicate**: if two reviewers flagged the same line, treat as
   one finding.
-- **Pre-existing convention** findings (e.g., "Create leaks resource on
-  state.Set failure" — same pattern in vswitch / vhd / image_file) get
-  flagged in the triage list with a "**Reject?**" suggestion. Don't
-  silently skip them; the author decides.
+- **Pre-existing convention** findings (for example, "Create leaks
+  resource on `state.Set` failure" — same pattern in vswitch / vhd /
+  image_file) get flagged in the triage list with a "**Reject?**"
+  suggestion. Don't silently skip them; the author decides.
 
 The author's confirmation kicks off the per-finding loop.
 
@@ -92,8 +95,8 @@ For each finding the author confirms, run this exact sequence:
    "agree on the symptom, disagree on the proposed fix". This is the
    "confirm" step from the manual `confirm and fix` pattern.
 
-3. **Propose the fix.** Brief: 2-4 sentences naming the file(s) and
-   the shape of the change. If two paths are reasonable (e.g.,
+3. **Propose the fix.** Brief: 2-4 sentences naming the files and
+   the shape of the change. If two paths are reasonable (for example,
    "document only" vs "code fix"), present both with a recommendation.
    The author picks before any code is written.
 

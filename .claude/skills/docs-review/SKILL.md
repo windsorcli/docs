@@ -127,8 +127,8 @@ Then read the rest of the changed prose and flag:
 - **Reassurance tails** — "for you", "yourself", "the right/correct X",
   "so you don't have to". State what the system does: "`KUBECONFIG` is
   set for you" → "set automatically".
-- **Vague list filler** — a trailing "and the rest / and more / and
-  other … / and so on". Name the items or bound the set.
+- **Vague list filler** — a trailing `and the rest` / `and more` /
+  `and other …` / `and so on`. Name the items or bound the set.
 - **Definition-thesis lead** — does the opening sentence *define the
   subject* ("X wraps Y", "X is a Y that …") or say something the reader
   can act on? Concept and `overview.md` leads are exempt.

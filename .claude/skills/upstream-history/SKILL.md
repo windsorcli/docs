@@ -66,7 +66,7 @@ git -C ../core log --oneline --since='6 months ago' -- kustomize/<addon>/
 Look for:
 
 - **Birth commits** — when the feature first appeared. Useful for
-  dating "as of vN.N" claims.
+  dating "as of `vN.N`" claims.
 - **Refactors** — large diffs that may have changed the API or
   output. Likely sources of doc drift.
 - **Deprecation/removal commits** — pages may describe code that no
