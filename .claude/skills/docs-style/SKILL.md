@@ -81,6 +81,183 @@ Banned words (Vale enforces — `styles/Windsor/MarketingWords.yml`):
 Hedges to drop: `basically`, `just`, `really`, `simply`,
 `essentially`, `obviously`, `clearly`, `of course`.
 
+## Voice persona
+
+Pick the voice before you pick the words. Write as one experienced
+engineer explaining something to another — a competent peer who can
+`sudo`, not a stranger you're selling to or a beginner you're
+lecturing. That archetype, not any particular writer, is the persona.
+Its qualities are concrete and checkable:
+
+- **Plain.** Short sentences, ordinary words. If a shorter word works,
+  use it.
+- **Concrete.** Real commands, paths, numbers, outcomes — never an
+  abstraction where an example would do.
+- **Calm and economical.** No hype, no padding. Every sentence earns
+  its place.
+- **Curious about the machine, not showing off.** Explain how it works
+  because that's useful, not to impress.
+
+For documented conventions to lean on, cite reusable style guides
+rather than a personality — they're built to be adopted, they don't go
+stale, and a new contributor can actually read them. This repo already
+extends the **Microsoft Writing Style Guide** (see `.vale.ini`); the
+**Google developer documentation style guide** and plain-language
+government guides like **GOV.UK** are good public references for the
+same register.
+
+The register shifts by page type (the types in
+[ADR 0001](../../../adrs/0001-guide-first-two-tier-pages.md)):
+
+- **Guide tier — how-to and tutorial.** Second person, present tense,
+  the task in the verb: "You run `windsor up`, and the cluster comes
+  up." The reader is mid-task; keep them moving.
+- **Under the hood — explanation.** Third-person about the *system*,
+  mechanism first: "Windsor walks up the tree looking for
+  `windsor.yaml`." Precise and unhurried, no second-person
+  hand-holding.
+- **Section overviews — explanation.** Lead with the idea, not a
+  command — one strong definition sentence, then the shape of the
+  thing.
+
+### The anti-voice — don't write like an LLM
+
+The fastest way to sound wrong is to sound like generic AI prose. If a
+sentence could open a thousand blog posts, cut it. Tells to delete on
+sight:
+
+- **Inflated vocabulary:** `delve`, `tapestry`, `testament to`,
+  `realm`, `landscape`, `boasts`, `pivotal`, `vibrant` (and the
+  banned marketing words above).
+- **Throat-clearing:** `it's worth noting that`, `it's important to
+  understand`, `in today's fast-paced world`, `when it comes to`,
+  `let's dive in`.
+- **Hollow structure:** the rule of three on every list; "not just X,
+  but Y" / "it's not about X, it's about Y"; a present-participle tail
+  clause tacked on to sound profound (`, further enhancing reliability`).
+- **The "verb *for you* — comma list — qualifier tail" cadence:**
+  "Windsor runs Terraform for you — `init`, `plan`, `apply`, and
+  `destroy`, in dependency order." One em-dash into a tidy list into a
+  trailing qualifier, all in a single breath. Split it: a short
+  declarative, then one concrete sentence. Drop the "for you" / "by
+  hand" reassurance tags while you're at it.
+- **Balanced negative parallelism:** "you don't X, and you don't Y" —
+  two negations hung symmetrically on `and you don't`. Same family as
+  "not just X, but Y." Say what the reader *does*, once.
+- **Reassurance tails:** "for you," "yourself," "so you don't have to,"
+  "the right/correct X." They flatter the tool instead of stating what
+  it does. "`KUBECONFIG` is set for you" → "set automatically";
+  "targets the right cluster" → "targets the new context's cluster."
+- **Vague list filler:** a trailing "and the rest," "and more," "and
+  other …," "and so on." Name the items or bound the set — don't wave
+  at it. "your `KUBECONFIG`, cloud profile, and the rest" → list them,
+  or "the per-context variables."
+- **Definition-thesis openers:** opening a page or section by *defining
+  its subject* ("Windsor wraps Terraform," "X is a Y that …") instead
+  of stating what it does or the one fact the reader needs. Concept and
+  `overview.md` leads are the exception — they're meant to define.
+- **Em-dashes in prose.** Avoid them. Convert to a colon, semicolon,
+  comma, or parentheses: `X — appositive — Y` → `X (appositive) Y`;
+  `statement — tacked-on clause` → `statement; clause`;
+  `**Term** — definition` (lists) → `**Term**: definition`. The only
+  em-dashes that stay are `[Page — Section]` link labels and text
+  inside code fences. In **YAML frontmatter** use a comma or
+  parentheses, never a colon — an unquoted `key: value` colon breaks
+  the parse.
+
+The point isn't a banned-word list — it's that this register is vague
+and unearned, the opposite of the specific, calm voice above.
+[Wikipedia's "Signs of AI writing"](https://en.wikipedia.org/wiki/Wikipedia:Signs_of_AI_writing)
+is a good running catalog of the tells.
+
+## Techniques worth stealing
+
+The anti-voice list says what to cut. These are the moves the best
+slightly-technical docs — Django's tutorial, Stripe's quickstarts,
+the Rails getting-started guide — actually make. They're checkable:
+
+- **Show the payoff before the prose.** Lead with the command that
+  produces a result, then explain it. The page-shape template's
+  "minimal example up front" is this rule.
+- **Predict the reader's next question and answer it in the same
+  sentence.** "which `up` does not request on its own" pre-empts "why
+  not?" without a digression.
+- **Be honest about scope and the ugly parts.** "There is no
+  `--force`." "It does not touch live cloud resources." A named limit
+  reads as competence; a glossed one reads as marketing.
+- **Concrete, memorable example values over `foo`/`bar`.** Real
+  context names (`local`, `staging`), real paths, real output.
+- **Vary sentence length on purpose.** A long sentence that carries
+  the mechanism, then a short one that lands it. A run of uniform
+  medium-length sentences is the deepest AI tell — deeper than any
+  single word.
+- **One idea per page; link out for the rest.** Don't fold reference
+  detail into a how-to. The two-tier seam from
+  [ADR 0001](../../../adrs/0001-guide-first-two-tier-pages.md) is
+  where the extra detail goes.
+
+## Calibration samples
+
+Rules tell you what to avoid; samples tell you what to hit. These
+three excerpts are one per register from
+[ADR 0001](../../../adrs/0001-guide-first-two-tier-pages.md). Read the
+matching one before you write that page type, and match the *rhythm*,
+not the content. The overview lead below is the docs owner's own
+writing — when a generated draft and these samples disagree, the
+owner's prose wins.
+
+### Guide tier (how-to) — [`contexts/lifecycle.md`](../../../content/contexts/lifecycle.md)
+
+> Host networking and DNS need elevation, which `up` does not request
+> on its own. It hands that to `configure network` instead: sudo on
+> macOS/Linux, an Administrator PowerShell on Windows.
+
+Why it works:
+
+- **Varied rhythm.** A long sentence carries the mechanism; a short
+  colon-clause names the three cases. Not two uniform sentences.
+- **Concrete, not abstract.** Names the exact command and the exact
+  elevation per OS — never "the appropriate permissions."
+- **Answers the next question inline.** "which `up` does not request
+  on its own" pre-empts "why doesn't `up` just do it?" without a
+  digression.
+
+### Under the hood (explanation) — [`contexts/environment-injection.md`](../../../content/contexts/environment-injection.md)
+
+> To choose project or global mode, Windsor walks up from the current
+> directory looking for `windsor.yaml`. If it finds one, that
+> directory is the project root and the shell is in project mode. If
+> it finds none, Windsor falls back to `~/.config/windsor` and runs in
+> global mode.
+
+Why it works:
+
+- **Mechanism first, third person about the system.** The subject is
+  Windsor and the verb is what it does — "walks up," "falls back." No
+  second-person hand-holding.
+- **Plain words for a precise idea.** "Walks up… looking for" beats
+  "performs an upward traversal in search of."
+- **Sentence shape mirrors the logic.** "If it finds one… / If it
+  finds none…" — the parallel structure carries the branch so the
+  reader doesn't have to reconstruct it.
+
+### Section / overview lead (explanation) — [`blueprints/terraform.md`](../../../content/blueprints/terraform.md)
+
+> Windsor manages a Terraform stack defined in a blueprint. Stacks are
+> built sequentially, threading Terraform output values to
+> corresponding input values according to the facet definition.
+
+Why it works:
+
+- **States what the system does, no windup.** No "X is a Y that…"
+  definition-thesis, no analogy, no "for you." Subject, verb, object.
+- **Dense with real nouns.** "threading output values to input values
+  according to the facet definition" carries the mechanism; the work is
+  in the nouns, not the adjectives.
+- **No em-dash, no flourish list, no trailing reassurance clause.** Two
+  plain declarative sentences. This is the truest target here: the docs
+  owner wrote it, not a model.
+
 ## Page shape
 
 ````markdown

@@ -22,4 +22,4 @@ docker build -t ${REGISTRY_URL}/myapp:$BUILD_ID .
 docker push ${REGISTRY_URL}/myapp:$BUILD_ID
 ```
 
-Reference `${BUILD_ID}` in your Kubernetes manifests or Kustomize rather than hard-coding the tag — a fresh install picks up whichever build ID was pushed most recently and substitutes it in, so dev iterations don't require manifest edits. This keeps iterations traceable and avoids overwriting a shared `:latest` in the local registry.
+Reference `${BUILD_ID}` in your Kubernetes manifests or Kustomize rather than hard-coding the tag. A fresh install picks up whichever build ID was pushed most recently and substitutes it in, so dev iterations don't require manifest edits. This keeps iterations traceable and avoids overwriting a shared `:latest` in the local registry.

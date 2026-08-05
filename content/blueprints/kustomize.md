@@ -1,6 +1,6 @@
 ---
 title: Kustomize
-description: How Windsor composes Flux Kustomizations from blueprints — substitutions, patches, and destroy-only hooks.
+description: How Windsor composes Flux Kustomizations from blueprints, with substitutions, patches, and destroy-only hooks.
 ---
 
 The kustomize layer is the second half of a blueprint, applied after Terraform. Each entry under `kustomize:` in `blueprint.yaml` becomes a Flux [`Kustomization`](https://fluxcd.io/flux/components/kustomize/kustomizations/) resource that points at a path in a blueprint source. Flux then reconciles the resources at that path onto the cluster.
@@ -55,9 +55,9 @@ For the full Kustomization schema (every field, type, and default) see the [blue
 
 Two fields control different things and are usually left unset.
 
-- **`targetNamespace`** sets `spec.targetNamespace` on the Flux Kustomization. Flux rewrites every reconciled resource into that namespace. Use it when the same kustomization layout serves multiple deployment namespaces — for example, the same `apps/my-app` path deployed into `staging` in one context and `production` in another.
+- **`targetNamespace`** sets `spec.targetNamespace` on the Flux Kustomization. Flux rewrites every reconciled resource into that namespace. Use it when the same kustomization layout serves multiple deployment namespaces, for example the same `apps/my-app` path deployed into `staging` in one context and `production` in another.
 
-- **`namespace`** controls where the Flux Kustomization *object itself* lives — the namespace of the `Kustomization` CR, not the namespace of the resources it reconciles. Defaults to the gitops namespace (`system-gitops`). Rarely needed; setting it also breaks `dependsOn` references, which always resolve in the gitops namespace.
+- **`namespace`** controls where the Flux Kustomization *object itself* lives: the namespace of the `Kustomization` CR, not the namespace of the resources it reconciles. Defaults to the gitops namespace (`system-gitops`). Rarely needed; setting it also breaks `dependsOn` references, which always resolve in the gitops namespace.
 
 ```yaml
 kustomize:
@@ -69,7 +69,7 @@ kustomize:
 
 ## destroyOnly
 
-A `destroyOnly` kustomization sits in the blueprint but is suppressed during `apply` / `up`. It's only applied during `destroy`, and only long enough to do its work — typically a one-shot job that needs to run before a stateful component disappears: snapshot a database before the operator tears it down, drain a queue, deregister a load balancer.
+A `destroyOnly` kustomization sits in the blueprint but is suppressed during `apply` / `up`. It's only applied during `destroy`, and only long enough to do its work. Typically that's a one-shot job that runs before a stateful component disappears: snapshot a database before the operator tears it down, drain a queue, deregister a load balancer.
 
 ```yaml
 kustomize:
@@ -87,7 +87,7 @@ kustomize:
 
 Flux's `postBuild.substitute` lets a Kustomization reference variables in its manifests via `${VAR_NAME}` and have them substituted at reconcile time. Windsor materializes two layers of substitutions automatically:
 
-**`values-common`** — a blueprint-level ConfigMap injected into every kustomization's `postBuild.substituteFrom`. Includes:
+**`values-common`**: a blueprint-level ConfigMap injected into every kustomization's `postBuild.substituteFrom`. Includes:
 
 | Variable | Source |
 |----------|--------|
@@ -101,7 +101,7 @@ Flux's `postBuild.substitute` lets a Kustomization reference variables in its ma
 | anything under `substitutions.common` in `values.yaml` | user-provided |
 | anything under blueprint-level `substitutions:` | user-provided |
 
-**`values-<name>`** — a per-kustomization ConfigMap, populated from the kustomization's `substitutions:` field:
+**`values-<name>`**: a per-kustomization ConfigMap, populated from the kustomization's `substitutions:` field:
 
 ```yaml
 kustomize:
@@ -114,7 +114,7 @@ kustomize:
 
 A manifest under `kustomize/my-app/` can then reference `${replicas}` and `${image_tag}` directly. Substitution values are converted to strings; complex types are JSON-encoded.
 
-`substitutions:` in the user-authored `blueprint.yaml` only accepts literal values. To produce dynamic substitutions — facet expressions, `terraform_output()` calls, anything resolved at compose time — declare them in a facet under `contexts/_template/facets/`. The composer evaluates them and merges the resulting string values into the kustomization's `substitutions` map. See [Blueprint templates](templates.md) and [Facets](facets.md).
+`substitutions:` in the user-authored `blueprint.yaml` only accepts literal values. To produce dynamic substitutions (facet expressions, `terraform_output()` calls, anything resolved at compose time), declare them in a facet under `contexts/_template/facets/`. The composer evaluates them and merges the resulting string values into the kustomization's `substitutions` map. See [Blueprint templates](templates.md) and [Facets](facets.md).
 
 ## Context-specific patches
 
@@ -155,7 +155,7 @@ Windsor detects the format from the document layout. Patches contributed by face
 
 ## Reconciliation
 
-After `apply`, Windsor annotates each blueprint source (`GitRepository` or `OCIRepository`) with `reconcile.fluxcd.io/requestedAt` set to the current timestamp. source-controller picks this up and re-fetches the artifact immediately rather than waiting for the next interval; kustomize-controller then reconciles dependent Kustomizations through its watch on source status. Only sources are annotated — Kustomizations follow automatically.
+After `apply`, Windsor annotates each blueprint source (`GitRepository` or `OCIRepository`) with `reconcile.fluxcd.io/requestedAt` set to the current timestamp. source-controller picks this up and re-fetches the artifact immediately rather than waiting for the next interval; kustomize-controller then reconciles dependent Kustomizations through its watch on source status. Only sources are annotated; Kustomizations follow automatically.
 
 This is annotation-based, receiver-type-agnostic, and works against any Flux installation. It is best-effort: if the cluster is unreachable, the apply still succeeds.
 

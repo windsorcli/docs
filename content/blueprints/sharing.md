@@ -3,7 +3,7 @@ title: Sharing blueprints
 description: Push to OCI, bundle blueprints, CLI version compatibility.
 ---
 
-Windsor shares blueprints through **OCI-compatible registries**. GHCR and ECR are tested; other registries that implement the OCI distribution spec (Docker Hub, Quay, your own) typically work but aren't part of the test matrix.
+Windsor packages a blueprint as an **OCI artifact**, so other projects can pull it from a registry and reuse its components. `windsor push` builds the artifact from `contexts/_template/` and pushes it; consumers add its `oci://` URL to their blueprint sources.
 
 ## Pushing to OCI
 
@@ -34,11 +34,11 @@ sources:
     deploy: true   # default for OCI sources; set false to reference without merging components
 ```
 
-Windsor downloads the artifact, extracts the template, processes [facets](facets.md), and validates config and CLI version. OCI sources with `deploy: true` (default) have their Terraform and Kustomize components merged; with `deploy: false` the blueprint is index-only — components elsewhere can reference it via `source: <name>` but its own components don't get merged. See [Blueprint templates — Composition order](templates.md#composition-order).
+Windsor downloads the artifact, extracts the template, processes [facets](facets.md), and validates config and CLI version. OCI sources with `deploy: true` (default) have their Terraform and Kustomize components merged; with `deploy: false` the blueprint is index-only; components elsewhere can reference it via `source: <name>` but its own components don't get merged. See [Blueprint templates — Composition order](templates.md#composition-order).
 
 ## Caching and private registries
 
-Downloaded artifacts are cached to disk and reused across commands, so a blueprint is fetched once and not re-downloaded on every `init` / `up` / `apply`. To force a fresh download, pass `--no-cache` on any command — it's a persistent flag that bypasses the cache for that invocation:
+Downloaded artifacts are cached to disk and reused across commands, so a blueprint is fetched once and not re-downloaded on every `init` / `up` / `apply`. To force a fresh download, pass `--no-cache` on any command; it's a persistent flag that bypasses the cache for that invocation:
 
 ```bash
 windsor up --no-cache
@@ -88,7 +88,7 @@ version: 1.0.0
 cliVersion: ">=0.9.0"
 ```
 
-Common patterns: `">=0.9.0"`, `"~0.9.0"`, `">=0.9.0 <0.10.0"`. Always quote — unquoted `>` and `<` are YAML control characters. Validation runs when loading from OCI or a local archive — see the [metadata reference](https://www.windsorcli.dev/reference/cli/metadata) for the full field set.
+Common patterns: `">=0.9.0"`, `"~0.9.0"`, `">=0.9.0 <0.10.0"`. Always quote; unquoted `>` and `<` are YAML control characters. Validation runs when loading from OCI or a local archive; see the [metadata reference](https://www.windsorcli.dev/reference/cli/metadata) for the full field set.
 
 ## Best practices
 

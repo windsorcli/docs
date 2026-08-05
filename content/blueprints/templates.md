@@ -84,13 +84,13 @@ version: 1.0.0
 cliVersion: ">=0.9.0"
 ```
 
-Constraint forms: `">=0.9.0"`, `"~0.9.0"`, `">=0.9.0 <0.10.0"`. Always quote — unquoted `>` and `<` are YAML control characters. If the running CLI version doesn't satisfy the constraint, blueprint loading fails with a clear error.
+Constraint forms: `">=0.9.0"`, `"~0.9.0"`, `">=0.9.0 <0.10.0"`. Always quote; unquoted `>` and `<` are YAML control characters. If the running CLI version doesn't satisfy the constraint, blueprint loading fails with a clear error.
 
 ## facets/
 
 A facet is a YAML file under `_template/facets/` that contributes to the composed blueprint when its `when` expression is true. Each facet can carry config blocks, conditional Terraform components, conditional Kustomizations, and common substitutions. Facets are evaluated by ordinal (ascending), then by name.
 
-See [Facets](facets.md) for the full authoring model — `when` expressions, ordinals, merge strategies, config blocks, and the `terraform_output()` substitution helper.
+See [Facets](facets.md) for the full authoring model: `when` expressions, ordinals, merge strategies, config blocks, and the `terraform_output()` substitution helper.
 
 ## Composition order
 
@@ -104,10 +104,10 @@ flowchart LR
 
 When Windsor builds the final blueprint:
 
-1. **OCI sources with `deploy: true`** — components from these sources are merged. Sources with `deploy: false` are index-only — their components aren't merged but components elsewhere can reference them via `source: <name>`. Non-OCI sources (Git URLs) are always index-only.
-2. **Base template** — `_template/blueprint.yaml` merges in full.
-3. **Facets** — processed in ordinal order, with strategies and `when` expressions applied.
-4. **User blueprint** — `contexts/<name>/blueprint.yaml` overrides without filtering. Components from earlier layers remain unless this layer sets `destroy: false` or omits them by name when the merge strategy is `replace`. See [Facets — merge strategies](facets.md).
+1. **OCI sources with `deploy: true`**: components from these sources are merged. Sources with `deploy: false` are index-only; their components aren't merged but components elsewhere can reference them via `source: <name>`. Non-OCI sources (Git URLs) are always index-only.
+2. **Base template**: `_template/blueprint.yaml` merges in full.
+3. **Facets**: processed in ordinal order, with strategies and `when` expressions applied.
+4. **User blueprint**: `contexts/<name>/blueprint.yaml` overrides without filtering. Components from earlier layers remain unless this layer sets `destroy: false` or omits them by name when the merge strategy is `replace`. See [Facets — merge strategies](facets.md).
 
 Only OCI sources can have their components merged; the `deploy` flag only applies to OCI sources and defaults to `true` when omitted.
 
