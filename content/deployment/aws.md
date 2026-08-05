@@ -72,7 +72,7 @@ Common additional knobs:
 
 | Key | Effect |
 |-----|--------|
-| `topology: ha` | One NAT gateway per AZ and node groups spread across all private subnets. The default is a single shared NAT and single-AZ node groups (cheaper). The control plane is always multi-AZ. |
+| `topology: ha` | One NAT gateway per AZ, and node groups become eligible to spread across all private subnets instead of just one. Doesn't by itself change how many nodes run; see [Node pools](#node-pools). The control plane is always multi-AZ. |
 | `dns.private_domain` | Name for the private, VPC-scoped Route53 zone (internal DNS). |
 | `gateway.access: private` | Keep the gateway internal; pairs with `dns.private_domain` for a private issuer. |
 | `cluster.cni.driver: cilium` | Replace VPC-CNI with Cilium (bootstrapped before Flux). Omit for the default VPC-CNI. |
@@ -97,6 +97,19 @@ cluster:
 ```
 
 `count` is required on every pool; `autoscaling` is optional and defaults on (min 1, max 3, seeded from `count`) for every class except `system`, which defaults fixed and carries a `CriticalAddonsOnly` taint so only cluster operators land there. When `cluster.pools` is unset, the cluster falls back to two managed node groups: `system` (1 node, fixed) and `general` (autoscaling 1-3 nodes), so a freshly bootstrapped cluster starts at 2 nodes and can grow to 4. Each class resolves to a multi-instance-type list so a pool tolerates single-type capacity shortages.
+
+`topology: ha` only widens which subnets (and so which AZs) a node group's nodes are eligible to land in; it doesn't raise `count` or an `autoscaling` minimum on its own. A `topology: ha` cluster with the default pools still starts at the same 2 nodes, just now eligible to spread across every private subnet instead of one, which isn't node-level HA: if a node's AZ goes down, the autoscaler has to notice and provision a replacement rather than there being a standby already running. For genuine node-level redundancy, pair `topology: ha` with an explicit multi-node `count`:
+
+```yaml
+topology: ha
+cluster:
+  pools:
+    system:
+      class: system
+      count: 3        # system defaults fixed; no autoscaling block needed
+```
+
+Node spread alone isn't sufficient either: workloads still need pod anti-affinity across those nodes to actually benefit from it.
 
 ## 3. Bootstrap
 
