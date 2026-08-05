@@ -17,6 +17,10 @@ Use `windsor env --decrypt` so secrets are decrypted only when needed. The shell
 
 Windsor scrubs registered secrets from command output. Values from SOPS or 1Password are registered for scrubbing; output from commands run by Windsor (for example, Terraform) is sanitized before display. Any registered value in stdout/stderr or error messages is replaced with `********`.
 
+### Marking values sensitive
+
+A custom facet or context [schema](../blueprints/schema.md) property can be marked `sensitive: true`. Windsor redacts that value's path as `<sensitive>` wherever config is displayed (currently `windsor show values`) and rejects any blueprint substitution that would render it into a plaintext ConfigMap. It doesn't change how the value is stored or resolved, only how it's shown back to the operator. To land a sensitive value in a cluster as a Kubernetes Secret instead of a substitution, see [Kubernetes Secrets on Flux systems](../blueprints/facets.md#kubernetes-secrets).
+
 ## Best practices
 
 - **Limit environment injection**: avoid injecting production secrets into your shell outside of controlled cases.

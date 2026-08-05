@@ -40,3 +40,18 @@ additionalProperties: false
 ## Usage
 
 When a blueprint is loaded, the schema from `_template/schema.yaml` (if present) is applied to the context's configuration before [facets](facets.md) are evaluated. See [Blueprint templates](templates.md) for the full composition order.
+
+## Marking a property sensitive
+
+Add `sensitive: true` alongside any property to have that value's path redacted wherever config is displayed:
+
+```yaml
+properties:
+  hetzner:
+    properties:
+      token:
+        type: string
+        sensitive: true
+```
+
+A `substitutions`/`substitute` value that references a `sensitive: true` property is rejected at composition time, since substitutions render into a plaintext ConfigMap. Use a `flux:` system's `secrets:` block instead; see [Kubernetes Secrets on Flux systems](facets.md#kubernetes-secrets). See [Securing secrets](../deployment/securing-secrets.md) for the redaction behavior itself.
