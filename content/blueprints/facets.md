@@ -50,7 +50,7 @@ Paths in facets (for example, `jsonnet()`, `file()`) are relative to the facet f
 
 ## Kubernetes Secrets
 
-A facet can wire a `sensitive: true` [schema](schema.md#marking-a-property-sensitive) value into a `flux:` system's `secrets:` block to land it as a Kubernetes Secret in a Flux-managed namespace. This is separate from `kustomize:`, the 1:1 Kustomization passthrough covered in [Kustomize](kustomize.md); `flux:` entries are system-level and compile to an install Kustomization plus one or more resources Kustomizations.
+A facet can wire a `sensitive: true` [schema](schema.md#marking-a-property-sensitive) value into a `flux:` system's `secrets:` block to land it as a Kubernetes Secret in a Flux-managed namespace. See [Flux systems](flux-systems.md) for the install/resources tiers, merge strategy, and `globalDependency`.
 
 ```yaml
 flux:

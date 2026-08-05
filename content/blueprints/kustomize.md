@@ -3,7 +3,7 @@ title: Kustomize
 description: How Windsor composes Flux Kustomizations from blueprints, with substitutions, patches, and destroy-only hooks.
 ---
 
-The kustomize layer is the second half of a blueprint, applied after Terraform. Each entry under `kustomize:` in `blueprint.yaml` becomes a Flux [`Kustomization`](https://fluxcd.io/flux/components/kustomize/kustomizations/) resource that points at a path in a blueprint source. Flux then reconciles the resources at that path onto the cluster.
+The kustomize layer is the second half of a blueprint, applied after Terraform. Each entry under `kustomize:` in `blueprint.yaml` becomes a Flux [`Kustomization`](https://fluxcd.io/flux/components/kustomize/kustomizations/) resource that points at a path in a blueprint source. Flux then reconciles the resources at that path onto the cluster. This is a 1:1 passthrough: for the multi-tier `flux:` system entries facets typically contribute instead, see [Flux systems](flux-systems.md).
 
 `windsor apply` (or `windsor up` for workstation contexts) installs every kustomization in dependency order. `windsor destroy` removes them all in reverse-topological order. Use `windsor apply kustomize <name>` or `windsor destroy kustomize <name>` to target a single kustomization.
 
@@ -179,4 +179,5 @@ Sources and kustomizations both live in the gitops namespace (default `system-gi
 - [`apply`](https://www.windsorcli.dev/reference/cli/commands/apply), [`destroy`](https://www.windsorcli.dev/reference/cli/commands/destroy), [`plan`](https://www.windsorcli.dev/reference/cli/commands/plan), [`show`](https://www.windsorcli.dev/reference/cli/commands/show)
 - [Blueprint reference](https://www.windsorcli.dev/reference/cli/blueprint) — full Kustomization schema
 - [Blueprint templates](templates.md) — facet-driven composition
+- [Flux systems](flux-systems.md) — the multi-tier `flux:` entries, and how they differ from this passthrough
 - [Flux Kustomization docs](https://fluxcd.io/flux/components/kustomize/kustomizations/)
