@@ -21,13 +21,13 @@ Here `op` is the 1Password provider and `personal` is the vault name.
 
 ## SOPS
 
-Use [SOPS](https://github.com/getsops/sops) to encrypt secrets to a file and commit them safely. Configure SOPS and an `sops.yaml` in your project, then:
+Use [SOPS](https://github.com/getsops/sops) to encrypt secrets to a file and commit them safely. Configure SOPS and an `sops.yaml` in your project, then start plaintext locally:
 
 ```bash
-sops contexts/<context>/secrets.enc.yaml
+$EDITOR contexts/<context>/secrets.yaml
 ```
 
-If that file exists and is valid SOPS-encrypted, reference values in `environment`:
+Nested keys flatten to dot-path lookups, so a `streaming: {criterion: {password: ...}}` entry resolves as `streaming.criterion.password`. Reference it in `environment`:
 
 ```yaml
 contexts:
@@ -35,6 +35,15 @@ contexts:
     environment:
       CRITERION_PASSWORD: ${{ sops.streaming.criterion.password }}
 ```
+
+`secrets.yaml` is auto-git-ignored, the same as `.env` (it's for local-only or pre-encryption values). Encrypt it before committing:
+
+```bash
+sops -e contexts/<context>/secrets.yaml > contexts/<context>/secrets.enc.yaml
+rm contexts/<context>/secrets.yaml
+```
+
+Windsor decides whether a `secrets*.yaml` file is encrypted by its content, not its filename, so an operator's own SOPS output can carry either name. A `secrets.yaml` that still contains plaintext is refused with an explicit error rather than a raw SOPS failure, since the likely cause is a file that was never encrypted. See [Contexts directory reference](https://www.windsorcli.dev/reference/cli/contexts) for the full file layout and error text.
 
 ## 1Password CLI
 
@@ -72,6 +81,8 @@ Secrets from remote providers are cached in memory. To force a refresh, start a 
 **Bash:** `NO_CACHE=true windsor init`
 
 **PowerShell:** `$env:NO_CACHE = "true"; windsor init`
+
+Passing `--no-cache` on any command does the same thing for that run; see [Global flags](https://www.windsorcli.dev/reference/cli/global-flags).
 
 ## Troubleshooting
 

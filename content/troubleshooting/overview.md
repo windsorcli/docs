@@ -14,7 +14,7 @@ The current context has no workstation. `up` is workstation-only. Use [`bootstra
 Host networking needs elevation, which `up` won't request mid-run. On Colima, the host route is required for cluster reachability, so `up` halts: run `windsor configure network` (it prompts for sudo), then re-run `windsor up` to finish the install. On Docker Desktop only DNS is deferred; `up` completes and the command is an optional follow-up, with no re-run needed. Use `--dry-run` to preview or `--revert` to undo.
 
 **`destroy` aborts with a confirmation error.**
-The `--confirm` value (or what you typed at the prompt) must match the prompt token exactly: the context name for a layer-wide destroy, or the component name for a targeted one. A mismatch aborts. There is no `--force`.
+The `--confirm` value (or what you typed at the prompt) must match the prompt token exactly: the context name for a layer-wide destroy, or the component name for a targeted one. A mismatch aborts.
 
 **`destroy` warns about `prevent_destroy` and may stop partway.**
 A Terraform resource carries `lifecycle { prevent_destroy = true }`. Windsor warns but does not override it. To actually remove the resource, delete the lifecycle block in the module's HCL, then re-run.
