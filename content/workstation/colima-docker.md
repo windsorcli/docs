@@ -43,7 +43,7 @@ To change the domain, set `dns.domain` in `values.yaml`.
 
 ## Registries
 
-Full registry support means the environment runs **local registry caches (mirrors)** of major registries—GCR, GHCR, Quay, Docker Hub, `registry.k8s.io`—so image pulls use local mirrors. A generic local registry is also available. Local registries run as containerized services. Common endpoints:
+Full registry support means the environment runs **local registry caches (mirrors)** of major registries (GCR, GHCR, Quay, Docker Hub, `registry.k8s.io`), so image pulls use local mirrors. A generic local registry is also available. Local registries run as containerized services. Common endpoints:
 
 | Registry | Local endpoint |
 |----------|-----------------|
@@ -108,7 +108,7 @@ cluster:
     - ${project_root}/.volumes:/var/mnt/local
 ```
 
-Kubeconfig: `contexts/local/.kube/config`; `KUBECONFIG` is set for you. List nodes:
+Kubeconfig: `contexts/local/.kube/config`; `KUBECONFIG` is set automatically. List nodes:
 
 ```bash
 kubectl get nodes

@@ -3,7 +3,7 @@ title: First project
 description: Install the CLI, start a project, and run your first local stack.
 ---
 
-This guide walks through installing Windsor, starting a project, and launching a local Kubernetes cluster with a single worker and controlplane.
+Install Windsor, start a project, and launch a local Kubernetes cluster with a single worker and controlplane.
 
 Recommended: 8 CPU cores, 8GB RAM, 60GB free storage.
 

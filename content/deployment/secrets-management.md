@@ -3,7 +3,7 @@ title: Secrets management
 description: SOPS and 1Password integration.
 ---
 
-Windsor provides secrets management for API keys, passwords, and other sensitive data, with support for [SOPS](https://github.com/getsops/sops) and [1Password CLI](https://developer.1password.com/cli/).
+Windsor manages secrets with [SOPS](https://github.com/getsops/sops) and the [1Password CLI](https://developer.1password.com/cli/).
 
 ## Overview
 
@@ -63,7 +63,7 @@ environment:
   STRIPE_API_KEY: ${{ op.development.stripe.api_key }}
 ```
 
-You may be prompted to sign in to 1Password; the session typically lasts about 30 minutes.
+1Password may prompt for sign-in on first use; sessions last about 30 minutes.
 
 ## Caching
 

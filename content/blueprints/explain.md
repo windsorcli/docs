@@ -7,7 +7,7 @@ A Windsor blueprint is composed from many places: facets, context values, deferr
 
 ## The show → find → explain flow
 
-`explain` is most useful as the second step of a debugging loop. Start by rendering the blueprint, find the value that surprises you, then trace it.
+`explain` is most useful as the second step of a debugging loop. Start by rendering the blueprint, find the unexpected value, then trace it.
 
 **1. Render the blueprint for the current context:**
 
@@ -29,7 +29,7 @@ terraform:
     private_subnet_ids: <deferred>
 ```
 
-**2. Spot a value worth investigating.** `external_dns_dns_zone_ids` is `<deferred>` — that's expected if its source hasn't been applied yet, but you want to see *what* is being deferred and where it came from.
+**2. Spot a value worth investigating.** `external_dns_dns_zone_ids` is `<deferred>`. That's expected if its source hasn't been applied yet, but you want to see *what* is being deferred and where it came from.
 
 **3. Trace it:**
 
@@ -59,7 +59,7 @@ Reading the output:
 - The first line is the path and its resolved status (here, `(deferred)`).
 - The next indent level lists each contributor with `file:line`. In this case the value is built from a single facet at `platform-azure.yaml:107`.
 - Inside that contribution, the expression references `gateway.access`, `dns.private_domain`, `dns.public_domain`. Each is expanded under it with its own `file:line` and any literal fallbacks (here, `dev`).
-- Markers like `(cycle)` annotate edges that would form a loop — Windsor breaks the cycle and uses the literal fallback.
+- Markers like `(cycle)` annotate edges that would form a loop; Windsor breaks the cycle and uses the literal fallback.
 
 The same flow works for any path:
 
@@ -81,7 +81,7 @@ kustomize.policy-resources.components
 
 Each list element gets its own contributor line, so you can see which facet appended what.
 
-## When to reach for it
+## When to use it
 
 - "Why is this Terraform input set to that value?"
 - "Which facet wins when two define the same substitution?"
@@ -92,13 +92,14 @@ Each list element gets its own contributor line, so you can see which facet appe
 
 Resolved values may include a marker after the path or inside an expression chain:
 
-- `(deferred)` — depends on a Terraform output that hasn't been applied yet. Apply the dependency (or let `windsor apply` walk the graph) and re-run.
-- `(empty)` — the chain resolved, but the result is an empty string.
-- `(not set)` — the referenced facet config was never provided.
-- `(cycle)` — the expression chain forms a cycle. Windsor breaks the cycle and uses the literal fallback at that node.
+- `(deferred)`: depends on a Terraform output that hasn't been applied yet. Apply the dependency (or let `windsor apply` walk the graph) and re-run.
+- `(empty)`: the chain resolved, but the result is an empty string.
+- `(not set)`: the referenced facet config was never provided.
+- `(cycle)`: the expression chain forms a cycle. Windsor breaks the cycle and uses the literal fallback at that node.
 
 ## Reference
 
 - [`windsor explain`](https://www.windsorcli.dev/reference/cli/commands/explain) — full path syntax, output markers, and examples.
-- [`windsor show`](https://www.windsorcli.dev/reference/cli/commands/show) — render the blueprint, kustomization, or values for the current context — the natural starting point for a debugging session.
+- [`windsor show`](https://www.windsorcli.dev/reference/cli/commands/show) — render the blueprint, kustomization, or values for the current context.
+- [Inspecting](inspecting.md) — `windsor plan`, `show`, and `explain` together.
 - [Facets](facets.md) — where most contributions originate.

@@ -35,9 +35,15 @@ If the siblings aren't present, clone them — most investigation
 commands below need a local checkout. The windsorcli.github.io
 website also assumes this layout for the local preview flow.
 
+That site vendors cli/core reference content at a **pinned version**
+(`windsorcli.github.io/docs/versions.yaml`), not at HEAD. A doc fix
+merged here or in cli/core doesn't appear on windsorcli.dev until that
+pin is bumped — check it before assuming the live site reflects a
+recent change.
+
 ## The half-hour playbook
 
-When a page needs grounding, run these four passes. Each is
+When a page needs grounding, run these five passes. Each is
 self-contained — drop the ones that don't apply.
 
 ### 1. Locate the feature in the code
@@ -60,7 +66,7 @@ git -C ../core log --oneline --since='6 months ago' -- kustomize/<addon>/
 Look for:
 
 - **Birth commits** — when the feature first appeared. Useful for
-  dating "as of vN.N" claims.
+  dating "as of `vN.N`" claims.
 - **Refactors** — large diffs that may have changed the API or
   output. Likely sources of doc drift.
 - **Deprecation/removal commits** — pages may describe code that no
@@ -76,7 +82,20 @@ gh pr view <number> --repo windsorcli/cli
 PR descriptions carry the *why* that commit messages often skip.
 They're the best source for design intent and the public contract.
 
-### 4. Check what's in flight
+### 4. Check for schema-artifact drift (config/blueprint fields only)
+
+A field that exists on a Go struct in `../cli/api/v1alpha1/` isn't necessarily usable — the CLI's
+validator loads a separate JSON schema artifact (`../cli/pkg/runtime/config/schemas/artifacts/
+*.yaml`) with `additionalProperties: false`. A field can be real in Go, absent from that artifact,
+and get silently rejected at runtime. When documenting a config/blueprint field, check all three:
+the struct, the schema artifact, and the doc page — not just struct vs. doc. If the artifact is
+missing the field, that's a cli-repo bug to file, not a doc-repo problem to work around.
+
+Also don't forget **persistent/global flags** (`../cli/cmd/root.go`) when surveying a command's
+flags — they don't show up in that command's own flag-parsing code, only in root, so a per-command
+`git log -- cmd/<name>.go` search misses them entirely.
+
+### 5. Check what's in flight
 
 ```bash
 gh pr list --repo windsorcli/cli --state open  --search '<feature>'

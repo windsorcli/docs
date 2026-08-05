@@ -3,7 +3,7 @@ title: Workstation
 description: Run Windsor locally on your machine.
 ---
 
-A workstation context runs a VM-backed Kubernetes cluster on your machine, with DNS, container registries, and a local git mirror configured to mimic production. Workstation contexts are the only place [`windsor up`](https://www.windsorcli.dev/reference/cli/commands/up) and [`windsor down`](https://www.windsorcli.dev/reference/cli/commands/down) apply — every other context (`staging`, `prod`, etc.) uses [`apply`](https://www.windsorcli.dev/reference/cli/commands/apply) and [`destroy`](https://www.windsorcli.dev/reference/cli/commands/destroy) directly.
+A workstation context runs a VM-backed Kubernetes cluster on your machine, with DNS, container registries, and a local git mirror configured to mimic production. Workstation contexts are the only place [`windsor up`](https://www.windsorcli.dev/reference/cli/commands/up) and [`windsor down`](https://www.windsorcli.dev/reference/cli/commands/down) apply; every other context (`staging`, `prod`, etc.) uses [`apply`](https://www.windsorcli.dev/reference/cli/commands/apply) and [`destroy`](https://www.windsorcli.dev/reference/cli/commands/destroy) directly.
 
 ```bash
 git init
@@ -48,7 +48,7 @@ flowchart TB
     FS -.->|bind-mount| Git
 ```
 
-The Docker daemon is on the host with `docker-desktop` / `docker`, and inside the Lima VM with `colima` / `colima-incus`. Either way, every container — support services and Talos alike — joins the `windsor-local` bridge, so they address each other on `10.5.0.x`.
+The Docker daemon is on the host with `docker-desktop` / `docker`, and inside the Lima VM with `colima` / `colima-incus`. Either way, every container (support services and Talos alike) joins the `windsor-local` bridge, so they address each other on `10.5.0.x`.
 
 Key flows:
 
@@ -79,7 +79,7 @@ workstation:
   runtime: docker-desktop
 ```
 
-`workstation.yaml` is system-managed — Windsor writes it during `init` / `up` based on `--vm-driver`, `--platform`, and the host architecture. Treat it as ephemeral; do not check it in.
+`workstation.yaml` is system-managed; Windsor writes it during `init` / `up` based on `--vm-driver`, `--platform`, and the host architecture. Treat it as ephemeral; do not check it in.
 
 Keys inside `workstation.yaml`:
 
@@ -107,9 +107,9 @@ Keys inside `workstation.yaml`:
 
 When to pick what:
 
-- **Docker Desktop** — application development, quick iteration, basic cluster access. Lowest setup cost.
-- **Colima + Docker** — networking work, production-like DNS/load balancing, CNIs. Free open-source alternative to Docker Desktop.
-- **Colima + Incus** — storage and CSIs, realistic networking constraints. Closest to a real datacenter; nested virt is slower.
+- **Docker Desktop**: application development, quick iteration, basic cluster access. Lowest setup cost.
+- **Colima + Docker**: networking work, production-like DNS/load balancing, CNIs. Free open-source alternative to Docker Desktop.
+- **Colima + Incus**: storage and CSIs, realistic networking constraints. Closest to a real datacenter; nested virt is slower.
 
 `--vm-driver` writes `workstation.runtime` (with `colima-incus` aliased to `colima` plus `platform: incus`). When `--platform` isn't provided, Windsor infers it from the driver: `colima` and `docker-desktop` → `docker`; `colima-incus` → `incus`.
 
@@ -137,7 +137,7 @@ cluster:
     - ${project_root}/.volumes:/var/mnt/local
 ```
 
-When fields are unset, Windsor derives sensible defaults. The default topology is **single-node**: one schedulable controlplane and zero workers, where the controlplane runs both control-plane and workload pods.
+When fields are unset, Windsor derives defaults. The default topology is **single-node**: one schedulable controlplane and zero workers, where the controlplane runs both control-plane and workload pods.
 
 | Topology | Default `cpu` | Default `memory` (GB) |
 |----------|---------------|------------------------|
@@ -147,7 +147,7 @@ When fields are unset, Windsor derives sensible defaults. The default topology i
 
 `controlplanes.schedulable` is automatically `true` when `workers.count == 0` and `controlplanes.count == 1`.
 
-`hostports` are container-to-host port mappings (only applied for `docker-desktop` and `docker`). `volumes` are bind-mounts on the worker filesystem — typically used to expose `${project_root}/.volumes/` to the cluster as PVC storage.
+`hostports` are container-to-host port mappings (only applied for `docker-desktop` and `docker`). `volumes` are bind-mounts on the worker filesystem, typically used to expose `${project_root}/.volumes/` to the cluster as PVC storage.
 
 ### VM rightsizing (Colima)
 
@@ -180,11 +180,11 @@ dns:
 windsor configure network --dns-address=10.5.0.10
 ```
 
-`--dns-address` is the DNS service IP — typically taken from the workstation Terraform component's outputs.
+`--dns-address` is the DNS service IP, typically taken from the workstation Terraform component's outputs.
 
 ## Local git mirror
 
-When `dev: true`, Windsor runs [git-livereload](https://github.com/windsorcli/git-livereload) as a docker container. Saves to your local files surface as commits to `http://git.test/git/<project>`, which is what Flux subscribes to in the local context — so pushing to a remote isn't required for the local GitOps loop.
+When `dev: true`, Windsor runs [git-livereload](https://github.com/windsorcli/git-livereload) as a docker container. Saves to your local files surface as commits to `http://git.test/git/<project>`, which is what Flux subscribes to in the local context, so pushing to a remote isn't required for the local GitOps loop.
 
 A Flux webhook is also wired up so changes reconcile faster than the configured interval. git-livereload triggers it automatically after each filesystem change.
 
@@ -197,7 +197,7 @@ windsor build-id            # current
 windsor build-id --new      # rotate
 ```
 
-Format: `YYMMDD.RANDOM.#` — date, random suffix for collision avoidance, and a same-day sequence counter. See the [build-id reference](build-id.md).
+Format: `YYMMDD.RANDOM.#` (date, random suffix for collision avoidance, and a same-day sequence counter). See the [build-id reference](build-id.md).
 
 ## Verifying
 

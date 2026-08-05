@@ -1,53 +1,48 @@
 ---
 title: Contexts
-description: How contexts work in Windsor.
+description: Contexts are Windsor's named environments (local, staging, production), each mapping to a cloud role and a cluster.
 ---
 
-In a Windsor project you work across different deployments or environments as **contexts**. A context can map to SDLC environments (`development`, `staging`, `production`), to parts of your infrastructure (`admin`, `web`, `observability`), or a mix (for example, `web-staging`, `web-production`).
+A **context** is a named environment that bundles a cluster, a cloud profile, and a secrets backend. Switching context switches all of them at once.
 
-A context typically represents a single cloud role and a single cluster role; all accounts and services in that context share the same administrative access.
+Contexts can map to SDLC stages (`development`, `staging`, `production`), to parts of your infrastructure (`admin`, `web`, `observability`), or a mix (`web-staging`, `web-production`). A context typically represents a single cloud role and a single cluster role: everything in it shares the same administrative access.
 
-## Workstation vs non-workstation contexts
+## Workstation vs non-workstation
 
-Contexts named `local` or starting with `local-` are **workstation contexts**. They run a VM-backed Kubernetes cluster on your machine and use [`windsor up`](https://www.windsorcli.dev/reference/cli/commands/up) and [`windsor down`](https://www.windsorcli.dev/reference/cli/commands/down) for lifecycle. See [Workstation overview](../workstation/overview.md).
+How you operate a context depends on whether it runs on your machine.
 
-Every other context is **non-workstation** — staging, production, anything that targets real cloud infrastructure. Non-workstation contexts use [`windsor apply`](https://www.windsorcli.dev/reference/cli/commands/apply) and [`windsor destroy`](https://www.windsorcli.dev/reference/cli/commands/destroy) directly; there is no VM to bring up.
+A context named `local`, or starting with `local-`, is a **workstation context**. It runs a VM-backed Kubernetes cluster on your machine and uses [`windsor up`](https://www.windsorcli.dev/reference/cli/commands/up) and [`windsor down`](https://www.windsorcli.dev/reference/cli/commands/down) for its lifecycle. See [Workstation overview](../workstation/overview.md).
 
-## Creating contexts
+Staging, production, and anything targeting real cloud infrastructure are **non-workstation** contexts. With no local VM, they use [`windsor apply`](https://www.windsorcli.dev/reference/cli/commands/apply) and [`windsor destroy`](https://www.windsorcli.dev/reference/cli/commands/destroy) directly. [Lifecycle](lifecycle.md) covers both paths.
 
-Create a Windsor project with:
+## Create a context
+
+`windsor init` creates a project with a `local` context: a `contexts/local` folder and a `contexts.local` entry in `windsor.yaml`:
 
 ```bash
 windsor init
 ```
 
-This creates a `local` context: a `contexts/local` folder and an entry under `contexts.local` in `windsor.yaml`.
-
-To add another context (for example, production targeting AWS):
+To add another, name it and point it at a platform. This creates production targeting AWS, with a starter `blueprint.yaml` and `windsor.yaml`:
 
 ```bash
 windsor init production --platform aws
 ```
 
-This creates `contexts/production` with a basic `blueprint.yaml` and default `windsor.yaml`. The `--platform` flag drives sensible defaults — for AWS that means `terraform.backend.type: s3`; for Azure, `azurerm`; for `metal`, `docker`, or `incus`, `kubernetes` (state stored as Secrets in the cluster).
+`--platform` drives the defaults: AWS sets `terraform.backend.type: s3`; Azure sets `azurerm`; `metal`, `docker`, and `incus` use `kubernetes` (state stored as Secrets in the cluster).
 
-## Switching contexts
+New contexts are generated from blueprint templates in `contexts/_template/`, which define the shared base blueprint, schema, and conditional facets every context inherits. See [Blueprint templates](../blueprints/templates.md).
+
+## Switch contexts
+
+Set the active context, then check it:
 
 ```bash
 windsor set context <context-name>
-```
-
-Show the current context:
-
-```bash
 windsor get context
 ```
 
-The `WINDSOR_CONTEXT` environment variable also reflects the active context, and Windsor's shell hook updates the rest of the per-context environment variables (kubeconfig, cloud profile, Talos config, etc.) on every prompt — see [Environment injection](environment-injection.md).
-
-## Blueprint templates
-
-Contexts are generated from blueprint templates in `contexts/_template/`. Templates define the shared base blueprint, schema, and conditional facets for every context. See [Blueprint templates](../blueprints/templates.md).
+`WINDSOR_CONTEXT` reflects the active context. On your next prompt, the shell hook updates the per-context environment, including kubeconfig and the cloud profile. See [Environment injection](environment-injection.md).
 
 ## In this section
 

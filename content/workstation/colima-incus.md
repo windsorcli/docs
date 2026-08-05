@@ -34,7 +34,7 @@ windsor configure network        # host route + DNS (prompts for sudo)
 windsor up                       # re-run to install the blueprint
 ```
 
-The `colima-incus` driver runs on a Colima VM, so — like [Colima + Docker](colima-docker.md) — it needs a host route plus the DNS resolver entry. The first `up` halts because both need elevation; run `configure network`, then re-run `up` to finish.
+Like [Colima + Docker](colima-docker.md), the `colima-incus` driver runs on a Colima VM, so it needs a host route plus the DNS resolver entry. The first `up` halts because both need elevation; run `configure network`, then re-run `up` to finish.
 
 Exact install steps depend on your Colima and Windsor version; refer to the [CLI repo](https://github.com/windsorcli/cli) and [Colima documentation](https://github.com/abiosoft/colima). See [First project — VM driver](../getting-started/first-project.md) for all drivers.
 

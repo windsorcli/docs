@@ -44,11 +44,28 @@ CI rejects pages without `title:` via the frontmatter check in
 
 ### Pass 2 — Links
 
-Internal links must use site paths (root-relative, no `/docs/`
-prefix), not relative `.md` paths. Grep the diff:
+Link by **where the target lives** (see
+[CLAUDE.md](../../../CLAUDE.md) and
+[docs-style](../docs-style/SKILL.md#link-conventions)):
+
+- **In this repo → relative `.md` path** —
+  `[lifecycle](../contexts/lifecycle.md)`. Resolves in GitHub's raw
+  view and for agents fetching the raw file; the website rewrites it
+  to a clean route at vendor time.
+- **Off-repo (cli/core reference, anything else) → full
+  `https://www.windsorcli.dev/...` URL.** Use that host *exactly* —
+  the vendor step strips it to a root-relative path; a bare
+  `windsorcli.dev` won't localize.
+- **Bare site paths (`/blueprints/schema`) are dead links** when the
+  raw `.md` is read alone. Flag every one.
+
+Grep the diff for the two failure modes:
 
 ```bash
-git diff origin/main...HEAD -- '*.md' | grep -E '\]\(\.\.?/[^)]+\.md\)'
+# bare site-absolute paths → should be a relative .md or a windsorcli.dev URL
+git diff origin/main...HEAD -- '*.md' | grep -E '\]\(/[A-Za-z]'
+# off-repo links — confirm the host is exactly https://www.windsorcli.dev
+git diff origin/main...HEAD -- '*.md' | grep -E '\]\(https?://(www\.)?windsorcli\.dev'
 ```
 
 External links must be `[label](url)`, not bare. Markdownlint MD034
@@ -79,7 +96,56 @@ Don't fight the Microsoft rules that fire as `suggestion`. Fix
 `error` and `warning` levels; ignore `suggestion` unless the prose
 genuinely reads better with the change.
 
-### Pass 4 — Page structure
+### Pass 4 — Rhythm and AI-tells
+
+Vale catches words; it does not catch *shape*. This is the read-aloud
+pass — the gate that separates prose that reads as human from prose
+that reads as generated. Nothing here trips CI, which is exactly why a
+deliberate read is the only thing that catches it.
+
+**Read the lead aloud first, every time.** It is written first,
+carries the most weight, and is where the instinct to cram the whole
+value proposition into one sentence peaks — which is the most AI-prone
+sentence on the page. Don't pass-mark this whole pass without literally
+reading that sentence against the list below.
+
+Then read the rest of the changed prose and flag:
+
+- **Uniform sentence length.** Three medium sentences in a row is the
+  strongest tell. Fix: cut one to a fragment, or merge two and land on
+  a short one. The calibration samples in
+  [docs-style](../docs-style/SKILL.md#calibration-samples) are the
+  target rhythm.
+- **Consecutive sentences with the same opener** ("Windsor… Windsor…
+  Windsor…", "You can… You can…"). Vary the entry.
+- **Throat-clearing intros and recap outros.** "In this guide we'll
+  explore…", "In summary…", a closing paragraph that restates the
+  page. Cut them — the lead and the content carry it.
+- **Hedging that dodges a position.** "can", "may", "often", "it's
+  worth noting", "generally". State the behavior; if it's conditional,
+  name the condition instead of softening the verb.
+- **Reassurance tails** — "for you", "yourself", "the right/correct X",
+  "so you don't have to". State what the system does: "`KUBECONFIG` is
+  set for you" → "set automatically".
+- **Vague list filler** — a trailing `and the rest` / `and more` /
+  `and other …` / `and so on`. Name the items or bound the set.
+- **Definition-thesis lead** — does the opening sentence *define the
+  subject* ("X wraps Y", "X is a Y that …") or say something the reader
+  can act on? Concept and `overview.md` leads are exempt.
+- **Folksy idioms** — "reach for it", "surprises you", "let's". Plain
+  beats chatty.
+- **Docs-specific tells:** bulleting what should be one sentence;
+  over-explaining a step the
+  [reader baseline](../../../adrs/0001-guide-first-two-tier-pages.md)
+  already knows; rule-of-three lists where the third item is padding;
+  "not just X, but Y"; em-dashes in prose (convert to colon / semicolon
+  / comma / parens — only `[Page — Section]` link labels and code keep
+  them; in YAML frontmatter use comma/parens, never a colon).
+
+Findings here are `should-fix` or `consider`, never `must-fix`. Quote
+the sentence and propose the rewrite — don't just name the smell.
+
+### Pass 5 — Page structure
 
 Skim each changed page against the canonical shape:
 
@@ -94,7 +160,14 @@ Skim each changed page against the canonical shape:
 A page may genuinely not need every section. But if a page is missing
 a *lead*, that's always a problem.
 
-### Pass 5 — Mechanical checks
+For the how-to + explanation pages,
+[ADR 0001](../../../adrs/0001-guide-first-two-tier-pages.md) sets the
+two-tier shape: guide tier first, then a `## Under the hood` seam
+(that exact text — it's part of the page API) before the mechanism. A
+reader who stops at the seam should already have what they came for.
+Don't require the seam on a short pure how-to.
+
+### Pass 6 — Mechanical checks
 
 Run the linters the CI workflow runs:
 

@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720" role="img"
+     aria-label="Media placeholder — a recording or screenshot drops in here">
+  <rect width="1280" height="720" rx="16" fill="#0f172a"/>
+  <rect x="8" y="8" width="1264" height="704" rx="12" fill="none"
+        stroke="#1e293b" stroke-width="2" stroke-dasharray="12 10"/>
+  <circle cx="640" cy="312" r="84" fill="#1e293b" stroke="#334155" stroke-width="2"/>
+  <path d="M612 270 L612 354 L688 312 Z" fill="#64748b"/>
+  <text x="640" y="452" text-anchor="middle"
+        font-family="ui-monospace, SFMono-Regular, Menlo, monospace"
+        font-size="34" fill="#94a3b8">Media placeholder</text>
+  <text x="640" y="498" text-anchor="middle"
+        font-family="ui-monospace, SFMono-Regular, Menlo, monospace"
+        font-size="22" fill="#64748b">recording / screenshot drops in here</text>
+</svg>

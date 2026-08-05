@@ -3,7 +3,7 @@ title: Securing secrets
 description: Best practices for managing secrets with Windsor.
 ---
 
-Windsor provides features and patterns for handling secrets safely. For setup and usage see [Secrets management](secrets-management.md).
+This page covers the risks in handling secrets and how to mitigate them. For setup and usage, see [Secrets management](secrets-management.md).
 
 ## Risks and mitigations
 
@@ -19,6 +19,6 @@ Windsor scrubs registered secrets from command output. Values from SOPS or 1Pass
 
 ## Best practices
 
-- **Limit environment injection** — Avoid injecting production secrets into your shell outside of controlled cases.
-- **Rotate secrets** — Rotate regularly; a central store (for example, 1Password) simplifies this.
-- **Short-lived shells** — Use shells only for the task at hand and close them when done to reduce exposure.
+- **Limit environment injection**: avoid injecting production secrets into your shell outside of controlled cases.
+- **Rotate secrets**: rotate regularly; a central store (for example, 1Password) simplifies this.
+- **Short-lived shells**: use shells only for the task at hand and close them when done to reduce exposure.

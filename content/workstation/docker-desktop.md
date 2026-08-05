@@ -30,12 +30,12 @@ On Linux, `docker` is the default when `--vm-driver` is omitted; use `docker-des
 
 ## DNS
 
-`up` does not prompt for elevation, so it defers DNS setup and prints a `windsor configure network` follow-up. That command points the reserved local domain (default `test`) at the cluster DNS — with Docker Desktop it resolves to 127.0.0.1. **Writing the rule always needs elevated privileges**, and the mechanism differs by OS:
+`up` does not prompt for elevation, so it defers DNS setup and prints a `windsor configure network` follow-up. That command points the reserved local domain (default `test`) at the cluster DNS; with Docker Desktop it resolves to 127.0.0.1. **Writing the rule always needs elevated privileges**, and the mechanism differs by OS:
 
 - **macOS / Linux:** run `windsor configure network` from a normal shell; it prompts for sudo per privileged step (cached after the first prompt) and writes `/etc/resolver/<domain>`.
 - **Windows:** the whole process must be elevated — open **PowerShell as Administrator** (right-click → Run as Administrator), `cd` to the project, then run `windsor configure network`. From a normal shell it fails fast with a "must be run from an Administrator PowerShell" error. It installs a per-domain **NRPT rule** rather than a resolver file; if a Group Policy manages NRPT it can shadow the rule, and the command warns when that happens (see [Troubleshooting](../troubleshooting/overview.md#workstation-and-networking)).
 
-Use `--dry-run` to preview or `--revert` to remove it. Unlike Colima, Docker Desktop needs no host route — only the DNS rule, so `up` completes without halting. Test resolution with:
+Use `--dry-run` to preview or `--revert` to remove it. Unlike Colima, Docker Desktop needs no host route, only the DNS rule, so `up` completes without halting. Test resolution with:
 
 - **Windows:** `nslookup registry.test dns.test`
 - **macOS / Linux:** `dig @dns.test registry.test`

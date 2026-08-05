@@ -1,9 +1,9 @@
 ---
 title: Deployment overview
-description: Stand up a Windsor stack on a real target — AWS, Azure, or bare metal — and manage its secrets.
+description: Stand up a Windsor stack on a real target (AWS, Azure, or bare metal) and manage its secrets.
 ---
 
-Deployment covers standing up a Windsor stack on infrastructure you keep: a cloud account, a virtualized platform, or bare metal you own. These are **non-workstation contexts** — staging, production, and anything that targets real infrastructure rather than a local VM. For the local-development path, see the [Workstation overview](../workstation/overview.md).
+Deployment covers standing up a Windsor stack on infrastructure you keep: a cloud account, a virtualized platform, or bare metal you own. These are **non-workstation contexts**: staging, production, and anything that targets real infrastructure rather than a local VM. For the local-development path, see the [Workstation overview](../workstation/overview.md).
 
 ## The deployment model
 
@@ -11,7 +11,7 @@ Every target follows the same lifecycle. The verbs differ from local development
 
 ```bash
 windsor init production --platform aws   # scaffold the context
-windsor bootstrap production --wait      # first run: backend, infrastructure, blueprint
+windsor bootstrap production             # first run: backend, infrastructure, blueprint (waits by default)
 # ... day-2 reconciles ...
 windsor apply --wait
 # ... teardown ...
