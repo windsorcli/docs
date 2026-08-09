@@ -70,7 +70,7 @@ Common additional knobs:
 
 | Key | Effect |
 |-----|--------|
-| `topology: ha` | Node pools spread across availability zones 1-3. The default is single-zone pools. |
+| `topology: ha` | Node pools become eligible to spread across availability zones 1-3, instead of a single zone. Doesn't by itself change how many nodes run; see [Node pools](#node-pools). |
 | `dns.private_domain` | Name for the private, VNet-linked Azure DNS zone (internal DNS). |
 | `gateway.access: private` | Keep the gateway internal, via an Azure internal load balancer; pairs with `dns.private_domain` for a private issuer. |
 | `cluster.cni.driver: cilium` | Replace Azure CNI with Cilium (bootstrapped before Flux). Omit for the default Azure CNI. |
@@ -97,6 +97,21 @@ cluster:
 `count` is required on every pool; `autoscaling` is optional and defaults on (min 1, max 3, seeded from `count`) for every class except `system`, which defaults fixed.
 
 When `cluster.pools` is unset, the cluster falls back to a single autoscaling `general` pool (1-3 nodes). AKS also always creates its own built-in system node pool alongside it, tainted `CriticalAddonsOnly` so only cluster operators land there, not `cluster.pools`-managed workloads; it also scales automatically between 1 and 3 nodes, so a freshly bootstrapped cluster with no `cluster.pools` set starts at 2 nodes total and can grow to 6. Each class resolves to a preference-ordered VM size list, but AKS pools accept a single SKU each: only the first entry is actually used, and it falls back to broadly available `v3`-generation sizes rather than the newest generation, since the newer families need per-subscription-and-region enablement.
+
+`topology: ha` only widens which zones a pool's nodes are eligible to land in; it doesn't raise `count` or an `autoscaling` minimum on its own. A `topology: ha` cluster with no explicit `cluster.pools` still starts at one node per pool, just now eligible for any of 3 zones instead of pinned to one, which isn't node-level HA: if that node's zone goes down, the autoscaler has to notice and provision a replacement rather than there being a standby already running. For genuine node-level redundancy in `cluster.pools`-managed pools, pair `topology: ha` with an explicit multi-node `count` or `autoscaling.min`:
+
+```yaml
+topology: ha
+cluster:
+  pools:
+    apps:
+      class: general
+      count: 3
+```
+
+Node spread alone isn't sufficient either: workloads still need pod anti-affinity across those nodes to actually benefit from it.
+
+AKS's built-in system pool doesn't follow this pattern. It isn't reachable through `cluster.pools` at all: a `cluster.pools.system` entry creates a second, separate node pool that collides with the built-in one's name rather than resizing it. The `platform-azure` facet passes no override for the built-in pool either, so its 1-3 autoscaling range is fixed regardless of `topology` or anything in `values.yaml`. Changing it needs a raw `contexts/<context>/terraform/cluster.tfvars` setting the full `default_node_pool` object; there's no portable schema path for it yet.
 
 ## 3. Bootstrap
 
