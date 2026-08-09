@@ -80,21 +80,23 @@ Common additional knobs:
 
 ### Node pools
 
-Size the cluster with `cluster.pools`, a portable shape that maps to EKS managed node groups. Each pool picks a **class** (which selects sensible instance types) and a size:
+Size the cluster with `cluster.pools`, which maps to EKS managed node groups and is portable across the other cloud platforms. Each pool picks a **class** (which selects sensible instance types) and a `count`; add an `autoscaling` block to scale between bounds instead of holding a fixed size:
 
 ```yaml
 cluster:
   pools:
     system:
       class: system        # system | general | compute | memory | storage | gpu | arm64
-      count: 2
+      count: 1
     apps:
       class: general
-      min: 2
-      max: 6               # min/max enables autoscaling between the bounds
+      count: 2
+      autoscaling:
+        min: 2
+        max: 6
 ```
 
-Use `count` for a fixed size, or `min`/`max` for an autoscaling range. When `cluster.pools` is unset, the cluster falls back to a single `general`-class group (2 nodes, scaling 1–3). Each class resolves to a multi-instance-type list so a pool tolerates single-type capacity shortages.
+`count` is required on every pool; `autoscaling` is optional and defaults on (min 1, max 3, seeded from `count`) for every class except `system`, which defaults fixed and carries a `CriticalAddonsOnly` taint so only cluster operators land there. When `cluster.pools` is unset, the cluster falls back to two managed node groups: `system` (1 node, fixed) and `general` (autoscaling 1-3 nodes), so a freshly bootstrapped cluster starts at 2 nodes and can grow to 4. Each class resolves to a multi-instance-type list so a pool tolerates single-type capacity shortages.
 
 ## 3. Bootstrap
 
