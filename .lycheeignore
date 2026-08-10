@@ -8,3 +8,6 @@
 # URL 404s from GitHub's public API. Remove this once the repo is
 # published.
 ^https://github\.com/windsorcli/windsorcli\.github\.io
+
+# Intel support PDFs (content/dam) return 403 to automated clients; valid in a browser.
+^https://www\.intel\.com/content/dam/support/.+\.pdf$

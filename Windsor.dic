@@ -12,6 +12,8 @@ prosumers
 Sidero
 
 # --- Ecosystem / tooling ---
+Aptio
+Rufus
 Astro
 Argo
 Colima
@@ -29,6 +31,7 @@ OpenTofu
 Renovate
 sops
 Talos
+talosctl
 Taskfile
 yamllint
 shellcheck
