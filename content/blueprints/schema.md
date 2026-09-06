@@ -9,7 +9,7 @@ The `contexts/_template/schema.yaml` file defines the expected structure and def
 
 - **Validation**: ensures configuration matches the schema.
 - **Defaults**: missing keys get default values.
-- **Consistency**: same shape across contexts.
+- **Consistency**: same structure across contexts.
 
 The schema file must be valid JSON Schema. Windsor implements a subset of **JSON Schema Draft 2020-12**.
 
@@ -19,10 +19,10 @@ The schema file must be valid JSON Schema. Windsor implements a subset of **JSON
 $schema: https://json-schema.org/draft/2020-12/schema
 type: object
 properties:
-  provider:
+  platform:
     type: string
     default: "none"
-    enum: ["none", "metal", "docker", "aws", "azure", "gcp"]
+    enum: ["none", "aws", "azure", "hetzner", "incus", "metal", "docker", "hyperv", "vsphere"]
   observability:
     type: object
     properties:

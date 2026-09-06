@@ -80,6 +80,42 @@ windsor plan terraform cluster  # full plan for one component
 
 To inspect the composition itself, render it with `windsor show` or trace a value with `windsor explain`. See [Inspecting](../blueprints/inspecting.md).
 
+## Upgrade
+
+`windsor upgrade` moves a running context to a newer blueprint version and reconciles the result, in one step:
+
+```bash
+windsor upgrade --yes
+```
+
+With no flags, it moves every declared OCI source to its latest stable tag. It then applies Terraform, installs the updated Flux blueprint, waits for it to become ready, and prunes any kustomization the new blueprint no longer declares. `--yes` is required whenever the run would prune something; without it, `upgrade` stops and shows what it would remove first. `apply --prune` does the same pruning on a plain apply, for that behavior without also moving source versions.
+
+Move one source instead of all of them with `--source name=url`, which persists to `blueprint.yaml`:
+
+```bash
+windsor upgrade --source core=oci://ghcr.io/windsorcli/core:v0.8.0 --yes
+```
+
+`upgrade` refuses to move a source backward by default — a blueprint author raises a version floor for a reason. Pass `--allow-downgrade` to override it. This only reverts infrastructure declaratively; it does not undo changes an add-on already made to application data (a migrated database schema, for example).
+
+Before moving anything, `upgrade` checks the target blueprint's own `cliVersion` constraint (set in its `metadata.yaml`) against your installed CLI, and fails with an explanatory error if your CLI is too old. See [CLI version compatibility](../blueprints/sharing.md#cli-version-compatibility).
+
+### Upgrading Talos nodes
+
+Blueprint upgrades don't touch the Talos nodes themselves — that's a separate step, split into two commands depending on how much parallelism you want:
+
+```bash
+# Roll every controlplane node at once; returns once requests are accepted
+windsor upgrade cluster --nodes=10.0.0.5,10.0.0.6,10.0.0.7 \
+  --image=ghcr.io/siderolabs/installer:v1.13.0
+
+# Roll one node at a time, blocking until each rejoins healthy
+windsor upgrade node --node=10.0.0.5 \
+  --image=ghcr.io/siderolabs/installer:v1.13.0
+```
+
+`upgrade cluster` triggers the upgrade on every named node in parallel and returns as soon as the requests are accepted. Nodes reboot asynchronously, so follow up with `windsor check node-health --wait-for-reboot` to confirm they came back. `upgrade node` is the rolling-upgrade primitive: it waits for the single node to reboot and pass a health check before returning. A script can call it once per node and get a real go/no-go between each one. Both take `--reboot-mode=powercycle` for platforms (commonly nested virtualization) where the default fast `kexec` reboot doesn't reliably register as an offline transition.
+
 ## Tear down
 
 `destroy` removes live infrastructure: every Flux kustomization, then every Terraform component in reverse-dependency order. Before it touches anything it shows a destroy plan (the Terraform resources it will remove and the live Flux inventory queried from the cluster) and waits for confirmation.
@@ -104,9 +140,11 @@ windsor down
 `destroy` has two safety behaviors:
 
 - If a Terraform resource carries `lifecycle { prevent_destroy = true }`, `destroy` names it up front and warns the run may halt partway through. It does not override the protection; remove the lifecycle block in HCL to actually destroy.
-- By default `destroy` aborts on the first component failure. `--continue` keeps going, collects failures, and prints a one-line summary. It is layer-wide only, and is refused with a component argument. When a non-tier component is left un-destroyed, the backend tier is deferred so the state store isn't removed out from under components that still depend on it. Rerun to converge.
+- By default `destroy` aborts on the first component failure. `--continue` keeps going, collects failures, and prints a one-line summary. It is layer-wide only; Windsor refuses it when given a component argument. When a non-tier component stays un-destroyed, `destroy` defers the backend tier so it doesn't remove the state store out from under components that still depend on it. Rerun to converge.
 
-A per-context lock guards concurrent runs. `up`, `apply`, `bootstrap`, `destroy`, and any `plan` that touches Terraform take a single-writer stack lock at `.windsor/contexts/<context>/.stacklock` before they run. A second `windsor` command on the same context fails immediately and names the holder (`user@host`, PID, operation), unless `--lock-timeout` is passed, in which case it waits up to that duration before failing. See [Global flags](https://www.windsorcli.dev/reference/cli/global-flags). Different contexts never contend, and a read-only `plan kustomize` does not lock. Terraform's own state lock follows `terraform.lock.timeout` (default `5m`), applied as `-lock-timeout` to every state-mutating Terraform command, so contended state waits rather than failing immediately.
+A per-context lock guards concurrent runs. `up`, `apply`, `bootstrap`, `destroy`, and any `plan` that touches Terraform take a single-writer stack lock at `.windsor/contexts/<context>/.stacklock` before they run. A second `windsor` command on the same context fails immediately and names the holder (`user@host`, PID, operation). Pass `--lock-timeout` to wait up to that duration before failing instead. See [Global flags](https://www.windsorcli.dev/reference/cli/global-flags). Different contexts never contend, and a read-only `plan kustomize` does not lock. Terraform's own state lock follows `terraform.lock.timeout` (default `5m`), applied as `-lock-timeout` to every state-mutating Terraform command, so contended state waits rather than failing immediately.
+
+A holder can die before releasing the lock (CI cancellation, an OOM, a crash). It leaves the lock behind, so later commands wait out the timeout and then fail. `windsor unlock` force-clears it. It does not check whether the holder is still alive, so only run it once you're sure no other `windsor` process is using the context.
 
 ## Reference
 
@@ -117,6 +155,8 @@ A per-context lock guards concurrent runs. `up`, `apply`, `bootstrap`, `destroy`
 | First-run | [`bootstrap`](https://www.windsorcli.dev/reference/cli/commands/bootstrap) | End-to-end install for non-workstation contexts. Two-phase apply when a `backend` component is in play. |
 | Install | [`apply`](https://www.windsorcli.dev/reference/cli/commands/apply) | Runs Terraform components, then installs the Flux blueprint. |
 | Inspect | [`plan`](https://www.windsorcli.dev/reference/cli/commands/plan) / [`show`](https://www.windsorcli.dev/reference/cli/commands/show) / [`explain`](https://www.windsorcli.dev/reference/cli/commands/explain) | Previews changes, prints rendered resources, traces values. |
+| Upgrade | [`upgrade`](https://www.windsorcli.dev/reference/cli/commands/upgrade) / [`upgrade cluster`](https://www.windsorcli.dev/reference/cli/commands/upgrade-cluster) / [`upgrade node`](https://www.windsorcli.dev/reference/cli/commands/upgrade-node) | Moves sources to a new version and reconciles; upgrades Talos nodes. |
+| Recovery | [`unlock`](https://www.windsorcli.dev/reference/cli/commands/unlock) | Force-releases a stuck stack lock. |
 | Tear down | [`destroy`](https://www.windsorcli.dev/reference/cli/commands/destroy) | Destroys live infrastructure (Terraform + Flux). |
 
 - [Contexts](overview.md) — workstation vs non-workstation, switching contexts

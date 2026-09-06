@@ -38,7 +38,7 @@ metadata:
   description: Base blueprint for all contexts
 sources:
   - name: core
-    url: oci://ghcr.io/windsorcli/core:v0.6.0
+    url: oci://ghcr.io/windsorcli/core:v0.8.0
 terraform:
   - source: core
     path: cluster/talos
@@ -72,7 +72,7 @@ properties:
 additionalProperties: false
 ```
 
-Use `$schema: https://json-schema.org/draft/2020-12/schema`. The earlier `https://windsorcli.dev/draft/2026-02/schema` dialect was removed in v0.9.0; a schema still declaring it fails validation with a migration hint. See [Schema](schema.md).
+Use `$schema: https://json-schema.org/draft/2020-12/schema`. Windsor removed the earlier `https://windsorcli.dev/draft/2026-02/schema` dialect in v0.9.0; a schema still declaring it fails validation with a migration hint. See [Schema](schema.md).
 
 ## metadata.yaml
 
@@ -115,5 +115,6 @@ Only OCI sources can have their components merged; the `deploy` flag only applie
 
 - [Schema](schema.md) — Validation and defaults.
 - [Facets](facets.md) — Conditional composition and expression authoring.
+- [Expressions](expressions.md) — the `when:` / `${...}` language and Windsor's added functions
 - [Sharing blueprints](sharing.md) — Pushing and bundling.
 - [Blueprint testing](testing.md) — Static tests for blueprint composition.

@@ -3,7 +3,14 @@ title: Blueprints
 description: What's in a blueprint, and how to write one.
 ---
 
-A blueprint is the recipe for what Windsor installs. It lists the Terraform components that provision infrastructure, the Kustomizations that run on a Kubernetes cluster, the configuration values the operator can set, and the conditional fragments (facets) that activate based on those values. Either section can be empty, so a blueprint can be a full Kubernetes platform or just a Terraform stack.
+A blueprint is the recipe for what Windsor installs. It lists:
+
+- The Terraform components that provision infrastructure
+- The Kustomizations that run on a Kubernetes cluster
+- The configuration values the operator can set
+- The conditional fragments (facets) that activate based on those values
+
+Either section can be empty, so a blueprint can be a full Kubernetes platform or just a Terraform stack.
 
 Windsor reads a blueprint, fills in the values for the current context, and deploys the platform to your chosen target. Most projects start with the default [`core`](https://github.com/windsorcli/core) blueprint and customize a few values.
 
@@ -16,7 +23,7 @@ A blueprint lives in `contexts/_template/`. The directory always contains a `blu
 | `metadata.yaml` | Name, version, and CLI version requirement |
 | `facets/` | Conditional fragments activated by context values |
 
-A blueprint can also be published as an OCI artifact and reused by other projects. The default `core` blueprint is published at `oci://ghcr.io/windsorcli/core:v0.6.0`.
+A blueprint can also be published as an OCI artifact and reused by other projects. The default `core` blueprint is published at `oci://ghcr.io/windsorcli/core:v0.8.0`.
 
 Per-context customizations live in `contexts/<name>/`. Files there override or extend what `_template/` defines for that one context, so most contexts share their blueprint and differ only where they need to.
 

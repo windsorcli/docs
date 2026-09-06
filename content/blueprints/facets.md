@@ -3,7 +3,7 @@ title: Facets
 description: Conditional blueprint composition from configuration.
 ---
 
-**Facets** are YAML files under `contexts/_template/facets/` that add or modify blueprint content based on configuration (for example, provider, feature flags). They let one template support multiple environments and options without duplicating the base blueprint.
+**Facets** are YAML files under `contexts/_template/facets/` that add or modify blueprint content based on configuration (for example, platform, feature flags). They let one template support multiple environments and options without duplicating the base blueprint.
 
 ## Overview
 
@@ -19,7 +19,7 @@ apiVersion: blueprints.windsorcli.dev/v1alpha1
 metadata:
   name: aws-facet
   description: AWS-specific infrastructure
-when: provider == 'aws'
+when: platform == 'aws'
 terraform:
   - path: network/vpc
     source: core
@@ -28,7 +28,7 @@ terraform:
     strategy: merge
 ```
 
-When `provider` is `aws`, the VPC Terraform component from `core` is included. Expressions can reference [schema](schema.md) properties and `terraform_output()` for cross-component values.
+When `platform` is `aws`, the VPC Terraform component from `core` is included. Expressions can reference [schema](schema.md) properties and `terraform_output()` for cross-component values.
 
 ## Ordinals
 
@@ -37,12 +37,12 @@ If a facet does not set `ordinal`, it is derived from the filename:
 | Pattern | Ordinal |
 | --- | --- |
 | `config-*` | 100 |
-| `provider-base` / `platform-base` | 199 |
-| `provider-*` / `platform-*` | 200 |
+| `platform-base` | 199 |
+| `platform-*` | 200 |
 | `options-*` / `option` | 300 |
 | `addon` / `addons` | 400 |
 
-Higher ordinal means higher precedence when merging (addons override provider-base for same-name entries).
+Higher ordinal means higher precedence when merging (addons override platform-base for same-name entries).
 
 ## File resolution
 
@@ -67,6 +67,7 @@ An optional `namespaces:` list targets more than one namespace; empty means auto
 
 ## See also
 
+- [Expressions](expressions.md) — the `when:` / `${...}` language and Windsor's added functions
 - [Blueprint templates](templates.md) — How the _template folder and composition order work.
 - [Blueprint testing](testing.md) — Testing facet conditions and expected components.
 - [Securing secrets](../deployment/securing-secrets.md) — marking schema values sensitive
