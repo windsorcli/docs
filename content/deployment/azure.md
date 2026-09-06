@@ -62,7 +62,7 @@ dns:
 email: platform@example.com                 # required when public_domain is set
 ```
 
-Unlike `aws.region`, there's no `azure.region` schema field yet: the network, cluster, and backend Terraform modules each default independently (`eastus` for network and cluster, `eastus2` for the backend). Override a component's region with a `contexts/azure-prod/terraform/<component>.tfvars` file (`region = "westus2"`, or `location` for the backend) if the defaults don't fit; see [Terraform reference](https://www.windsorcli.dev/reference/cli/terraform).
+Set `azure.region` to choose the region once; it's exported to every Terraform component as `TF_VAR_region`. Without it, the network, cluster, and backend modules each default independently (`eastus` for network and cluster, `eastus2` for the backend). To override a single component instead of the whole context, use a `contexts/azure-prod/terraform/<component>.tfvars` file (`region = "westus2"`, or `location` for the backend); see [Terraform reference](https://www.windsorcli.dev/reference/cli/terraform).
 
 `azure.subscription_id`/`azure.tenant_id` activate Azure integration alongside (or instead of) `platform: azure` — either is sufficient. `kubelogin_mode` auto-detects from the active credential chain (`AZURE_FEDERATED_TOKEN_FILE` → workload identity, a client secret/certificate → service principal, otherwise the Azure CLI); set it explicitly only when the active credential is a mode without a process-env signal, like a managed identity. When `dns.public_domain` is set, Windsor provisions a public Azure DNS zone, wires `external-dns` to manage records in it, and issues real TLS certificates through Let's Encrypt (ACME) using a DNS-01 challenge scoped to that zone via Workload Identity, so `email` is required.
 
@@ -74,7 +74,7 @@ Common additional knobs:
 | `dns.private_domain` | Name for the private, VNet-linked Azure DNS zone (internal DNS). |
 | `gateway.access: private` | Keep the gateway internal, via an Azure internal load balancer; pairs with `dns.private_domain` for a private issuer. |
 | `cluster.cni.driver: cilium` | Replace Azure CNI with Cilium (bootstrapped before Flux). Omit for the default Azure CNI. |
-| `addons.observability.enabled: true` | Grafana, Prometheus, and the logging stack. |
+| `observability.enabled: true` | Grafana, Prometheus, and the logging stack. |
 
 ### Node pools
 
@@ -172,4 +172,4 @@ windsor destroy --confirm=azure-prod
 - [Lifecycle](../contexts/lifecycle.md) — the full command model and safety behaviors
 - [Terraform](../blueprints/terraform.md) — state backends, the bootstrap two-phase apply, cross-component outputs
 - [Secrets management](secrets-management.md) — SOPS and 1Password for sensitive values
-- [AWS](aws.md) and [Metal](metal.md) — the other deployment targets
+- [AWS](aws.md), [Hetzner](hetzner.md), [Hyper-V](hyperv.md), [vSphere](vsphere.md), and [Metal](metal.md) — the other deployment targets

@@ -76,7 +76,7 @@ Common additional knobs:
 | `dns.private_domain` | Name for the private, VPC-scoped Route53 zone (internal DNS). |
 | `gateway.access: private` | Keep the gateway internal; pairs with `dns.private_domain` for a private issuer. |
 | `cluster.cni.driver: cilium` | Replace VPC-CNI with Cilium (bootstrapped before Flux). Omit for the default VPC-CNI. |
-| `addons.observability.enabled: true` | Grafana, Prometheus, and the logging stack. |
+| `observability.enabled: true` | Grafana, Prometheus, and the logging stack. |
 
 ### Node pools
 
@@ -170,4 +170,4 @@ windsor destroy --confirm=aws-prod
 - [Lifecycle](../contexts/lifecycle.md) — the full command model and safety behaviors
 - [Terraform](../blueprints/terraform.md) — state backends, the bootstrap two-phase apply, cross-component outputs
 - [Secrets management](secrets-management.md) — SOPS and 1Password for sensitive values
-- [Azure](azure.md) and [Metal](metal.md) — the other deployment targets
+- [Azure](azure.md), [Hetzner](hetzner.md), [Hyper-V](hyperv.md), [vSphere](vsphere.md), and [Metal](metal.md) — the other deployment targets
