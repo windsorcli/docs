@@ -14,7 +14,7 @@ identity:
   enabled: true
 ```
 
-This hosts Keycloak in-cluster — the operator, a `Keycloak` server, and its
+This hosts Keycloak in-cluster: the operator, a `Keycloak` server, and its
 own Postgres database, reachable at `keycloak.${external_domain}` through
 the shared gateway. A consumer with SSO support turns it on with its own
 switch and never has to name Keycloak directly:
@@ -49,10 +49,10 @@ observability:
     client_secret: ${secret("MyVault", "grafana-oidc", "clientSecret")}
 ```
 
-With an external issuer, Windsor deploys nothing into `system-identity` —
-consumers read the issuer and bring their own client credentials, since the
+With an external issuer, Windsor deploys nothing into `system-identity`.
+Consumers read the issuer and bring their own client credentials, since the
 external provider owns them. Either driver, consumers see the same
-effective issuer and realm; nothing downstream cares which one is behind it.
+effective issuer and realm. Nothing downstream cares which one is behind it.
 
 ## Let apps use it
 
@@ -73,13 +73,13 @@ platform realm and pins its secret via
 `identity.keycloak.grafana_client_secret` (a dev default applies in dev;
 required otherwise). The client carries a mapper that puts the
 `platform-admins` group into the token, which Grafana maps to the Admin
-role — override with `grafana.role_attribute_path`, or set `grafana.sso:
-false` to opt back out.
+role. Override the mapping with `grafana.role_attribute_path`, or set
+`grafana.sso: false` to opt back out entirely.
 
 ## kubectl over SSO
 
 `cluster.oidc.enabled: true` turns on OIDC login for the Kubernetes API
-server — **on Talos-driven platforms only** (Metal, Hetzner, Hyper-V,
+server, **on Talos-driven platforms only** (Metal, Hetzner, Hyper-V,
 vSphere). It works by patching Talos's own machine config with
 `--oidc-*` flags on the apiserver, so it needs Windsor to control the
 control plane directly:
@@ -92,22 +92,22 @@ cluster:
     enabled: true
 ```
 
-With the hosted driver, the issuer and a public PKCE client are inferred
-from the platform realm, so no `issuer_url` or `client_id` is needed — pair
-this with a `kubectl` OIDC plugin such as `kubelogin`. OIDC only
-authenticates; it grants no RBAC by itself. Outside dev, bind
+With the hosted driver, Windsor infers the issuer and a public PKCE client
+from the platform realm, so you don't need to set `issuer_url` or
+`client_id`. Pair this with a `kubectl` OIDC plugin such as `kubelogin`.
+OIDC only authenticates: it grants no RBAC by itself. Outside dev, bind
 `platform-admins` (or another realm claim) to a `ClusterRoleBinding`
-yourself — in `dev`, that binding is seeded to `cluster-admin` so the
+yourself. In `dev`, Windsor seeds that binding to `cluster-admin` so the
 seeded `dev-admin` user can do something after logging in.
 
 **On AWS (EKS) and Azure (AKS), this flag does nothing.** Those are managed
-control planes — Windsor has no way to inject apiserver flags into them,
-and neither platform facet reads `cluster.oidc` at all, so setting it is a
-silent no-op rather than an error. Hosted Keycloak and Grafana SSO above
-still work fully on EKS/AKS; only kube-apiserver-level `kubectl` login is
+control planes. Windsor has no way to inject apiserver flags into them, and
+neither platform facet reads `cluster.oidc` at all. Setting it there is a
+silent no-op, not an error. Hosted Keycloak and Grafana SSO above still
+work fully on EKS/AKS. Only kube-apiserver-level `kubectl` login is
 Talos-only today. Reaching the same outcome on EKS or AKS means using each
-cloud's own native mechanism (EKS access entries / IAM, Azure AD/Entra
-integration) instead — Windsor doesn't wire either of those up yet.
+cloud's own native mechanism instead: EKS access entries/IAM, or Azure
+AD/Entra integration. Windsor doesn't wire either of those up yet.
 
 ## Under the hood
 
@@ -137,10 +137,10 @@ flowchart LR
   gateway -->|HTTP| keycloak_sts
 ```
 
-TLS terminates at the gateway; Keycloak serves plain HTTP internally and
+TLS terminates at the gateway. Keycloak serves plain HTTP internally and
 trusts the proxy's forwarded headers for the external scheme and host.
 
-Enabling Keycloak also imports a `platform` realm — apps never live in
+Enabling Keycloak also imports a `platform` realm. Apps never live in
 `master`. The import is one-shot: the operator applies it once, so later
 changes happen in-console (or by recreating the `Keycloak` resource), not
 by continuous reconciliation. The realm ships a security baseline (TLS
@@ -155,7 +155,7 @@ failover. `single-node` and `multi-node` keep both at 1.
 Database traffic is `sslmode=verify-full` against Postgres's own generated
 CA, ingress is HTTPS-only at the gateway, and every image in
 `system-identity` is digest-pinned under policy. Client secrets never land
-in git — `${secret(...)}` references resolve them at apply time, and
+in git. `${secret(...)}` references resolve them at apply time, and
 consumer pods wait rather than start misconfigured.
 
 ## Reference

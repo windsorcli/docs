@@ -98,7 +98,7 @@ cluster:
 
 `count` is required on every pool; `autoscaling` is optional and defaults on (min 1, max 3, seeded from `count`) for every class except `system`, which defaults fixed and carries a `CriticalAddonsOnly` taint so only cluster operators land there. When `cluster.pools` is unset, the cluster falls back to two managed node groups: `system` (1 node, fixed) and `general` (autoscaling 1-3 nodes), so a freshly bootstrapped cluster starts at 2 nodes and can grow to 4. Each class resolves to a multi-instance-type list so a pool tolerates single-type capacity shortages.
 
-`topology: ha` only widens which subnets (and so which AZs) a node group's nodes are eligible to land in; it doesn't raise `count` or an `autoscaling` minimum on its own. A `topology: ha` cluster with the default pools still starts at the same 2 nodes, just now eligible to spread across every private subnet instead of one, which isn't node-level HA: if a node's AZ goes down, the autoscaler has to notice and provision a replacement rather than there being a standby already running. For genuine node-level redundancy, pair `topology: ha` with an explicit multi-node `count`:
+`topology: ha` only widens which subnets (and so which AZs) a node group's nodes are eligible to land in. It doesn't raise `count` or an `autoscaling` minimum on its own. A `topology: ha` cluster with the default pools still starts at the same 2 nodes, just now eligible to spread across every private subnet instead of one. That spread alone isn't node-level HA: if a node's AZ goes down, the autoscaler has to notice and provision a replacement, rather than a standby already running and ready. For genuine node-level redundancy, pair `topology: ha` with an explicit multi-node `count`:
 
 ```yaml
 topology: ha
@@ -156,7 +156,7 @@ windsor apply kustomize observability   # one Flux kustomization
 windsor destroy --confirm=aws-prod
 ```
 
-`destroy` removes the Flux kustomizations, then the Terraform components in reverse order, with the S3 backend removed last so dependent state is written out first. The state bucket is emptied and deleted as part of teardown. `--confirm=aws-prod` is the non-interactive equivalent of typing the context name at the prompt. The public Route53 zone lives in its own stack, so it is removed only by this destroy; to keep the delegated zone, destroy individual components instead. See [destroy safety](../contexts/lifecycle.md#tear-down).
+`destroy` removes the Flux kustomizations, then the Terraform components in reverse order, with the S3 backend removed last so dependent state is written out first. The state bucket is emptied and deleted as part of teardown. `--confirm=aws-prod` is the non-interactive equivalent of typing the context name at the prompt. The public Route53 zone lives in its own stack, so a full `destroy` removes it too. To keep the delegated zone, destroy individual components instead. See [destroy safety](../contexts/lifecycle.md#tear-down).
 
 ## Troubleshooting
 
