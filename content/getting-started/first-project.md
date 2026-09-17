@@ -105,6 +105,7 @@ windsor down
 
 ## Next steps
 
-- [Contexts](../contexts/overview.md) — Multiple environments and switching
-- [Workstation](../workstation/colima-docker.md) — Local virtualization (Colima, Docker Desktop)
-- [Blueprints](../blueprints/overview.md) and [Components](../blueprints/terraform.md) — Terraform and Kustomize
+- [Workflow](../provisioning/workflow.md) — the full command model behind what you just ran, and how it differs for a cloud or metal context
+- [Contexts](../contexts/overview.md) — multiple environments and switching
+- [Workstation](../workstation/colima-docker.md) — local virtualization (Colima, Docker Desktop)
+- [Components](../components/terraform.md) — adding your own Terraform and Kustomize to a consumed blueprint

@@ -1,20 +1,36 @@
 ---
 title: Welcome to the Windsor docs!
-description: Documentation index for Windsor CLI.
+description: What Windsor is, and how to find your way through this guide.
 ---
 
-Windsor is an infrastructure provisioning tool. A blueprint author can codify 100% of a distributed compute system and its requirements into a single versioned package. Consumers of blueprints can deploy them to the compute platform of their choosing.
+## What Windsor is
 
-Currently, Windsor supports AWS, Azure, virtualized platforms (Hyper-V), and bare metal (no-os). Windsor abstracts the underlying infrastructure cleanly from the application layer, using standard tools from within and around the Cloud Native computing ecosystem. The workloads you deploy on top run the same way on every supported target.
+Windsor is an infrastructure provisioning tool. It drives Terraform and Kustomize against a Kubernetes cluster, and manages the context, credentials, and environment variables each command needs along the way.
 
-The goal is to enable anyone to operate secure, private, and reliable compute infrastructure on their own terms. Blueprints should be repeatable, testable, and offer a clean authorship contract for delivering high-fidelity self-hosted services from minimum prerequisites.
+You can use it two ways. Add your own [Terraform](components/terraform.md) modules and [Kustomizations](components/kustomize.md) directly to one context, on top of a blueprint you consume. Or author a blueprint: a template that composes the same kind of components across every context in a project, with conditional fragments (facets) and a schema for the values each context sets — see [Blueprints](blueprints/overview.md). Both produce the same `windsor apply`; only how you got there differs.
 
-Blueprint authorship is key to this project's success. Most of the documentation covers the `core` blueprint, which provides the infrastructure bootstrapping, a properly configured Kubernetes cluster, and essential cloud services. `core` is the primary blueprint today, and the authorship contract is open: to write your own, read on, get in touch, and extend `core`.
+Most projects start from the default [`core`](https://github.com/windsorcli/core) blueprint, which bootstraps the infrastructure, a configured Kubernetes cluster, and a set of common cloud services. `core` is open to extend: add components on top of it, or write your own blueprint that consumes it.
 
-- [Getting started](getting-started/first-project.md) — install the CLI and run your first local stack
-- [Contexts](contexts/overview.md) — environments, lifecycle, and per-context configuration
-- [Blueprints](blueprints/overview.md) — how a stack is composed, customized, and shared
-- [Workstation](workstation/overview.md) — running a blueprint locally in dev mode
-- [Deployment](deployment/overview.md) — bootstrapping infrastructure on AWS, Azure, or bare metal you own
-- [Troubleshooting](troubleshooting/overview.md) — common failure modes and their fixes
+Windsor currently provisions AWS, Azure, Hetzner, two hypervisors (Hyper-V, vSphere), a local workstation VM, and bare metal you already have. A blueprint's Kustomize layer runs the same way regardless of target; only the Terraform layer underneath changes.
+
+## How to use this guide
+
+- **New to Windsor?** Start at [Getting started](getting-started/first-project.md) — install the CLI and run a local stack.
+- **Already have Terraform and Kubernetes manifests, and want Windsor to run them for one context?** Go to [Components](components/terraform.md).
+- **Need the same infrastructure across contexts, or want to publish it for other projects to consume?** [Blueprints](blueprints/overview.md) covers the template model.
+- **Deploying to a specific target?** [Local](workstation/overview.md), [Virtual](virtual/hyperv.md), [Cloud](cloud/aws.md), and [Metal](metal/overview.md) each cover their own setup.
+- **Already running — moving to a newer blueprint version, tearing it down, or want CI to apply changes instead of a person?** [Upgrade](maintenance/upgrade.md), [Destroy](maintenance/destroy.md), and [CI/CD](ci-cd/github-actions.md) cover the ongoing side of running it.
+- **Looking for a specific flag or YAML key?** [Reference](https://www.windsorcli.dev/reference/cli/configuration) covers the CLI and the `core` blueprint in full.
+
+## Chapters
+
+- [Getting started](getting-started/first-project.md) — install the CLI and run your first stack
+- [Contexts](contexts/overview.md) — environments and per-context configuration
+- [Secrets](secrets/sops.md) — SOPS and 1Password for context secrets
+- [Local](workstation/overview.md), [Virtual](virtual/hyperv.md), [Cloud](cloud/aws.md), [Metal](metal/overview.md) — provisioning a context on each target
+- [Components](components/terraform.md) — adding your own Terraform and Kustomize to a consumed blueprint
+- [Blueprints](blueprints/overview.md) — the full authoring model, for building something reusable
+- [Upgrade](maintenance/upgrade.md) — moving a context to a newer blueprint version
+- [Destroy](maintenance/destroy.md) — safety behaviors and locking on teardown
+- [CI/CD](ci-cd/github-actions.md) — running Windsor from a pipeline instead of a shell
 - [Reference](https://www.windsorcli.dev/reference/cli/configuration) — in-depth references for the CLI and `core` blueprint

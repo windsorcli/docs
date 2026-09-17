@@ -1,5 +1,5 @@
 ---
-title: Blueprint testing
+title: Testing
 description: Static testing for blueprint composition.
 ---
 

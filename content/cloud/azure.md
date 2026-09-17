@@ -3,7 +3,7 @@ title: Azure
 description: Deploy a Windsor stack to Azure, with an AKS cluster on a dedicated VNet, Storage Account state, Azure DNS, and Flux-managed workloads.
 ---
 
-This guide stands up a production-style Windsor stack on Azure: a dedicated VNet, an [AKS](https://azure.microsoft.com/products/kubernetes-service) cluster, Terraform state in a Storage Account, and the `core` blueprint's services reconciled by Flux. It targets a **non-workstation context**: there is no local VM, so the lifecycle is `init` → `bootstrap` → `apply` → `destroy`. For the concepts behind those verbs, see [Lifecycle](../contexts/lifecycle.md).
+This guide stands up a production-style Windsor stack on Azure: a dedicated VNet, an [AKS](https://azure.microsoft.com/products/kubernetes-service) cluster, Terraform state in a Storage Account, and the `core` blueprint's services reconciled by Flux. It targets a **non-workstation context**: there is no local VM, so the lifecycle is `init` → `bootstrap` → `apply` → `destroy`. For the concepts behind those verbs, see [Command model](../provisioning/workflow.md).
 
 ## Prerequisites
 
@@ -164,7 +164,7 @@ windsor apply kustomize observability   # one Flux kustomization
 windsor destroy --confirm=azure-prod
 ```
 
-`destroy` removes the Flux kustomizations, then the Terraform components in reverse order, with the Storage Account backend removed last so dependent state is written out first. The public Azure DNS zone lives in its own stack, so a full `destroy` removes it too. To keep the delegated zone, destroy individual components instead. See [destroy safety](../contexts/lifecycle.md#tear-down).
+`destroy` removes the Flux kustomizations, then the Terraform components in reverse order, with the Storage Account backend removed last so dependent state is written out first. The public Azure DNS zone lives in its own stack, so a full `destroy` removes it too. To keep the delegated zone, destroy individual components instead. See [destroy safety](../maintenance/destroy.md#tear-down).
 
 ## Troubleshooting
 
@@ -175,7 +175,8 @@ windsor destroy --confirm=azure-prod
 
 ## Where to next
 
-- [Lifecycle](../contexts/lifecycle.md) — the full command model and safety behaviors
+- [Command model](../provisioning/workflow.md) — the full command model
+- [Destroy](../maintenance/destroy.md) — safety behaviors and locking on teardown
 - [Terraform](../blueprints/terraform.md) — state backends, the bootstrap two-phase apply, cross-component outputs
-- [Secrets management](secrets-management.md) — SOPS and 1Password for sensitive values
-- [AWS](aws.md), [Hetzner](hetzner.md), [Hyper-V](hyperv.md), [vSphere](vsphere.md), and [Metal](metal.md) — the other deployment targets
+- [SOPS](../secrets/sops.md), [1Password](../secrets/1password.md) — for sensitive values
+- [AWS](aws.md), [Hetzner](hetzner.md), [Hyper-V](../virtual/hyperv.md), and [vSphere](../virtual/vsphere.md) — the other deployment targets

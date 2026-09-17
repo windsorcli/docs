@@ -54,4 +54,4 @@ properties:
         sensitive: true
 ```
 
-A `substitutions`/`substitute` value that references a `sensitive: true` property is rejected at composition time, since substitutions render into a plaintext ConfigMap. Use a `flux:` system's `secrets:` block instead; see [Kubernetes Secrets on Flux systems](facets.md#kubernetes-secrets). See [Securing secrets](../deployment/securing-secrets.md) for the redaction behavior itself.
+Windsor redacts that value's path as `<sensitive>` wherever config is displayed — currently `windsor show values`. It doesn't change how the value is stored or resolved, only how it's shown back to the operator. A `substitutions`/`substitute` value that references a `sensitive: true` property is rejected at composition time, since substitutions render into a plaintext ConfigMap. Use a `flux:` system's `secrets:` block instead to land it as a Kubernetes Secret; see [Kubernetes Secrets on Flux systems](facets.md#kubernetes-secrets).

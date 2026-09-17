@@ -1,5 +1,5 @@
 ---
-title: Sharing blueprints
+title: Registries
 description: Push to OCI, bundle blueprints, CLI version compatibility.
 ---
 

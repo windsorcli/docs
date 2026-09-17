@@ -1,9 +1,9 @@
 ---
-title: Blueprints
+title: Overview
 description: What's in a blueprint, and how to write one.
 ---
 
-A blueprint is the recipe for what Windsor installs. It lists:
+[Components](../components/terraform.md) puts Terraform modules and Kustomizations directly in one context's `blueprint.yaml`. That works as long as one context is all you have. A blueprint turns the same components into a template, shared by every context instead of hand-copied into each one. It lists:
 
 - The Terraform components that provision infrastructure
 - The Kustomizations that run on a Kubernetes cluster
@@ -14,7 +14,7 @@ Either section can be empty, so a blueprint can be a full Kubernetes platform or
 
 Windsor reads a blueprint, fills in the values for the current context, and deploys the platform to your chosen target. Most projects start with the default [`core`](https://github.com/windsorcli/core) blueprint and customize a few values.
 
-A blueprint lives in `contexts/_template/`. The directory always contains a `blueprint.yaml`, which lists the Terraform components and Kustomizations the platform installs. The other files in `_template/` are optional.
+A blueprint lives in `contexts/_template/`. The directory always contains a `blueprint.yaml` — the same `terraform:`/`kustomize:` shape as [Components](../components/terraform.md), now written once and inherited by every context. The other files in `_template/` are optional.
 
 | File | Purpose |
 |---|---|
@@ -35,6 +35,6 @@ Per-context customizations live in `contexts/<name>/`. Files there override or e
 - [Terraform components](terraform.md)
 - [Kustomize](kustomize.md)
 - [Flux systems](flux-systems.md)
-- [Sharing via OCI](sharing.md)
+- [Registries](sharing.md)
 - [Testing](testing.md)
 - [Inspecting](inspecting.md)

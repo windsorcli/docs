@@ -3,7 +3,7 @@ title: Expressions
 description: The expression language behind facet when clauses and ${...} substitutions, and the functions Windsor adds on top of it.
 ---
 
-Facet `when:` conditions, `${...}` substitutions in schema values, and config blocks all share one expression language: [expr](https://expr-lang.org), a general-purpose expression language for Go. It isn't Windsor-specific. Normal comparison and boolean operators, ternaries, string concatenation, and a full standard library (`map`, `filter`, `get`, `len`, and more) all work exactly as [expr's own syntax reference](https://expr-lang.org/docs/language-definition) documents them. Windsor adds a small, fixed set of functions on top, for these tasks:
+Facet `when:` conditions, `${...}` substitutions in schema values, and config blocks all share one expression language: [expr](https://expr-lang.org), a general-purpose expression language for Go. It isn't Windsor-specific. Normal comparison and boolean operators, ternaries, string concatenation, and a full standard library (`map`, `filter`, `get`, `len`, and more) all work exactly as [expr's own syntax reference](https://expr-lang.org/docs/language-definition) documents them, with one exception: member access. See [Member access is always optional](#member-access-is-always-optional) below. Windsor adds a small, fixed set of functions on top, for these tasks:
 
 - Reading environment variables
 - Computing CIDR addresses
@@ -39,11 +39,29 @@ A blueprint author reaches for these constantly. `platform-hetzner.yaml`'s
 example. Everything else in an expression (`??`, `in`, `map`, `filter`, `fromPairs`,
 `toPairs`, `concat`, `values`) is plain expr, not something Windsor added.
 
+## Member access is always optional
+
+Plain expr distinguishes `a.b` (errors if `a` is missing) from `a?.b` (returns nil instead). Windsor patches every expression so every `.` already behaves like `?.`: `addons.database.enabled` and `addons?.database?.enabled` compile to the same thing. Writing the `?` changes nothing, and there's no way to write a *required* member access in a Windsor expression.
+
+A missing or misspelled path resolves to nil, not an error:
+
+- Alone, or in a boolean context like `when:`, it's `false`.
+- Inside a `${...}` substitution embedded in a larger string, it's an empty string.
+- Combined with `??`, the fallback wins, the same as if the path had resolved to nil on purpose.
+
+This is intentional for `when:` — a facet has to evaluate cleanly against a blueprint that doesn't declare a given config section at all, not error out.
+
+For a Terraform `inputs:` field, a nil result is dropped from the generated `.tfvars` entirely, rather than written as an empty value. If the module's own `variable` block has no `default`, Terraform's own "no value for required variable" check catches it. If the module does have a default, the input silently falls back to it, which is quiet but not corrupting: the operator's override just didn't take effect.
+
+Kustomize `substitutions:` and any `${...}` embedded inside a larger string have no such backstop: a nil result there is written through as a literal empty string, with nothing downstream positioned to reject it.
+
+If a value genuinely must be present, don't rely on an expression to catch it. Declare it under a facet's `requires:` block instead — that path does a real presence check on the composed scope and fails composition with a clear message, rather than resolving quietly to nil. See [Facets reference](https://www.windsorcli.dev/reference/cli/facets).
+
 ## Where expressions run
 
 - **`when:`** on a facet, a config block, a Terraform or Flux entry — must evaluate to a boolean. See [Facets](facets.md).
 - **`value:`** inside a facet's `config:` blocks — any expression, including nested maps and lists built from `fromPairs`/`map`.
-- **`${...}` substitutions** inside schema values, Terraform `inputs:`, and Kustomize `substitutions:` — the whole string must be exactly one `${...}` expression, or a plain literal; expr doesn't do partial string interpolation mid-string.
+- **`${...}` substitutions** inside schema values, Terraform `inputs:`, and Kustomize `substitutions:`. A string that's exactly one `${...}` expression evaluates to that expression's own type (a map, a number, a bool); `${...}` embedded alongside other text interpolates as a string, with a nil result rendering as empty (`"prefix-${cluster.undefined}-suffix"` becomes `"prefix--suffix"`).
 
 ## Deferred evaluation
 

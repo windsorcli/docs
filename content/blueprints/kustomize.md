@@ -28,28 +28,15 @@ kustomize/
     └── service.yaml
 ```
 
-In this example `my-app` is a local app with a Prometheus [Kustomize component](https://kubectl.docs.kubernetes.io/guides/config_management/components/). The blueprint references it without a `source:`:
+In this example `my-app` is a local app with a Prometheus [Kustomize component](https://kubectl.docs.kubernetes.io/guides/config_management/components/), referenced without a `source:`. See [Components — Kustomize](../components/kustomize.md) for the `kustomize:` entry shape — local `path:` vs. a remote `source:`. For the full Kustomization schema (every field, type, and default) see the [blueprint reference](https://www.windsorcli.dev/reference/cli/blueprint).
 
-```yaml
-kustomize:
-- name: my-app
-  path: my-app
-  components:
-    - prometheus
-```
+## Add-on components
 
-To pull a kustomization from a remote source, name the source and let Windsor resolve the path inside it:
+An add-on's own README (`kustomize/<name>` in a blueprint's repo) breaks it down into named **components** — for example Identity's `keycloak-operator`, `keycloak`, and `oidc-federation`. That's a different, Windsor-specific meaning from the Kustomize `components:` field above.
 
-```yaml
-kustomize:
-- name: csi
-  source: core
-  path: csi
-  components:
-    - longhorn
-```
+Each named component is a real, distinct resource inside the add-on — a HelmRelease, a Job, an HTTPRoute — gated by its own condition: a config flag, another add-on being enabled, a platform choice. A component's condition decides whether it exists in your context at all, not how it's patched.
 
-For the full Kustomization schema (every field, type, and default) see the [blueprint reference](https://www.windsorcli.dev/reference/cli/blueprint).
+The Catalog's own guides stick to what you configure at the `values.yaml` layer; for the full component breakdown, read the add-on's README directly — see [Identity](https://github.com/windsorcli/core/tree/main/kustomize/identity) for a worked example.
 
 ## Namespace vs target namespace
 
@@ -118,40 +105,7 @@ A manifest under `kustomize/my-app/` can then reference `${replicas}` and `${ima
 
 ## Context-specific patches
 
-Files placed in `contexts/<name>/patches/<kustomization-name>/` are automatically discovered and added to the kustomization's `patches`. All `.yaml` and `.yml` files in that directory contribute one patch each.
-
-### Strategic-merge patches
-
-Standard Kubernetes resource YAML. Fields are merged into matching resources in the kustomization output.
-
-```yaml
-# contexts/local/patches/my-app/increase-replicas.yaml
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: my-app
-spec:
-  replicas: 5
-```
-
-### JSON 6902 patches
-
-A Kubernetes resource header (`apiVersion`, `kind`, `metadata`) selects the target; the `patches:` field is the [RFC 6902](https://www.rfc-editor.org/rfc/rfc6902) operation list:
-
-```yaml
-# contexts/local/patches/my-app/json-patch.yaml
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: my-app
-  namespace: default
-patches:
-  - op: replace
-    path: /spec/replicas
-    value: 5
-```
-
-Windsor detects the format from the document layout. Patches contributed by facets and patches contributed by the context directory are concatenated in declaration order.
+Files placed in `contexts/<name>/patches/<name>/` are automatically discovered and added to a kustomization's `patches` — strategic-merge or JSON 6902, detected from the file. They apply after any facet-declared patches. See [Components — Kustomize — Per-context patches](../components/kustomize.md#per-context-patches) for the full mechanics: Flux tier names, file ordering, and current limits.
 
 ## Reconciliation
 
@@ -179,5 +133,6 @@ Sources and kustomizations both live in the gitops namespace (default `system-gi
 - [`apply`](https://www.windsorcli.dev/reference/cli/commands/apply), [`destroy`](https://www.windsorcli.dev/reference/cli/commands/destroy), [`plan`](https://www.windsorcli.dev/reference/cli/commands/plan), [`show`](https://www.windsorcli.dev/reference/cli/commands/show)
 - [Blueprint reference](https://www.windsorcli.dev/reference/cli/blueprint) — full Kustomization schema
 - [Blueprint templates](templates.md) — facet-driven composition
+- [Components — Kustomize — Per-context patches](../components/kustomize.md#per-context-patches) — the full context-patches mechanics
 - [Flux systems](flux-systems.md) — the multi-tier `flux:` entries, and how they differ from this passthrough
 - [Flux Kustomization docs](https://fluxcd.io/flux/components/kustomize/kustomizations/)

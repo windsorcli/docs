@@ -3,7 +3,7 @@ title: Hetzner
 description: Deploy a Windsor stack to Hetzner Cloud, with Talos nodes on a private network, Hetzner DNS, and Flux-managed workloads.
 ---
 
-This guide stands up a Windsor stack on [Hetzner Cloud](https://www.hetzner.com/cloud/): Talos Linux servers on a private network, Hetzner's Cloud Load Balancer and Volumes, and the `core` blueprint's services reconciled by Flux. It targets a **non-workstation context**. There is no local VM, so the lifecycle is `init` → `bootstrap` → `apply` → `destroy`. For the concepts behind those verbs, see [Lifecycle](../contexts/lifecycle.md).
+This guide stands up a Windsor stack on [Hetzner Cloud](https://www.hetzner.com/cloud/): Talos Linux servers on a private network, Hetzner's Cloud Load Balancer and Volumes, and the `core` blueprint's services reconciled by Flux. It targets a **non-workstation context**. There is no local VM, so the lifecycle is `init` → `bootstrap` → `apply` → `destroy`. For the concepts behind those verbs, see [Command model](../provisioning/workflow.md).
 
 Unlike AWS or Azure, Hetzner has no managed Kubernetes offering. `cluster.driver` is always `talos`, and Windsor builds the cluster itself from bare servers.
 
@@ -37,7 +37,7 @@ flowchart TB
   Addons -.provisions.-> Vol
 ```
 
-Windsor builds a Talos Image Factory snapshot on first apply (or reuses one you supply via `image_ids`), boots servers from it into Talos maintenance mode, then applies machine config over each server's public IP. State lives in the cluster itself once it exists. Hetzner has no equivalent to S3 that Terraform's backend can encrypt at rest, so there's no separate state-bucket bootstrap phase the way AWS and Azure have.
+Windsor builds a Talos Image Factory snapshot on first apply, boots servers from it into Talos maintenance mode, then applies machine config over each server's public IP. Hetzner has no equivalent to S3 that Terraform's backend can encrypt at rest, so the backend tier is the `cluster` component itself: `bootstrap` applies it against local state first, then migrates that state into the cluster. There's no separate state-bucket phase to run first, the way AWS and Azure have.
 
 ## 1. Create the context
 
@@ -67,15 +67,20 @@ dns:
 email: platform@example.com
 ```
 
-There's no `cluster.pools` on Hetzner. `cluster.controlplanes.count` and `cluster.workers.count` set node counts directly. Each pool sizes from `cluster.{controlplanes,workers}.instance_type` (a Hetzner server type, `cpx31` by default) rather than a portable class name. `topology` is inferred from those counts rather than something you set: 1 controlplane resolves to `single-node`, 3+ to `ha`.
+`cluster.pools` is for elastic providers (AWS, Azure, GCP); Hetzner ignores it. `cluster.controlplanes.count` and `cluster.workers.count` set node counts directly — `workers.count` defaults to `1` when unset — and each sizes from `cluster.{controlplanes,workers}.instance_type` (a Hetzner server type, `cpx31` by default) rather than a portable class name.
+
+`topology` defaults from those counts when you don't set it explicitly: one node total resolves to `single-node`, three or more controlplanes to `ha`, anything else to `multi-node`. The minimal config above (1 controlplane, 2 workers) resolves to `multi-node`.
 
 Common additional knobs:
 
 | Key | Effect |
 |-----|--------|
-| `hetzner.network_zone` | Network zone the private network spans; must contain `hetzner.location` (see the location table below). |
+| `cluster.api_allowed_cidrs` | CIDRs allowed to reach the Talos API (`50000`) and Kubernetes API (`6443`) on each node's public interface. Defaults to `["0.0.0.0/0"]` — open to the internet. Restrict this before going to production. |
+| `hetzner.network_zone` | Network zone the private network spans. Defaults to the zone matching `hetzner.location` (see the table below); set it only to override that. |
 | `hetzner.dns_parent_zone` | An existing Hetzner-managed parent zone to auto-delegate `dns.public_domain` from, instead of delegating manually. |
 | `cluster.controlplanes.instance_type` / `cluster.workers.instance_type` | Hetzner server type (`cpx31`, `ccx23`, …); drives both the servers Terraform creates and the CPU/memory Flux's own concurrency tuning assumes. |
+| `cluster.storage.driver` | Swaps Hetzner Volumes (`hcloud-csi`) for a Talos-native driver (`openebs`, `longhorn`, `mayastor`). |
+| `gateway.access: private` | Skips the public ACME issuer. external-dns still runs in public mode only — Hetzner DNS has no private-zone equivalent. |
 | `observability.enabled: true` | Grafana, Prometheus, and the logging stack. |
 
 ### Locations and instance types
@@ -91,7 +96,7 @@ Six locations are available, each tied to a network zone:
 | `hil` | US West | `us-west` |
 | `sin` | Singapore | `ap-southeast` |
 
-The two US locations (`ash`, `hil`) offer a narrower instance catalog than the rest: only `cpx11`-`cpx51` and the `ccx` dedicated-vCPU line. Windsor validates this. Setting `cluster.controlplanes.instance_type` or `cluster.workers.instance_type` to a Gen2 (`cpx*2`) or ARM (`cax*`) type while `hetzner.location` is `ash` or `hil` fails composition with an explanatory error before Terraform ever runs. Pick a Gen1/CCX type for a US location, or a EU/Asia location for the wider catalog.
+The two US locations (`ash`, `hil`) offer a narrower instance catalog than the rest: only `cpx11`-`cpx51` and `ccx13`-`ccx63`. Every other line — Gen2 `cpx*2`, the shared-vCPU `cx*` line, and ARM `cax*` — fails there. Windsor validates this: setting `cluster.controlplanes.instance_type` or `cluster.workers.instance_type` outside that list while `hetzner.location` is `ash` or `hil` fails composition before Terraform ever runs, citing a `hetzner_us_instance_type_ok` requirement with the restriction spelled out. Pick a `cpx11`-`cpx51` or `ccx` type for a US location, or a EU/Asia location for the wider catalog.
 
 ## 3. Bootstrap
 
@@ -123,24 +128,29 @@ windsor apply --wait
 
 Raising `cluster.workers.count` adds servers on the next `apply`. There's no separate autoscaling group to configure: Hetzner has no managed node group concept.
 
+Changing `cluster.workers.instance_type` replaces worker servers — an in-place hcloud resize reboots the server and can corrupt Talos's container image store. The same change to `cluster.controlplanes.instance_type` resizes in place.
+
 ## 6. Tear down
 
 ```bash
 windsor destroy --confirm=hetzner-prod
 ```
 
-`destroy` removes the Flux kustomizations, then the servers and private network in reverse order. There's a separate `dns-zone` component when `dns.public_domain` is set. It's independent of the cluster, so a plain `destroy` removes it too. To keep a delegated zone while tearing down the cluster, target `dns-zone` separately with `windsor destroy terraform dns-zone`.
+`destroy` removes the Flux kustomizations, then the servers and private network in reverse order. Since every component's Terraform state lives on the cluster itself (the `kubernetes` backend), `destroy` migrates it all to local state first, before the cluster hosting it disappears.
+
+There's a separate `dns-zone` component when `dns.public_domain` is set. It's independent of the cluster, so a plain `destroy` removes it too. To keep a delegated zone while tearing down the cluster, target it separately: `windsor destroy terraform dns-zone --confirm=dns-zone`.
 
 ## Troubleshooting
 
 - **`bootstrap` fails validating the token.** Confirm `HCLOUD_TOKEN` is exported or `hetzner.token` resolves; a token scoped to the wrong project fails with a Hetzner API 403, not a Windsor-specific error.
-- **Composition fails with an instance-type error mentioning `ash`/`hil`.** You're in a US location with a Gen2 or ARM instance type set. See [Locations and instance types](#locations-and-instance-types).
+- **Composition fails citing `hetzner_us_instance_type_ok`.** You're in a US location (`ash`/`hil`) with an instance type outside the US catalog. See [Locations and instance types](#locations-and-instance-types).
 - **The apiserver can't reach kubelet on port 10250.** Each server also has a public NIC, but kubelet binds to the private network. `nodeIP.validSubnets` pins that automatically, so this symptom usually means you changed `network.cidr_block` after the cluster existed. Nodes provisioned under the old CIDR need replacing, not just a config edit.
 - **TLS certificates stay pending.** ACME needs the public zone reachable; verify NS delegation (direct or via `hetzner.dns_parent_zone`) and that `email` is set.
 
 ## Where to next
 
-- [Lifecycle](../contexts/lifecycle.md) — the full command model and safety behaviors
+- [Command model](../provisioning/workflow.md) — the full command model
+- [Destroy](../maintenance/destroy.md) — safety behaviors and locking on teardown
 - [Terraform](../blueprints/terraform.md) — state backends and cross-component outputs
-- [Secrets management](secrets-management.md) — SOPS and 1Password for `hetzner.token`
-- [AWS](aws.md), [Azure](azure.md), and [Metal](metal.md) — the other deployment targets
+- [SOPS](../secrets/sops.md), [1Password](../secrets/1password.md) — for `hetzner.token`
+- [AWS](aws.md) and [Azure](azure.md) — the other deployment targets

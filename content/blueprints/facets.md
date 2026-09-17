@@ -69,5 +69,5 @@ An optional `namespaces:` list targets more than one namespace; empty means auto
 
 - [Expressions](expressions.md) — the `when:` / `${...}` language and Windsor's added functions
 - [Blueprint templates](templates.md) — How the _template folder and composition order work.
-- [Blueprint testing](testing.md) — Testing facet conditions and expected components.
-- [Securing secrets](../deployment/securing-secrets.md) — marking schema values sensitive
+- [Testing](testing.md) — Testing facet conditions and expected components.
+- [Schema — Marking a property sensitive](schema.md#marking-a-property-sensitive) — the `sensitive: true` flag this section's `data:` values must carry

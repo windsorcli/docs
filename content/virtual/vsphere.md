@@ -3,7 +3,7 @@ title: vSphere
 description: Deploy a Windsor stack to VMware vSphere, with Talos VMs on existing inventory and an in-cluster load balancer.
 ---
 
-This guide stands up a Windsor stack on [VMware vSphere](https://www.vmware.com/products/cloud-infrastructure/vsphere): Talos Linux VMs on infrastructure you already run, and the `core` blueprint's services reconciled by Flux. It targets a **non-workstation context**. The lifecycle is `init` → `bootstrap` → `apply` → `destroy`, the same as a cloud platform. For the concepts behind those verbs, see [Lifecycle](../contexts/lifecycle.md).
+This guide stands up a Windsor stack on [VMware vSphere](https://www.vmware.com/products/cloud-infrastructure/vsphere): Talos Linux VMs on infrastructure you already run, and the `core` blueprint's services reconciled by Flux. It targets a **non-workstation context**. The lifecycle is `init` → `bootstrap` → `apply` → `destroy`, the same as a cloud platform. For the concepts behind those verbs, see [Command model](../provisioning/workflow.md).
 
 vSphere is common for industrial and on-premises deployments with no public cloud reachable: plant networks, air-gapped-adjacent sites, and existing VMware estates. `cluster.driver` is always `talos`. vSphere has no managed Kubernetes offering to target instead.
 
@@ -144,7 +144,8 @@ windsor destroy --confirm=vsphere-prod
 
 ## Where to next
 
-- [Lifecycle](../contexts/lifecycle.md) — the full command model and safety behaviors
+- [Command model](../provisioning/workflow.md) — the full command model
+- [Destroy](../maintenance/destroy.md) — safety behaviors and locking on teardown
 - [Terraform](../blueprints/terraform.md) — state backends and cross-component outputs
 - [Hyper-V](hyperv.md) — the other on-premises VM platform
-- [AWS](aws.md), [Azure](azure.md), [Hetzner](hetzner.md), and [Metal](metal.md) — the other deployment targets
+- [AWS](../cloud/aws.md), [Azure](../cloud/azure.md), and [Hetzner](../cloud/hetzner.md) — the other deployment targets

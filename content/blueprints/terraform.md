@@ -7,25 +7,7 @@ Windsor manages a Terraform stack defined in a [blueprint](overview.md). Stacks 
 
 ## Declare components
 
-Add a `terraform:` entry to `blueprint.yaml` for each module the context depends on:
-
-```yaml
-terraform:
-- source: core
-  path: cluster/talos
-- source: core
-  path: gitops/flux
-  dependsOn:
-    - cluster/talos
-- path: example/my-app          # local module under terraform/
-- name: backend                 # opt-in formal name (any unique slug)
-  source: core
-  path: aws/state
-  inputs:
-    bucket_name: ${cluster.name}-state
-```
-
-A component with no `source:` resolves to `terraform/<path>` in your project; with `source:`, it resolves into the named blueprint source. `inputs` takes literal values or `${...}` expressions evaluated at compose time. The full schema is in the [blueprint reference](https://www.windsorcli.dev/reference/cli/blueprint).
+See [Components — Terraform](../components/terraform.md) for the `terraform:` entry shape — `source:` vs. local `path:`, `dependsOn`, `inputs`. This page picks up from there: running components, reading outputs across them, and the backend.
 
 ## Run components
 
@@ -124,7 +106,7 @@ terraform/
 
 Modules under `terraform/` are local to the project, referenced with a `path:` and no `source:`. Modules pulled from blueprint sources (OCI artifacts or Git repositories) are unpacked as shims into `.windsor/contexts/<name>/terraform/<component>/`. Each shim carries a generated `terraform.tfvars` and a `backend_override.tf` pointing at the configured [state backend](#state-backend).
 
-`contexts/<name>/terraform/<component>.tfvars` is an optional hand-authored override. When it's present, Windsor consumes it instead of the generated tfvars.
+The `terraform/` folder under a context holds hand-authored overrides — per-component tfvars, backend config, a scoped `.env` file. See [Components — Terraform — Per-context overrides](../components/terraform.md#per-context-overrides).
 
 ### Generated tfvars and variables
 
@@ -148,7 +130,7 @@ terraform:
     timeout: 10m
 ```
 
-This is separate from Windsor's own per-context [stack lock](../contexts/lifecycle.md#safety-and-concurrency), which serializes concurrent `windsor` commands before Terraform's state lock ever engages.
+This is separate from Windsor's own per-context [stack lock](../maintenance/destroy.md#safety-and-concurrency), which serializes concurrent `windsor` commands before Terraform's state lock ever engages.
 
 ### Bootstrap
 
@@ -181,7 +163,8 @@ Windsor can drive OpenTofu instead of Terraform. Setting `terraform.driver: open
 
 ## Reference
 
-- [Lifecycle](../contexts/lifecycle.md) — phase-by-phase command map
+- [Command model](../provisioning/workflow.md) — phase-by-phase command map
 - [Environment injection](../contexts/environment-injection.md) — how context env vars are managed
+- [Components — Terraform — Per-context overrides](../components/terraform.md#per-context-overrides) — per-context tfvars, backend config, and patches
 - [Workstation overview](../workstation/overview.md) — workstation-specific Terraform components
 - [Blueprint reference](https://www.windsorcli.dev/reference/cli/blueprint) — `TerraformComponent` schema

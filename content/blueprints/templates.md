@@ -94,27 +94,13 @@ See [Facets](facets.md) for the full authoring model: `when` expressions, ordina
 
 ## Composition order
 
-```mermaid
-flowchart LR
-  OCI["OCI sources<br/>deploy: true"] --> Base["base template<br/>_template/blueprint.yaml"]
-  Base --> Facets["facets<br/>ordinal order, when-gated"]
-  Facets --> User["context blueprint<br/>user overrides"]
-  User --> Result["composed blueprint<br/>windsor show blueprint"]
-```
-
-When Windsor builds the final blueprint:
-
-1. **OCI sources with `deploy: true`**: components from these sources are merged. Sources with `deploy: false` are index-only; their components aren't merged but components elsewhere can reference them via `source: <name>`. Non-OCI sources (Git URLs) are always index-only.
-2. **Base template**: `_template/blueprint.yaml` merges in full.
-3. **Facets**: processed in ordinal order, with strategies and `when` expressions applied.
-4. **User blueprint**: `contexts/<name>/blueprint.yaml` overrides without filtering. Components from earlier layers remain unless this layer sets `destroy: false` or omits them by name when the merge strategy is `replace`. See [Facets — merge strategies](facets.md).
-
-Only OCI sources can have their components merged; the `deploy` flag only applies to OCI sources and defaults to `true` when omitted.
+See [Composition workflow](../composition/workflow.md) for the merge order — OCI sources, base template, facets, user blueprint — and how CRD layers sequence ahead of the stack.
 
 ## See also
 
+- [Composition workflow](../composition/workflow.md) — merge order and CRD layers
 - [Schema](schema.md) — Validation and defaults.
 - [Facets](facets.md) — Conditional composition and expression authoring.
 - [Expressions](expressions.md) — the `when:` / `${...}` language and Windsor's added functions
-- [Sharing blueprints](sharing.md) — Pushing and bundling.
-- [Blueprint testing](testing.md) — Static tests for blueprint composition.
+- [Registries](sharing.md) — Pushing and bundling.
+- [Testing](testing.md) — Static tests for blueprint composition.
