@@ -53,17 +53,11 @@ Three blocks share the name `pki_effective` here, each contributing under its ow
 
 ### Merge precedence
 
-Blocks sharing a name — whether from the same facet or different ones — merge in this order:
-
-1. **Higher `ordinal` wins.** A block's ordinal defaults to its facet's own ordinal (see [Ordinals](#ordinals) below); set `ordinal:` on the block itself to override that for just this block.
-2. **Equal ordinal: `strategy` breaks the tie**, precedence `remove` > `replace` > `merge` (the default). `replace` swaps the whole value; `merge` deep-merges map values key by key (a scalar or list value is replaced outright, since there's nothing to merge key-wise); `remove` drops the block from scope entirely.
-3. **Equal ordinal and equal strategy: the later declaration wins** — same rule `terraform:`/`kustomize:` entries follow. Within one facet's own list, that's simply the order the blocks appear in the file, which is why the `pki_effective` example above reads as "last matching `when:` wins."
+Within one facet, later entries win: the last block whose `when:` matches is the one that applies, same as the `pki_effective` example above. Across facets, the facet that composes later wins — the same rule `terraform:` and `kustomize:` entries already follow (see [Ordinals](#ordinals) below). `strategy: replace` or `strategy: remove` change that behavior for one block, but the default (`merge`) is right for almost every case.
 
 ### Evaluation order
 
-A block that references another block (`${talos_common.storage_driver}` inside a different block's own `value:`) always evaluates after the block it references — Windsor topologically sorts blocks by their `${...}` cross-references, not by facet processing order. Two blocks with no dependency between them break ties alphabetically by name. A real cycle (block A reads B, B reads A) fails composition with an error naming both blocks.
-
-Keeping a block's own declaration below the blocks it depends on, the convention most facets in `core` follow, is for a *reader's* benefit — dependency order, not file order, is what Windsor actually guarantees.
+A block's `value:` can reference another block. Windsor works out the right order automatically, so you don't need to declare blocks in dependency order yourself.
 
 ## Ordinals
 
