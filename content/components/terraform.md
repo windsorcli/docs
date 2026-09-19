@@ -77,6 +77,8 @@ Windsor walks components in dependency order. By the time `app` evaluates `terra
 
 There is no bare-path form. `${terraform.<other>.outputs.<key>}` does not exist; the `terraform_output()` helper is the only access, and only inside facet expressions.
 
+For a value computed once and shared across many components instead — not read from a specific component's own outputs — see [Facets — Config blocks](../blueprints/facets.md#config-blocks).
+
 ## State backend
 
 Set the backend in the context's `windsor.yaml`:

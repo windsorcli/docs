@@ -9,7 +9,7 @@ description: Conditional blueprint composition from configuration.
 
 - Loaded from `_template/facets/*.yaml` and `_template/facets/**/*.yaml`.
 - Ordered by ordinal (ascending), then by name.
-- Each facet has a `when` expression; when it evaluates to true, that facet's Terraform/Kustomize entries are merged.
+- Each facet has a `when` expression; when it evaluates to true, that facet's Terraform components, Kustomizations, Flux systems, and [config blocks](#config-blocks) are merged.
 
 ## Example
 
@@ -30,6 +30,41 @@ terraform:
 
 When `platform` is `aws`, the VPC Terraform component from `core` is included. Expressions can reference [schema](schema.md) properties and `terraform_output()` for cross-component values.
 
+## Config blocks
+
+A `config:` entry computes a named value from expressions and exposes it at scope root, alongside `values.yaml` properties like `cluster.driver` — so `terraform:` inputs, `kustomize:` substitutions, and other facets' own expressions can reference it the same way. This is different from a `values.yaml` default: a schema default is only visible where the property itself is read, but a config block's value is visible to *every* facet that composes after it, including facets from a different blueprint source. That cross-facet visibility is the reason this mechanism exists — see [Schema](schema.md) for `values.yaml` properties and their defaults.
+
+```yaml
+config:
+  - name: pki_effective
+    value:
+      issuer_component: public-issuer/selfsigned
+  - name: pki_effective
+    when: (dns.public_domain ?? '') != ''
+    value:
+      issuer_component: public-issuer/acme/route53
+  - name: pki_effective
+    when: gateway.access == 'private' && (dns.private_domain ?? '') != ''
+    value:
+      issuer_component: ""
+```
+
+Three blocks share the name `pki_effective` here, each contributing under its own `when:`. A scalar or list value is read as `${pki_effective}`; a map value like this one is read key by key — `${pki_effective.issuer_component}` — from a `terraform:` input, a `kustomize:` substitution, or another config block's own `value:`.
+
+### Merge precedence
+
+Blocks sharing a name — whether from the same facet or different ones — merge in this order:
+
+1. **Higher `ordinal` wins.** A block's ordinal defaults to its facet's own ordinal (see [Ordinals](#ordinals) below); set `ordinal:` on the block itself to override that for just this block.
+2. **Equal ordinal: `strategy` breaks the tie**, precedence `remove` > `replace` > `merge` (the default). `replace` swaps the whole value; `merge` deep-merges map values key by key (a scalar or list value is replaced outright, since there's nothing to merge key-wise); `remove` drops the block from scope entirely.
+3. **Equal ordinal and equal strategy: the later declaration wins** — same rule `terraform:`/`kustomize:` entries follow. Within one facet's own list, that's simply the order the blocks appear in the file, which is why the `pki_effective` example above reads as "last matching `when:` wins."
+
+### Evaluation order
+
+A block that references another block (`${talos_common.storage_driver}` inside a different block's own `value:`) always evaluates after the block it references — Windsor topologically sorts blocks by their `${...}` cross-references, not by facet processing order. Two blocks with no dependency between them break ties alphabetically by name. A real cycle (block A reads B, B reads A) fails composition with an error naming both blocks.
+
+Keeping a block's own declaration below the blocks it depends on, the convention most facets in `core` follow, is for a *reader's* benefit — dependency order, not file order, is what Windsor actually guarantees.
+
 ## Ordinals
 
 If a facet does not set `ordinal`, it is derived from the filename:
@@ -37,12 +72,13 @@ If a facet does not set `ordinal`, it is derived from the filename:
 | Pattern | Ordinal |
 | --- | --- |
 | `config-*` | 100 |
-| `platform-base` | 199 |
-| `platform-*` | 200 |
-| `options-*` / `option` | 300 |
-| `addon` / `addons` | 400 |
+| `platform-*-base` / `provider-*-base` (filename contains `-base`) | 199 |
+| `platform-*` / `provider-*` | 200 |
+| `option-*` / `options-*` | 300 |
+| `addon-*` / `addons-*` | 400 |
+| anything else | 0 |
 
-Higher ordinal means higher precedence when merging (addons override platform-base for same-name entries).
+Higher ordinal means higher precedence when merging (addons override platform-base for same-name entries). A filename matching none of these patterns gets ordinal 0 — lower than even `config-*` — so it's worth naming facets to match one of these prefixes rather than relying on the fallback.
 
 ## File resolution
 
