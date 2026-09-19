@@ -27,4 +27,4 @@ Like Hetzner, Hyper-V, and vSphere, there's no managed control plane, so `cluste
 
 - [Raspberry Pi](raspberry-pi.md) — a Pi is a metal target too
 - [terraform/cluster/talos](https://github.com/windsorcli/core/tree/main/terraform/cluster/talos) on GitHub — every `cluster.*` field
-- [Local](../workstation/overview.md), [Virtual](../virtual/hyperv.md), [Cloud](../cloud/aws.md) — the other provisioning targets
+- [Local](../workstation/overview.md), [Hypervisor](../virtual/hyperv.md), [Cloud](../cloud/aws.md) — the other provisioning targets

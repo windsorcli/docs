@@ -18,7 +18,7 @@ Windsor currently provisions AWS, Azure, Hetzner, two hypervisors (Hyper-V, vSph
 - **New to Windsor?** Start at [Getting started](getting-started/first-project.md) — install the CLI and run a local stack.
 - **Already have Terraform and Kubernetes manifests, and want Windsor to run them for one context?** Go to [Components](components/terraform.md).
 - **Need the same infrastructure across contexts, or want to publish it for other projects to consume?** [Blueprints](blueprints/overview.md) covers the template model.
-- **Deploying to a specific target?** [Local](workstation/overview.md), [Virtual](virtual/hyperv.md), [Cloud](cloud/aws.md), and [Metal](metal/overview.md) each cover their own setup.
+- **Deploying to a specific target?** [Local](workstation/overview.md), [Hypervisor](virtual/hyperv.md), [Cloud](cloud/aws.md), and [Metal](metal/overview.md) each cover their own setup.
 - **Already running — moving to a newer blueprint version, tearing it down, or want CI to apply changes instead of a person?** [Upgrade](maintenance/upgrade.md), [Destroy](maintenance/destroy.md), and [CI/CD](ci-cd/github-actions.md) cover the ongoing side of running it.
 - **Looking for a specific flag or YAML key?** [Reference](https://www.windsorcli.dev/reference/cli/configuration) covers the CLI and the `core` blueprint in full.
 
@@ -27,7 +27,7 @@ Windsor currently provisions AWS, Azure, Hetzner, two hypervisors (Hyper-V, vSph
 - [Getting started](getting-started/first-project.md) — install the CLI and run your first stack
 - [Contexts](contexts/overview.md) — environments and per-context configuration
 - [Secrets](secrets/sops.md) — SOPS and 1Password for context secrets
-- [Local](workstation/overview.md), [Virtual](virtual/hyperv.md), [Cloud](cloud/aws.md), [Metal](metal/overview.md) — provisioning a context on each target
+- [Local](workstation/overview.md), [Hypervisor](virtual/hyperv.md), [Cloud](cloud/aws.md), [Metal](metal/overview.md) — provisioning a context on each target
 - [Components](components/terraform.md) — adding your own Terraform and Kustomize to a consumed blueprint
 - [Blueprints](blueprints/overview.md) — the full authoring model, for building something reusable
 - [Upgrade](maintenance/upgrade.md) — moving a context to a newer blueprint version
