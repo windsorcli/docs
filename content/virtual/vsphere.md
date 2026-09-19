@@ -148,4 +148,4 @@ windsor destroy --confirm=vsphere-prod
 - [Destroy](../maintenance/destroy.md) — safety behaviors and locking on teardown
 - [Terraform](../components/terraform.md) — state backends and cross-component outputs
 - [Hyper-V](hyperv.md) — the other on-premises VM platform
-- [AWS](../cloud/aws.md), [Azure](../cloud/azure.md), and [Hetzner](../cloud/hetzner.md) — the other deployment targets
+- [AWS](../cloud/aws.md), [Azure](../cloud/azure.md), [GCP](../cloud/gcp.md), and [Hetzner](../cloud/hetzner.md) — the other deployment targets

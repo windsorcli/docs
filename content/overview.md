@@ -11,7 +11,7 @@ You can use it two ways. Add your own [Terraform](components/terraform.md) modul
 
 Most projects start from the default [`core`](https://github.com/windsorcli/core) blueprint, which bootstraps the infrastructure, a configured Kubernetes cluster, and a set of common cloud services. `core` is open to extend: add components on top of it, or write your own blueprint that consumes it.
 
-Windsor currently provisions AWS, Azure, Hetzner, two hypervisors (Hyper-V, vSphere), and a local workstation VM. A blueprint's Kustomize layer runs the same way regardless of target; only the Terraform layer underneath changes.
+Windsor currently provisions AWS, Azure, GCP, Hetzner, two hypervisors (Hyper-V, vSphere), and a local workstation VM. A blueprint's Kustomize layer runs the same way regardless of target; only the Terraform layer underneath changes.
 
 ## How to use this guide
 

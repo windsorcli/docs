@@ -64,7 +64,7 @@ As on Hetzner, there's no `cluster.pools`. `cluster.controlplanes.count` and `cl
 `hyperv.net_adapter` picks which of the two networking modes you get:
 
 - **Unset (default): an Internal switch.** VMs are reachable from the host only. Simplest to set up; use this when you're driving `kubectl` from the same Windows machine.
-- **Set to a host NIC name:** an External switch, bridged onto that NIC. VMs get real addresses on your LAN, reachable from any machine on the network. This is closer to how AWS, Azure, or Hetzner behave.
+- **Set to a host NIC name:** an External switch, bridged onto that NIC. VMs get real addresses on your LAN, reachable from any machine on the network. This is closer to how AWS, Azure, GCP, or Hetzner behave.
 
 ```yaml
 hyperv:
@@ -129,4 +129,4 @@ windsor destroy --confirm=hyperv-prod
 - [Destroy](../maintenance/destroy.md) — safety behaviors and locking on teardown
 - [Terraform](../components/terraform.md) — state backends and cross-component outputs
 - [vSphere](vsphere.md) — the other on-premises VM platform
-- [AWS](../cloud/aws.md), [Azure](../cloud/azure.md), and [Hetzner](../cloud/hetzner.md) — the other deployment targets
+- [AWS](../cloud/aws.md), [Azure](../cloud/azure.md), [GCP](../cloud/gcp.md), and [Hetzner](../cloud/hetzner.md) — the other deployment targets
