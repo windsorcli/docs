@@ -1,6 +1,6 @@
 ---
 title: Expressions
-description: The expression language behind facet when clauses and ${...} substitutions, and the functions Windsor adds on top of it.
+description: The expression language behind facet when clauses and ${expr} substitutions, and the functions Windsor adds on top of it.
 ---
 
 Facet `when:` conditions, `${...}` substitutions in schema values, and config blocks all share one expression language: [expr](https://expr-lang.org), a general-purpose expression language for Go. It isn't Windsor-specific. Normal comparison and boolean operators, ternaries, string concatenation, and a full standard library (`map`, `filter`, `get`, `len`, and more) all work exactly as [expr's own syntax reference](https://expr-lang.org/docs/language-definition) documents them, with one exception: member access. See [Member access is always optional](#member-access-is-always-optional) below. Windsor adds a small, fixed set of functions on top, for these tasks:

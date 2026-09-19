@@ -88,7 +88,7 @@ patches:
     value: 5
 ```
 
-Windsor detects the format from the document layout: a file with no `kind` is always treated as a raw strategic-merge patch, never JSON 6902, even if it has a `patches:` field. Context patches apply after facet- and blueprint-declared patches, so they always win on a conflicting field.
+Windsor detects the format from the document layout: a file with no `kind` is always treated as a raw strategic-merge patch, never JSON 6902, even if it has a `patches:` field. Context patches apply after both facet-declared and blueprint-declared patches, so they always win on a conflicting field.
 
 A patch directory that doesn't match any kustomization or Flux tier name prints one warning and is skipped; composition still succeeds. A patch file with invalid YAML, or one Windsor can't read, is skipped with no warning at all. Check `windsor show kustomization <name>` if a patch doesn't seem to have applied.
 

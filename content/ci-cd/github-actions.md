@@ -3,7 +3,7 @@ title: GitHub Actions
 description: Installing the Windsor CLI in a workflow, authenticating to a cloud platform, and wrapping windsor commands as steps.
 ---
 
-The [Windsor GitHub Action](https://github.com/windsorcli/action) installs and configures the Windsor CLI for use in GitHub Actions workflows, and provides a sub-action per `windsor` command so a workflow doesn't need to hand-write `run: windsor ...` steps.
+The [Windsor GitHub Action](https://github.com/windsorcli/action) installs and configures the Windsor CLI for use in GitHub Actions workflows, and provides a sub-action per `windsor` command so a workflow doesn't need to hand-write `run: windsor <command>` steps.
 
 ## Install the CLI
 
@@ -97,7 +97,7 @@ Requires `permissions: pull-requests: write` on the calling job.
 
 ## Example workflow
 
-A manually-triggered workflow that bootstraps or destroys a context, chaining the root action, `cloud-auth`, and `bootstrap`/`destroy`:
+A manually triggered workflow that bootstraps or destroys a context, chaining the root action, `cloud-auth`, and `bootstrap`/`destroy`:
 
 ```yaml
 on:
