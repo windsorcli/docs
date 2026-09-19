@@ -35,7 +35,7 @@ windsor upgrade node --node=10.0.0.5 \
   --image=ghcr.io/siderolabs/installer:v1.13.0
 ```
 
-`upgrade cluster` triggers the upgrade on every named node in parallel and returns as soon as the requests are accepted. Nodes reboot asynchronously, so follow up with `windsor check node-health --wait-for-reboot` to confirm they came back. `upgrade node` is the rolling-upgrade primitive: it waits for the single node to reboot and pass a health check before returning. A script can call it once per node and get a real go/no-go between each one. Both take `--reboot-mode=powercycle` for platforms (commonly nested virtualization) where the default fast `kexec` reboot doesn't reliably register as an offline transition.
+`upgrade cluster` triggers the upgrade on every named node in parallel and returns as soon as the requests are accepted. Nodes reboot asynchronously, so follow up with `windsor check node-health --wait-for-reboot` to confirm they came back. `upgrade node` is the rolling-upgrade `primitive`: it waits for the single node to reboot and pass a health check before returning. A script can call it once per node and get a real go/no-go between each one. Both take `--reboot-mode=powercycle` for platforms (commonly nested virtualization) where the default fast `kexec` reboot doesn't reliably register as an offline transition.
 
 ## See also
 

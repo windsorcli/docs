@@ -21,6 +21,7 @@ Flux
 GitOps
 Hyper-V
 Incus
+Jsonnet
 Kustomize
 Kustomization
 kustomizations
@@ -35,7 +36,10 @@ shellcheck
 markdownlint
 
 # --- Kubernetes / cloud ---
+apiserver
 controlplane
+controlplanes
+guestinfo
 hostports
 Kubeconfig
 kubectl
@@ -46,6 +50,7 @@ schedulable
 virt
 
 # --- Docs / writing ---
+componentized
 frontmatter
 hoster
 llms
