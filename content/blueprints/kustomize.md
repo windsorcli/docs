@@ -9,7 +9,7 @@ The kustomize layer is the second half of a blueprint, applied after Terraform. 
 
 ## Folder layout
 
-Kustomizations live in source repositories, not in the project tree. A typical OCI blueprint exposes them under a `kustomize/` directory; local kustomizations sit under `kustomize/` in the project root:
+See [Components — Kustomize](../components/kustomize.md) for the `kustomize:` entry shape — local `path:` vs. a remote `source:`. A local entry's files sit under `kustomize/` in the project root; per-context patches sit under `contexts/<name>/patches/`:
 
 ```text
 contexts/
@@ -28,7 +28,7 @@ kustomize/
     └── service.yaml
 ```
 
-In this example `my-app` is a local app with a Prometheus [Kustomize component](https://kubectl.docs.kubernetes.io/guides/config_management/components/), referenced without a `source:`. See [Components — Kustomize](../components/kustomize.md) for the `kustomize:` entry shape — local `path:` vs. a remote `source:`. For the full Kustomization schema (every field, type, and default) see the [blueprint reference](https://www.windsorcli.dev/reference/cli/blueprint).
+`my-app` here is the local app from that page's own example — a Prometheus [Kustomize component](https://kubectl.docs.kubernetes.io/guides/config_management/components/), referenced without a `source:`. For the full Kustomization schema (every field, type, and default) see the [blueprint reference](https://www.windsorcli.dev/reference/cli/blueprint).
 
 ## Add-on components
 
