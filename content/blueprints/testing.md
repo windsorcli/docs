@@ -1,5 +1,5 @@
 ---
-title: Blueprint testing
+title: Testing
 description: Static testing for blueprint composition.
 ---
 
@@ -18,11 +18,11 @@ Windsor's `windsor test` command validates blueprint composition without provisi
 Create a test file under `contexts/_template/tests/`:
 
 ```yaml
-# contexts/_template/tests/provider.test.yaml
+# contexts/_template/tests/platform.test.yaml
 cases:
-  - name: aws-provider-includes-vpc
+  - name: aws-platform-includes-vpc
     values:
-      provider: aws
+      platform: aws
     expect:
       terraform:
         - name: vpc

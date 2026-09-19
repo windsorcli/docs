@@ -105,3 +105,12 @@ jobs:
 
       - name: Check every page has title and description
         run: ./scripts/check-frontmatter.sh
+
+  no-future-work:
+    name: no-future-work (pages describe the current state)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Check for future-work framing
+        run: ./scripts/check-no-future-work.sh

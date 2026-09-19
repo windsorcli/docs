@@ -1,5 +1,5 @@
 ---
-title: Sharing blueprints
+title: Registries
 description: Push to OCI, bundle blueprints, CLI version compatibility.
 ---
 
@@ -21,7 +21,7 @@ windsor push <account>.dkr.ecr.us-east-1.amazonaws.com/myblueprint:v1.0.0
 windsor push registry.example.com/blueprints   # uses metadata.yaml name/version
 ```
 
-OCI URLs: `oci://registry/repository:tag`. In blueprint sources use the full form, for example, `oci://ghcr.io/windsorcli/core:v0.6.0`.
+OCI URLs: `oci://registry/repository:tag`. In blueprint sources use the full form, for example, `oci://ghcr.io/windsorcli/core:v0.8.0`.
 
 ## Using shared blueprints
 
@@ -34,7 +34,7 @@ sources:
     deploy: true   # default for OCI sources; set false to reference without merging components
 ```
 
-Windsor downloads the artifact, extracts the template, processes [facets](facets.md), and validates config and CLI version. OCI sources with `deploy: true` (default) have their Terraform and Kustomize components merged; with `deploy: false` the blueprint is index-only; components elsewhere can reference it via `source: <name>` but its own components don't get merged. See [Blueprint templates — Composition order](templates.md#composition-order).
+Windsor downloads the artifact, extracts the template, processes [facets](facets.md), and validates config and CLI version. OCI sources with `deploy: true` (default) have their Terraform and Kustomize components merged. With `deploy: false` the blueprint is index-only: components elsewhere can reference it via `source: <name>`, but its own components don't get merged. See [Blueprint templates — Composition order](templates.md#composition-order).
 
 ## Caching and private registries
 

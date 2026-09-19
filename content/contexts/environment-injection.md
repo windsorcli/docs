@@ -5,7 +5,7 @@ description: Windsor keeps your KUBECONFIG and cloud profile in sync with the ac
 
 Windsor manages a set of environment variables for the active context: `KUBECONFIG`, the cloud profile, and others. On a context switch they update on the next shell prompt, so `kubectl` and the cloud CLIs target the new context's cluster and account. It works like [direnv](https://github.com/direnv/direnv), except the variables follow the active context rather than the current directory.
 
-![Terminal: windsor set context staging, then kubectl on the next prompt hitting the staging cluster with no manual export](../assets/media-placeholder.svg)
+![Terminal: KUBECONFIG unset outside a trusted project, then set automatically on the next prompt after cd-ing into one, with no windsor command run by hand](../assets/environment-injection.gif)
 
 ## Set it up once
 
@@ -32,7 +32,7 @@ After that, `windsor set context <name>` updates the environment on your next pr
 
 `windsor set context staging` changes the active context. On the next prompt the hook replaces the old context's variables with the new one's, among them `KUBECONFIG` and the cloud profile. The previous values are unset, not merged.
 
-Whether anything is injected depends on two things. First, the directory has to be trusted; in an untrusted directory Windsor injects nothing (see [Trusted folders](trusted-folders.md)). Second, the variable set depends on whether you're inside a project. A project is any directory with a `windsor.yaml` above it, and there you get the full context environment. Outside a project, Windsor runs in global mode: the cloud CLIs and `kubectl` still target the managed context, but variables that point a tool at a project-local config or credential file are left out, so Windsor doesn't override your operator-level setup.
+Whether anything is injected depends on two things. First, the directory has to be trusted; in an untrusted directory Windsor injects nothing (see [Trusted folders](trusted-folders.md)). "Injects nothing" means exactly that: it doesn't clear variables from a previous prompt either, so `cd`-ing out of a trusted project into an untrusted one leaves the old project's `KUBECONFIG` and friends set until you `cd` somewhere trusted again. Second, the variable set depends on whether you're inside a project. A project is any directory with a `windsor.yaml` above it, and there you get the full context environment. Outside a project, Windsor runs in global mode: the cloud CLIs and `kubectl` still target the managed context, but variables that point a tool at a project-local config or credential file are left out, so Windsor doesn't override your operator-level setup.
 
 ## Under the hood
 
@@ -72,6 +72,10 @@ WINDSOR_SESSION_TOKEN=ldC26Dp
 ```
 
 `WINDSOR_MANAGED_ENV` is the comma-separated list of variables Windsor unsets on the next context switch, and `WINDSOR_MANAGED_ALIAS` is the same for shell aliases. Cloud-provider variables appear when the matching config block is present. Terraform variables appear when the current directory is inside a generated Terraform module shim.
+
+## Terraform-scoped variables
+
+`cd` into a component's module shim (`.windsor/contexts/<name>/terraform/<component>/`) and Windsor also injects `TF_VAR_<input>` for each of the component's evaluated inputs, `TF_DATA_DIR`, and `TF_CLI_ARGS_{init,plan,apply,import,destroy,refresh}` pointing Terraform at the right var-files and backend config. Run `terraform plan` by hand in that directory and it picks up the same values `windsor plan terraform` would. See [Terraform — Generated tfvars and variables](../components/terraform.md#generated-tfvars-and-variables) for how those values are computed.
 
 ## Reference
 

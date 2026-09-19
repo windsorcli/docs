@@ -3,7 +3,7 @@ title: AWS
 description: Deploy a Windsor stack to AWS, with an EKS cluster on a dedicated VPC, S3 state, Route53 DNS, and Flux-managed workloads.
 ---
 
-This guide stands up a production-style Windsor stack on AWS: a dedicated VPC, an [EKS](https://aws.amazon.com/eks/) cluster, Terraform state in S3, and the `core` blueprint's services reconciled by Flux. It targets a **non-workstation context**: there is no local VM, so the lifecycle is `init` → `bootstrap` → `apply` → `destroy`. For the concepts behind those verbs, see [Lifecycle](../contexts/lifecycle.md).
+This guide stands up a production-style Windsor stack on AWS: a dedicated VPC, an [EKS](https://aws.amazon.com/eks/) cluster, Terraform state in S3, and the `core` blueprint's services reconciled by Flux. It targets a **non-workstation context**: there is no local VM, so the lifecycle is `init` → `bootstrap` → `apply` → `destroy`. For the concepts behind those verbs, see [Command model](../provisioning/workflow.md).
 
 ## Prerequisites
 
@@ -76,7 +76,7 @@ Common additional knobs:
 | `dns.private_domain` | Name for the private, VPC-scoped Route53 zone (internal DNS). |
 | `gateway.access: private` | Keep the gateway internal; pairs with `dns.private_domain` for a private issuer. |
 | `cluster.cni.driver: cilium` | Replace VPC-CNI with Cilium (bootstrapped before Flux). Omit for the default VPC-CNI. |
-| `addons.observability.enabled: true` | Grafana, Prometheus, and the logging stack. |
+| `observability.enabled: true` | Grafana, Prometheus, and the logging stack. |
 
 ### Node pools
 
@@ -98,7 +98,7 @@ cluster:
 
 `count` is required on every pool; `autoscaling` is optional and defaults on (min 1, max 3, seeded from `count`) for every class except `system`, which defaults fixed and carries a `CriticalAddonsOnly` taint so only cluster operators land there. When `cluster.pools` is unset, the cluster falls back to two managed node groups: `system` (1 node, fixed) and `general` (autoscaling 1-3 nodes), so a freshly bootstrapped cluster starts at 2 nodes and can grow to 4. Each class resolves to a multi-instance-type list so a pool tolerates single-type capacity shortages.
 
-`topology: ha` only widens which subnets (and so which AZs) a node group's nodes are eligible to land in; it doesn't raise `count` or an `autoscaling` minimum on its own. A `topology: ha` cluster with the default pools still starts at the same 2 nodes, just now eligible to spread across every private subnet instead of one, which isn't node-level HA: if a node's AZ goes down, the autoscaler has to notice and provision a replacement rather than there being a standby already running. For genuine node-level redundancy, pair `topology: ha` with an explicit multi-node `count`:
+`topology: ha` only widens which subnets (and so which AZs) a node group's nodes are eligible to land in. It doesn't raise `count` or an `autoscaling` minimum on its own. A `topology: ha` cluster with the default pools still starts at the same 2 nodes, just now eligible to spread across every private subnet instead of one. That spread alone isn't node-level HA: if a node's AZ goes down, the autoscaler has to notice and provision a replacement, rather than a standby already running and ready. For genuine node-level redundancy, pair `topology: ha` with an explicit multi-node `count`:
 
 ```yaml
 topology: ha
@@ -119,7 +119,7 @@ Node spread alone isn't sufficient either: workloads still need pod anti-affinit
 windsor bootstrap aws-prod
 ```
 
-`bootstrap` blocks until every Kustomization reports ready. Windsor applies the components in order (S3 backend, VPC, Route53 zone if public, EKS, then Flux), migrating state from local to S3 once the bucket exists. The on-disk `windsor.yaml` is never mutated during the migration. See [Terraform — Bootstrap](../blueprints/terraform.md#bootstrap) for the mechanics.
+`bootstrap` blocks until every Kustomization reports ready. Windsor applies the components in order (S3 backend, VPC, Route53 zone if public, EKS, then Flux), migrating state from local to S3 once the bucket exists. The on-disk `windsor.yaml` is never mutated during the migration. See [Terraform — Bootstrap](../components/terraform.md#bootstrap) for the mechanics.
 
 If you delegated `dns.public_domain` to the new Route53 zone, update your registrar's NS records to the zone's nameservers so ACME validation and external-dns can resolve.
 
@@ -156,7 +156,7 @@ windsor apply kustomize observability   # one Flux kustomization
 windsor destroy --confirm=aws-prod
 ```
 
-`destroy` removes the Flux kustomizations, then the Terraform components in reverse order, with the S3 backend removed last so dependent state is written out first. The state bucket is emptied and deleted as part of teardown. `--confirm=aws-prod` is the non-interactive equivalent of typing the context name at the prompt. The public Route53 zone lives in its own stack, so it is removed only by this destroy; to keep the delegated zone, destroy individual components instead. See [destroy safety](../contexts/lifecycle.md#tear-down).
+`destroy` removes the Flux kustomizations, then the Terraform components in reverse order, with the S3 backend removed last so dependent state is written out first. The state bucket is emptied and deleted as part of teardown. `--confirm=aws-prod` is the non-interactive equivalent of typing the context name at the prompt. The public Route53 zone lives in its own stack, so a full `destroy` removes it too. To keep the delegated zone, destroy individual components instead. See [destroy safety](../maintenance/destroy.md#tear-down).
 
 ## Troubleshooting
 
@@ -167,7 +167,8 @@ windsor destroy --confirm=aws-prod
 
 ## Where to next
 
-- [Lifecycle](../contexts/lifecycle.md) — the full command model and safety behaviors
-- [Terraform](../blueprints/terraform.md) — state backends, the bootstrap two-phase apply, cross-component outputs
-- [Secrets management](secrets-management.md) — SOPS and 1Password for sensitive values
-- [Azure](azure.md) and [Metal](metal.md) — the other deployment targets
+- [Command model](../provisioning/workflow.md) — the full command model
+- [Destroy](../maintenance/destroy.md) — safety behaviors and locking on teardown
+- [Terraform](../components/terraform.md) — state backends, the bootstrap two-phase apply, cross-component outputs
+- [SOPS](../secrets/sops.md), [1Password](../secrets/1password.md) — for sensitive values
+- [Azure](azure.md), [GCP](gcp.md), [Hetzner](hetzner.md), [Hyper-V](../virtual/hyperv.md), and [vSphere](../virtual/vsphere.md) — the other deployment targets

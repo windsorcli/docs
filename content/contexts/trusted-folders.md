@@ -53,5 +53,5 @@ Commands that don't inject environment variables work in any directory, trusted 
 ## Reference
 
 - [Environment injection](environment-injection.md) — what trust gates
-- [Securing secrets](../deployment/securing-secrets.md)
+- [SOPS](../secrets/sops.md), [1Password](../secrets/1password.md) — the secrets backends a `windsor.yaml` can name
 - [`init`](https://www.windsorcli.dev/reference/cli/commands/init), [`env`](https://www.windsorcli.dev/reference/cli/commands/env), [`hook`](https://www.windsorcli.dev/reference/cli/commands/hook)

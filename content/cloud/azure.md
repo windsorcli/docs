@@ -3,7 +3,7 @@ title: Azure
 description: Deploy a Windsor stack to Azure, with an AKS cluster on a dedicated VNet, Storage Account state, Azure DNS, and Flux-managed workloads.
 ---
 
-This guide stands up a production-style Windsor stack on Azure: a dedicated VNet, an [AKS](https://azure.microsoft.com/products/kubernetes-service) cluster, Terraform state in a Storage Account, and the `core` blueprint's services reconciled by Flux. It targets a **non-workstation context**: there is no local VM, so the lifecycle is `init` → `bootstrap` → `apply` → `destroy`. For the concepts behind those verbs, see [Lifecycle](../contexts/lifecycle.md).
+This guide stands up a production-style Windsor stack on Azure: a dedicated VNet, an [AKS](https://azure.microsoft.com/products/kubernetes-service) cluster, Terraform state in a Storage Account, and the `core` blueprint's services reconciled by Flux. It targets a **non-workstation context**: there is no local VM, so the lifecycle is `init` → `bootstrap` → `apply` → `destroy`. For the concepts behind those verbs, see [Command model](../provisioning/workflow.md).
 
 ## Prerequisites
 
@@ -62,9 +62,13 @@ dns:
 email: platform@example.com                 # required when public_domain is set
 ```
 
-Unlike `aws.region`, there's no `azure.region` schema field yet: the network, cluster, and backend Terraform modules each default independently (`eastus` for network and cluster, `eastus2` for the backend). Override a component's region with a `contexts/azure-prod/terraform/<component>.tfvars` file (`region = "westus2"`, or `location` for the backend) if the defaults don't fit; see [Terraform reference](https://www.windsorcli.dev/reference/cli/terraform).
+Set `azure.region` to choose the region once. It's exported to every Terraform component as `TF_VAR_region`. Without it, the network, cluster, and backend modules each default independently (`eastus` for network and cluster, `eastus2` for the backend). To override a single component instead of the whole context, use a `contexts/azure-prod/terraform/<component>.tfvars` file (`region = "westus2"`, or `location` for the backend). See [Terraform reference](https://www.windsorcli.dev/reference/cli/terraform).
 
-`azure.subscription_id`/`azure.tenant_id` activate Azure integration alongside (or instead of) `platform: azure` — either is sufficient. `kubelogin_mode` auto-detects from the active credential chain (`AZURE_FEDERATED_TOKEN_FILE` → workload identity, a client secret/certificate → service principal, otherwise the Azure CLI); set it explicitly only when the active credential is a mode without a process-env signal, like a managed identity. When `dns.public_domain` is set, Windsor provisions a public Azure DNS zone, wires `external-dns` to manage records in it, and issues real TLS certificates through Let's Encrypt (ACME) using a DNS-01 challenge scoped to that zone via Workload Identity, so `email` is required.
+`azure.subscription_id`/`azure.tenant_id` activate Azure integration alongside (or instead of) `platform: azure`. Either is sufficient.
+
+`kubelogin_mode` auto-detects from the active credential chain: `AZURE_FEDERATED_TOKEN_FILE` maps to workload identity, a client secret/certificate maps to service principal, and otherwise Windsor falls back to the Azure CLI. Set it explicitly only when the active credential is a mode without a process-env signal, like a managed identity.
+
+When `dns.public_domain` is set, Windsor provisions a public Azure DNS zone, wires `external-dns` to manage records in it, and issues real TLS certificates through Let's Encrypt (ACME) using a DNS-01 challenge scoped to that zone via Workload Identity. `email` is required in that case.
 
 Common additional knobs:
 
@@ -74,7 +78,7 @@ Common additional knobs:
 | `dns.private_domain` | Name for the private, VNet-linked Azure DNS zone (internal DNS). |
 | `gateway.access: private` | Keep the gateway internal, via an Azure internal load balancer; pairs with `dns.private_domain` for a private issuer. |
 | `cluster.cni.driver: cilium` | Replace Azure CNI with Cilium (bootstrapped before Flux). Omit for the default Azure CNI. |
-| `addons.observability.enabled: true` | Grafana, Prometheus, and the logging stack. |
+| `observability.enabled: true` | Grafana, Prometheus, and the logging stack. |
 
 ### Node pools
 
@@ -96,9 +100,11 @@ cluster:
 
 `count` is required on every pool; `autoscaling` is optional and defaults on (min 1, max 3, seeded from `count`) for every class except `system`, which defaults fixed.
 
-When `cluster.pools` is unset, the cluster falls back to a single autoscaling `general` pool (1-3 nodes). AKS also always creates its own built-in system node pool alongside it, tainted `CriticalAddonsOnly` so only cluster operators land there, not `cluster.pools`-managed workloads; it also scales automatically between 1 and 3 nodes, so a freshly bootstrapped cluster with no `cluster.pools` set starts at 2 nodes total and can grow to 6. Each class resolves to a preference-ordered VM size list, but AKS pools accept a single SKU each: only the first entry is actually used, and it falls back to broadly available `v3`-generation sizes rather than the newest generation, since the newer families need per-subscription-and-region enablement.
+When `cluster.pools` is unset, the cluster falls back to a single autoscaling `general` pool (1-3 nodes). AKS also always creates its own built-in system node pool alongside it, tainted `CriticalAddonsOnly` so only cluster operators land there, not `cluster.pools`-managed workloads. That built-in pool also scales automatically between 1 and 3 nodes, so a freshly bootstrapped cluster with no `cluster.pools` set starts at 2 nodes total and can grow to 6.
 
-`topology: ha` only widens which zones a pool's nodes are eligible to land in; it doesn't raise `count` or an `autoscaling` minimum on its own. A `topology: ha` cluster with no explicit `cluster.pools` still starts at one node per pool, just now eligible for any of 3 zones instead of pinned to one, which isn't node-level HA: if that node's zone goes down, the autoscaler has to notice and provision a replacement rather than there being a standby already running. For genuine node-level redundancy in `cluster.pools`-managed pools, pair `topology: ha` with an explicit multi-node `count` or `autoscaling.min`:
+Each class resolves to a preference-ordered VM size list, but AKS pools accept a single SKU each: only the first entry is actually used. That entry falls back to broadly available `v3`-generation sizes rather than the newest generation, since the newer families need per-subscription-and-region enablement.
+
+`topology: ha` only widens which zones a pool's nodes are eligible to land in. It doesn't raise `count` or an `autoscaling` minimum on its own. A `topology: ha` cluster with no explicit `cluster.pools` still starts at one node per pool, just now eligible for any of 3 zones instead of pinned to one. That spread alone isn't node-level HA: if that node's zone goes down, the autoscaler has to notice and provision a replacement, rather than a standby already running and ready. For genuine node-level redundancy in `cluster.pools`-managed pools, pair `topology: ha` with an explicit multi-node `count` or `autoscaling.min`:
 
 ```yaml
 topology: ha
@@ -111,7 +117,7 @@ cluster:
 
 Node spread alone isn't sufficient either: workloads still need pod anti-affinity across those nodes to actually benefit from it.
 
-AKS's built-in system pool doesn't follow this pattern. It isn't reachable through `cluster.pools` at all: a `cluster.pools.system` entry creates a second, separate node pool that collides with the built-in one's name rather than resizing it. The `platform-azure` facet passes no override for the built-in pool either, so its 1-3 autoscaling range is fixed regardless of `topology` or anything in `values.yaml`. Changing it needs a raw `contexts/<context>/terraform/cluster.tfvars` setting the full `default_node_pool` object; there's no portable schema path for it yet.
+AKS's built-in system pool doesn't follow this pattern. It isn't reachable through `cluster.pools` at all: a `cluster.pools.system` entry creates a second, separate node pool that collides with the built-in one's name rather than resizing it. The `platform-azure` facet passes no override for the built-in pool either, so its 1-3 autoscaling range is fixed regardless of `topology` or anything in `values.yaml`. Changing it needs a raw `contexts/<context>/terraform/cluster.tfvars` setting the full `default_node_pool` object. There's no portable schema path for it yet.
 
 ## 3. Bootstrap
 
@@ -121,7 +127,7 @@ AKS's built-in system pool doesn't follow this pattern. It isn't reachable throu
 windsor bootstrap azure-prod
 ```
 
-`bootstrap` blocks until every Kustomization reports ready. Windsor applies the components in order (Storage Account backend, VNet, Azure DNS zone if public, AKS, then Flux), migrating state from local to the Storage Account once it exists. The on-disk `windsor.yaml` is never mutated during the migration. See [Terraform — Bootstrap](../blueprints/terraform.md#bootstrap) for the mechanics.
+`bootstrap` blocks until every Kustomization reports ready. Windsor applies the components in order (Storage Account backend, VNet, Azure DNS zone if public, AKS, then Flux), migrating state from local to the Storage Account once it exists. The on-disk `windsor.yaml` is never mutated during the migration. See [Terraform — Bootstrap](../components/terraform.md#bootstrap) for the mechanics.
 
 If you delegated `dns.public_domain` to the new Azure DNS zone, update your registrar's NS records to the zone's nameservers so ACME validation and external-dns can resolve.
 
@@ -158,7 +164,7 @@ windsor apply kustomize observability   # one Flux kustomization
 windsor destroy --confirm=azure-prod
 ```
 
-`destroy` removes the Flux kustomizations, then the Terraform components in reverse order, with the Storage Account backend removed last so dependent state is written out first. The public Azure DNS zone lives in its own stack, so it is removed only by this destroy; to keep the delegated zone, destroy individual components instead. See [destroy safety](../contexts/lifecycle.md#tear-down).
+`destroy` removes the Flux kustomizations, then the Terraform components in reverse order, with the Storage Account backend removed last so dependent state is written out first. The public Azure DNS zone lives in its own stack, so a full `destroy` removes it too. To keep the delegated zone, destroy individual components instead. See [destroy safety](../maintenance/destroy.md#tear-down).
 
 ## Troubleshooting
 
@@ -169,7 +175,8 @@ windsor destroy --confirm=azure-prod
 
 ## Where to next
 
-- [Lifecycle](../contexts/lifecycle.md) — the full command model and safety behaviors
-- [Terraform](../blueprints/terraform.md) — state backends, the bootstrap two-phase apply, cross-component outputs
-- [Secrets management](secrets-management.md) — SOPS and 1Password for sensitive values
-- [AWS](aws.md) and [Metal](metal.md) — the other deployment targets
+- [Command model](../provisioning/workflow.md) — the full command model
+- [Destroy](../maintenance/destroy.md) — safety behaviors and locking on teardown
+- [Terraform](../components/terraform.md) — state backends, the bootstrap two-phase apply, cross-component outputs
+- [SOPS](../secrets/sops.md), [1Password](../secrets/1password.md) — for sensitive values
+- [AWS](aws.md), [GCP](gcp.md), [Hetzner](hetzner.md), [Hyper-V](../virtual/hyperv.md), and [vSphere](../virtual/vsphere.md) — the other deployment targets

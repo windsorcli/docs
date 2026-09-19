@@ -3,13 +3,13 @@ title: Facets
 description: Conditional blueprint composition from configuration.
 ---
 
-**Facets** are YAML files under `contexts/_template/facets/` that add or modify blueprint content based on configuration (for example, provider, feature flags). They let one template support multiple environments and options without duplicating the base blueprint.
+**Facets** are YAML files under `contexts/_template/facets/` that add or modify blueprint content based on configuration (for example, platform, feature flags). They let one template support multiple environments and options without duplicating the base blueprint.
 
 ## Overview
 
 - Loaded from `_template/facets/*.yaml` and `_template/facets/**/*.yaml`.
 - Ordered by ordinal (ascending), then by name.
-- Each facet has a `when` expression; when it evaluates to true, that facet's Terraform/Kustomize entries are merged.
+- Each facet has a `when` expression; when it evaluates to true, that facet's Terraform components, Kustomizations, Flux systems, and [config blocks](#config-blocks) are merged.
 
 ## Example
 
@@ -19,7 +19,7 @@ apiVersion: blueprints.windsorcli.dev/v1alpha1
 metadata:
   name: aws-facet
   description: AWS-specific infrastructure
-when: provider == 'aws'
+when: platform == 'aws'
 terraform:
   - path: network/vpc
     source: core
@@ -28,7 +28,36 @@ terraform:
     strategy: merge
 ```
 
-When `provider` is `aws`, the VPC Terraform component from `core` is included. Expressions can reference [schema](schema.md) properties and `terraform_output()` for cross-component values.
+When `platform` is `aws`, the VPC Terraform component from `core` is included. Expressions can reference [schema](schema.md) properties and `terraform_output()` for cross-component values.
+
+## Config blocks
+
+A `config:` entry computes a named value from expressions and exposes it at scope root, alongside `values.yaml` properties like `cluster.driver` — so `terraform:` inputs, `kustomize:` substitutions, and other facets' own expressions can reference it the same way. This is different from a `values.yaml` default: a schema default is only visible where the property itself is read, but a config block's value is visible to *every* facet that composes after it, including facets from a different blueprint source. That cross-facet visibility is the reason this mechanism exists — see [Schema](schema.md) for `values.yaml` properties and their defaults.
+
+```yaml
+config:
+  - name: pki_effective
+    value:
+      issuer_component: public-issuer/selfsigned
+  - name: pki_effective
+    when: (dns.public_domain ?? '') != ''
+    value:
+      issuer_component: public-issuer/acme/route53
+  - name: pki_effective
+    when: gateway.access == 'private' && (dns.private_domain ?? '') != ''
+    value:
+      issuer_component: ""
+```
+
+Three blocks share the name `pki_effective` here, each contributing under its own `when:`. A scalar or list value is read as `${pki_effective}`; a map value like this one is read key by key — `${pki_effective.issuer_component}` — from a `terraform:` input, a `kustomize:` substitution, or another config block's own `value:`.
+
+### Merge precedence
+
+Within one facet, later entries win: the last block whose `when:` matches is the one that applies, same as the `pki_effective` example above. Across facets, the facet that composes later wins — the same rule `terraform:` and `kustomize:` entries already follow (see [Ordinals](#ordinals) below). `strategy: replace` or `strategy: remove` change that behavior for one block, but the default (`merge`) is right for almost every case.
+
+### Evaluation order
+
+A block's `value:` can reference another block. Windsor works out the right order automatically, so you don't need to declare blocks in dependency order yourself.
 
 ## Ordinals
 
@@ -37,12 +66,13 @@ If a facet does not set `ordinal`, it is derived from the filename:
 | Pattern | Ordinal |
 | --- | --- |
 | `config-*` | 100 |
-| `provider-base` / `platform-base` | 199 |
-| `provider-*` / `platform-*` | 200 |
-| `options-*` / `option` | 300 |
-| `addon` / `addons` | 400 |
+| `platform-*-base` / `provider-*-base` (filename contains `-base`) | 199 |
+| `platform-*` / `provider-*` | 200 |
+| `option-*` / `options-*` | 300 |
+| `addon-*` / `addons-*` | 400 |
+| anything else | 0 |
 
-Higher ordinal means higher precedence when merging (addons override provider-base for same-name entries).
+Higher ordinal means higher precedence when merging (addons override platform-base for same-name entries). A filename matching none of these patterns gets ordinal 0 — lower than even `config-*` — so it's worth naming facets to match one of these prefixes rather than relying on the fallback.
 
 ## File resolution
 
@@ -67,6 +97,7 @@ An optional `namespaces:` list targets more than one namespace; empty means auto
 
 ## See also
 
+- [Expressions](expressions.md) — the `when:` / `${...}` language and Windsor's added functions
 - [Blueprint templates](templates.md) — How the _template folder and composition order work.
-- [Blueprint testing](testing.md) — Testing facet conditions and expected components.
-- [Securing secrets](../deployment/securing-secrets.md) — marking schema values sensitive
+- [Testing](testing.md) — Testing facet conditions and expected components.
+- [Schema — Marking a property sensitive](schema.md#marking-a-property-sensitive) — the `sensitive: true` flag this section's `data:` values must carry

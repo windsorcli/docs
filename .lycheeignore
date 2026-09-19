@@ -8,3 +8,11 @@
 # URL 404s from GitHub's public API. Remove this once the repo is
 # published.
 ^https://github\.com/windsorcli/windsorcli\.github\.io
+
+# ADR-0001's own stack lists contexts/{lifecycle,environment-injection,
+# trusted-folders} as a trio; only the latter two were ever written. The
+# skill docs quote lifecycle.md as a worked example of the guide-tier
+# voice regardless — that's a real content gap for the docs owner to
+# close, not a stale link to silently fix. Remove this once the page
+# exists.
+content/contexts/lifecycle\.md$
