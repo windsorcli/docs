@@ -21,7 +21,7 @@ cluster:
 
 Getting a physical machine to that state — imaging it, PXE-booting it, or building an installer with [Image Factory](https://factory.talos.dev) — is outside Windsor's scope. See the [Talos project](https://github.com/siderolabs/talos) for that step.
 
-Like Hetzner, Hyper-V, and vSphere, there's no managed control plane, so `cluster.oidc.enabled` works for `kubectl` SSO — see [Identity](https://www.windsorcli.dev/catalog/core/guides/identity). The Terraform backend defaults to `kubernetes`, each component's state stored as a Secret in the cluster, unless `windsor.yaml` sets something else.
+Like Hetzner, Hyper-V, and vSphere, there's no managed control plane, so `cluster.oidc.enabled` works for `kubectl` SSO — see [Identity](https://www.windsorcli.dev/catalog/core/guides/identity/keycloak). The Terraform backend defaults to `kubernetes`, each component's state stored as a Secret in the cluster, unless `windsor.yaml` sets something else.
 
 ## See also
 
