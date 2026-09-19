@@ -119,7 +119,7 @@ Node spread alone isn't sufficient either: workloads still need pod anti-affinit
 windsor bootstrap aws-prod
 ```
 
-`bootstrap` blocks until every Kustomization reports ready. Windsor applies the components in order (S3 backend, VPC, Route53 zone if public, EKS, then Flux), migrating state from local to S3 once the bucket exists. The on-disk `windsor.yaml` is never mutated during the migration. See [Terraform — Bootstrap](../blueprints/terraform.md#bootstrap) for the mechanics.
+`bootstrap` blocks until every Kustomization reports ready. Windsor applies the components in order (S3 backend, VPC, Route53 zone if public, EKS, then Flux), migrating state from local to S3 once the bucket exists. The on-disk `windsor.yaml` is never mutated during the migration. See [Terraform — Bootstrap](../components/terraform.md#bootstrap) for the mechanics.
 
 If you delegated `dns.public_domain` to the new Route53 zone, update your registrar's NS records to the zone's nameservers so ACME validation and external-dns can resolve.
 
@@ -169,6 +169,6 @@ windsor destroy --confirm=aws-prod
 
 - [Command model](../provisioning/workflow.md) — the full command model
 - [Destroy](../maintenance/destroy.md) — safety behaviors and locking on teardown
-- [Terraform](../blueprints/terraform.md) — state backends, the bootstrap two-phase apply, cross-component outputs
+- [Terraform](../components/terraform.md) — state backends, the bootstrap two-phase apply, cross-component outputs
 - [SOPS](../secrets/sops.md), [1Password](../secrets/1password.md) — for sensitive values
 - [Azure](azure.md), [Hetzner](hetzner.md), [Hyper-V](../virtual/hyperv.md), and [vSphere](../virtual/vsphere.md) — the other deployment targets

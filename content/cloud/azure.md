@@ -127,7 +127,7 @@ AKS's built-in system pool doesn't follow this pattern. It isn't reachable throu
 windsor bootstrap azure-prod
 ```
 
-`bootstrap` blocks until every Kustomization reports ready. Windsor applies the components in order (Storage Account backend, VNet, Azure DNS zone if public, AKS, then Flux), migrating state from local to the Storage Account once it exists. The on-disk `windsor.yaml` is never mutated during the migration. See [Terraform — Bootstrap](../blueprints/terraform.md#bootstrap) for the mechanics.
+`bootstrap` blocks until every Kustomization reports ready. Windsor applies the components in order (Storage Account backend, VNet, Azure DNS zone if public, AKS, then Flux), migrating state from local to the Storage Account once it exists. The on-disk `windsor.yaml` is never mutated during the migration. See [Terraform — Bootstrap](../components/terraform.md#bootstrap) for the mechanics.
 
 If you delegated `dns.public_domain` to the new Azure DNS zone, update your registrar's NS records to the zone's nameservers so ACME validation and external-dns can resolve.
 
@@ -177,6 +177,6 @@ windsor destroy --confirm=azure-prod
 
 - [Command model](../provisioning/workflow.md) — the full command model
 - [Destroy](../maintenance/destroy.md) — safety behaviors and locking on teardown
-- [Terraform](../blueprints/terraform.md) — state backends, the bootstrap two-phase apply, cross-component outputs
+- [Terraform](../components/terraform.md) — state backends, the bootstrap two-phase apply, cross-component outputs
 - [SOPS](../secrets/sops.md), [1Password](../secrets/1password.md) — for sensitive values
 - [AWS](aws.md), [Hetzner](hetzner.md), [Hyper-V](../virtual/hyperv.md), and [vSphere](../virtual/vsphere.md) — the other deployment targets

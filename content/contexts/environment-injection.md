@@ -75,7 +75,7 @@ WINDSOR_SESSION_TOKEN=ldC26Dp
 
 ## Terraform-scoped variables
 
-`cd` into a component's module shim (`.windsor/contexts/<name>/terraform/<component>/`) and Windsor also injects `TF_VAR_<input>` for each of the component's evaluated inputs, `TF_DATA_DIR`, and `TF_CLI_ARGS_{init,plan,apply,import,destroy,refresh}` pointing Terraform at the right var-files and backend config. Run `terraform plan` by hand in that directory and it picks up the same values `windsor plan terraform` would. See [Terraform — Generated tfvars and variables](../blueprints/terraform.md#generated-tfvars-and-variables) for how those values are computed.
+`cd` into a component's module shim (`.windsor/contexts/<name>/terraform/<component>/`) and Windsor also injects `TF_VAR_<input>` for each of the component's evaluated inputs, `TF_DATA_DIR`, and `TF_CLI_ARGS_{init,plan,apply,import,destroy,refresh}` pointing Terraform at the right var-files and backend config. Run `terraform plan` by hand in that directory and it picks up the same values `windsor plan terraform` would. See [Terraform — Generated tfvars and variables](../components/terraform.md#generated-tfvars-and-variables) for how those values are computed.
 
 ## Reference
 

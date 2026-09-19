@@ -39,7 +39,7 @@ Windows DNS is configured as an NRPT (Name Resolution Policy Table) rule. A doma
 ## Deploy and state backend
 
 **A cloud deploy hard-errors before the confirm prompt about a missing backend.**
-Remote state requires the blueprint to declare which Terraform component terminates the backend tier. Use a `platform` that sets one (`--platform aws`/`azure`), or declare a `backend` component. See [Terraform — State backend](../blueprints/terraform.md#state-backend).
+Remote state requires the blueprint to declare which Terraform component terminates the backend tier. Use a `platform` that sets one (`--platform aws`/`azure`), or declare a `backend` component. See [Terraform — State backend](../components/terraform.md#state-backend).
 
 **`bootstrap` fails during the first (backend) stage.**
 Credentials or region aren't resolving. Confirm the provider CLI is authenticated (for AWS, `aws sts get-caller-identity`) and the region is set. The backend stack runs first, so a credential error stops everything downstream. See [AWS](../cloud/aws.md).
@@ -73,4 +73,4 @@ Run `windsor check` to validate the toolchain; it names what's missing or needs 
 
 - [Command model](../provisioning/workflow.md) — the command model and safety behaviors
 - [Environment injection](../contexts/environment-injection.md) — the shell hook and trust gate
-- [Terraform](../blueprints/terraform.md) — state backends and the bootstrap flow
+- [Terraform](../components/terraform.md) — state backends and the bootstrap flow

@@ -32,8 +32,6 @@ Per-context customizations live in `contexts/<name>/`. Files there override or e
 - [Directory layout](templates.md)
 - [Schema dialect](schema.md)
 - [Facets and conditional fragments](facets.md)
-- [Terraform components](terraform.md)
-- [Kustomize](kustomize.md)
 - [Flux systems](flux-systems.md)
 - [Registries](sharing.md)
 - [Testing](testing.md)

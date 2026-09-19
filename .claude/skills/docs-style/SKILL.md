@@ -241,11 +241,11 @@ Why it works:
   finds none…" — the parallel structure carries the branch so the
   reader doesn't have to reconstruct it.
 
-### Section / overview lead (explanation) — [`blueprints/terraform.md`](../../../content/blueprints/terraform.md)
+### Section / overview lead (explanation) — [`components/terraform.md`](../../../content/components/terraform.md)
 
-> Windsor manages a Terraform stack defined in a blueprint. Stacks are
-> built sequentially, threading Terraform output values to
-> corresponding input values according to the facet definition.
+> Windsor builds the stack sequentially, threading each component's
+> Terraform output values to the input values of the components that
+> depend on it.
 
 Why it works:
 

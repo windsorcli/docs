@@ -3,7 +3,7 @@ title: Flux systems
 description: How flux entries compose into multi-tier Flux Kustomizations, distinct from the kustomize 1:1 passthrough.
 ---
 
-A `flux:` entry in `blueprint.yaml` is a **system**: a named functional layer that compiles to an install Kustomization plus one or more resources Kustomizations. This is different from `kustomize:`, which is a 1:1 passthrough where each entry maps to exactly one Kustomization; see [Kustomize](kustomize.md). Facets typically contribute `flux:` entries rather than `kustomize:` ones, since a system's controller and the custom resources it admits usually need separate reconciliation tiers.
+A `flux:` entry in `blueprint.yaml` is a **system**: a named functional layer that compiles to an install Kustomization plus one or more resources Kustomizations. This is different from `kustomize:`, which is a 1:1 passthrough where each entry maps to exactly one Kustomization; see [Kustomize](../components/kustomize.md). Facets typically contribute `flux:` entries rather than `kustomize:` ones, since a system's controller and the custom resources it admits usually need separate reconciliation tiers.
 
 ```yaml
 flux:
@@ -64,6 +64,6 @@ A `flux:` system can also declare a `secrets:` block to land a `sensitive: true`
 
 ## See also
 
-- [Kustomize](kustomize.md) — the `kustomize:` 1:1 passthrough, and how substitutions and patches work for either layer
+- [Kustomize](../components/kustomize.md) — the `kustomize:` 1:1 passthrough, and how substitutions and patches work for either layer
 - [Facets](facets.md) — how facets contribute `flux:` entries, ordinals, and Kubernetes Secrets
 - [Blueprint reference](https://www.windsorcli.dev/reference/cli/blueprint) — full `flux[]` schema

@@ -127,6 +127,6 @@ windsor destroy --confirm=hyperv-prod
 
 - [Command model](../provisioning/workflow.md) — the full command model
 - [Destroy](../maintenance/destroy.md) — safety behaviors and locking on teardown
-- [Terraform](../blueprints/terraform.md) — state backends and cross-component outputs
+- [Terraform](../components/terraform.md) — state backends and cross-component outputs
 - [vSphere](vsphere.md) — the other on-premises VM platform
 - [AWS](../cloud/aws.md), [Azure](../cloud/azure.md), and [Hetzner](../cloud/hetzner.md) — the other deployment targets

@@ -151,6 +151,6 @@ There's a separate `dns-zone` component when `dns.public_domain` is set. It's in
 
 - [Command model](../provisioning/workflow.md) — the full command model
 - [Destroy](../maintenance/destroy.md) — safety behaviors and locking on teardown
-- [Terraform](../blueprints/terraform.md) — state backends and cross-component outputs
+- [Terraform](../components/terraform.md) — state backends and cross-component outputs
 - [SOPS](../secrets/sops.md), [1Password](../secrets/1password.md) — for `hetzner.token`
 - [AWS](aws.md) and [Azure](azure.md) — the other deployment targets
