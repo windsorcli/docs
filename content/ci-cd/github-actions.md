@@ -3,7 +3,7 @@ title: GitHub Actions
 description: Installing the Windsor CLI in a workflow, authenticating to a cloud platform, and wrapping windsor commands as steps.
 ---
 
-The [Windsor GitHub Action](https://github.com/windsorcli/action) installs and configures the Windsor CLI for use in GitHub Actions workflows, and provides a sub-action per `windsor` command so a workflow doesn't need to hand-write `run: windsor <command>` steps.
+The [Windsor GitHub Action](https://github.com/windsorcli/action) installs and configures the Windsor CLI in a workflow. It also ships a sub-action for each `windsor` command, so a job calls `windsorcli/action/check` instead of a hand-written `run: windsor check` step.
 
 ## Install the CLI
 

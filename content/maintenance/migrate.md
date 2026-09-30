@@ -3,7 +3,7 @@ title: Migrate
 description: How Windsor recovers Terraform state left behind by an interrupted bootstrap or a renamed component.
 ---
 
-Windsor checks for stranded Terraform state on every `up` and `apply`, without a separate command for it. What it does about what it finds depends on whether the state is still reachable from the blueprint.
+On every `up` and `apply`, Windsor looks for Terraform state stranded by an interrupted bootstrap or a renamed component. It recovers the first automatically and only warns about the second, because a renamed component looks the same as a decommissioned one.
 
 ## An interrupted bootstrap
 

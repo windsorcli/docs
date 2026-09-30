@@ -3,9 +3,11 @@ title: Destroy
 description: Removing live infrastructure safely, and the safety and locking behaviors that guard a destroy run.
 ---
 
+`windsor destroy` removes a context's live infrastructure: every Flux kustomization first, then every Terraform component in reverse-dependency order. It shows what it will remove and waits for you to type the context name before touching anything.
+
 ## Tear down
 
-`destroy` removes live infrastructure: every Flux kustomization, then every Terraform component in reverse-dependency order. Before it touches anything it shows a destroy plan (the Terraform resources it will remove and the live Flux inventory queried from the cluster) and waits for confirmation.
+The destroy plan lists the Terraform resources to be removed and the live Flux inventory queried from the cluster.
 
 Confirmation is always required. Type the context name (layer-wide) or component name (targeted) at the prompt, or pass `--confirm=<expected>` for CI. The value must match the prompt token exactly, or the run aborts. There is no `--force`.
 

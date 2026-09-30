@@ -3,7 +3,7 @@ title: SOPS
 description: Encrypt secrets to a file with SOPS, commit them safely, and reference them in a context's environment.
 ---
 
-Use [SOPS](https://github.com/getsops/sops) to encrypt secrets to a file and commit them safely. Configure SOPS and an `sops.yaml` in your project, then start plaintext locally:
+Windsor reads secrets from a `secrets.yaml` encrypted with [SOPS](https://github.com/getsops/sops), so the encrypted file can live in git. Add a `sops.yaml` to your project, then start with a plaintext file locally:
 
 ```bash
 $EDITOR contexts/<context>/secrets.yaml
