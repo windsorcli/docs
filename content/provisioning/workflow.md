@@ -1,6 +1,6 @@
 ---
-title: Workflow
-description: The full command model behind provisioning a context — grouped by purpose, and how a workstation context differs from a cloud or metal one.
+title: Lifecycle
+description: How a context moves from init to teardown, which commands provision and remove it, and how a workstation context differs from a cloud one.
 ---
 
 [First project](../getting-started/first-project.md) ran `init`, `up`, and `destroy` against a local workstation. Every context follows the same short lifecycle: scaffold it, provision its infrastructure and install the blueprint, then tear it down. Which commands do that work depends on whether the context runs a local workstation VM or targets cloud infrastructure. The path splits right after `windsor init`:

@@ -39,5 +39,5 @@ windsor upgrade node --node=10.0.0.5 \
 
 ## See also
 
-- [Command model](../provisioning/workflow.md): where `upgrade` fits among the other commands
+- [Lifecycle](../provisioning/workflow.md): where `upgrade` fits among the other commands
 - [Destroy](destroy.md): the other maintenance action on a running context

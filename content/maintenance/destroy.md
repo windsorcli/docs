@@ -31,5 +31,5 @@ A holder that dies (CI cancellation, an OOM, a crash) normally releases the lock
 
 ## See also
 
-- [Command model](../provisioning/workflow.md): where `destroy` fits among the other commands
+- [Lifecycle](../provisioning/workflow.md): where `destroy` fits among the other commands
 - [Upgrade](upgrade.md): moving a context forward instead of tearing it down

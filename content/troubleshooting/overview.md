@@ -3,7 +3,7 @@ title: Troubleshooting
 description: Common Windsor failure modes and their fixes, across lifecycle, workstation networking, state backends, environment injection, and blueprints.
 ---
 
-Common failure modes, grouped by where they show up. Each entry lists the symptom, the cause, and the fix. For the command model these reference, see [Command model](../provisioning/workflow.md).
+Common failure modes, grouped by where they show up. Each entry lists the symptom, the cause, and the fix. For the commands these entries refer to, see [Lifecycle](../provisioning/workflow.md).
 
 ## Lifecycle and commands
 
@@ -71,6 +71,6 @@ Run `windsor check` to validate the toolchain; it names what's missing or needs 
 
 ## Where to next
 
-- [Command model](../provisioning/workflow.md): the command model and safety behaviors
+- [Lifecycle](../provisioning/workflow.md): the commands and safety behaviors
 - [Environment injection](../contexts/environment-injection.md) — the shell hook and trust gate
 - [Terraform](../components/terraform.md): state backends and the bootstrap flow

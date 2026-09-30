@@ -31,6 +31,6 @@ Windsor never force-copies orphaned state into the shared backend unattended: pu
 
 ## See also
 
-- [Command model](../provisioning/workflow.md): where `up` and `apply` fit among the other commands
+- [Lifecycle](../provisioning/workflow.md): where `up` and `apply` fit among the other commands
 - [Terraform — State backend](../components/terraform.md#state-backend): configuring the backend this migrates state into
 - [Destroy](destroy.md): retiring a component's infrastructure instead of moving its state

@@ -166,5 +166,5 @@ That covers what the action does, not the workflow you write around it. Pin ever
 ## See also
 
 - [Global flags](https://www.windsorcli.dev/reference/cli/global-flags): every flag the underlying commands accept, beyond what a sub-action exposes
-- [Command model](../provisioning/workflow.md): what `bootstrap`, `apply`, `destroy`, and `up` each actually do
+- [Lifecycle](../provisioning/workflow.md): what `bootstrap`, `apply`, `destroy`, and `up` each actually do
 - [Action repo README](https://github.com/windsorcli/action): support-bundle collection on failure, and Terraform provider caching across runs

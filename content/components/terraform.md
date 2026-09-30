@@ -37,7 +37,7 @@ contexts/staging/terraform/
 └── cluster/talos.tfvars        # overrides the same component by path, if unnamed
 ```
 
-The override only reaches `plan`, `refresh`, `destroy`, and `import`. `apply` takes no var-files — it applies the plan `plan` already produced, so set the override before planning, not between plan and apply. See [Command model](../provisioning/workflow.md) for what each command does.
+The override only reaches `plan`, `refresh`, `destroy`, and `import`. `apply` takes no var-files — it applies the plan `plan` already produced, so set the override before planning, not between plan and apply. See [Lifecycle](../provisioning/workflow.md) for what each command does.
 
 `contexts/<name>/backend.tfvars` overrides the Terraform backend config the same way, checked before the equivalent `contexts/<name>/terraform/backend.tfvars`. `contexts/<name>/terraform/.env` sets environment variables for every Terraform command run in that context — the same idea as a project `.env` file, scoped one level deeper. See [Environment injection](../contexts/environment-injection.md) for what else Windsor exports, including `TF_VAR_*`.
 
@@ -200,7 +200,7 @@ Windsor can drive OpenTofu instead of Terraform. Setting `terraform.driver: open
 
 - [Kustomize](kustomize.md) — the other half of a component
 - [Blueprints](../blueprints/overview.md) — turning a componentized context into a reusable, multi-context template
-- [Command model](../provisioning/workflow.md) — the commands that apply what you declared here
+- [Lifecycle](../provisioning/workflow.md) — the commands that apply what you declared here
 - [Environment injection](../contexts/environment-injection.md) — what Windsor exports into your shell
 - [Workstation overview](../workstation/overview.md) — workstation-specific Terraform components
 - [Blueprint reference](https://www.windsorcli.dev/reference/cli/blueprint) — `TerraformComponent` schema

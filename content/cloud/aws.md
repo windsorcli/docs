@@ -3,7 +3,7 @@ title: AWS
 description: Deploy a Windsor stack to AWS, with an EKS cluster on a dedicated VPC, S3 state, Route53 DNS, and Flux-managed workloads.
 ---
 
-This guide stands up a production-style Windsor stack on AWS: a dedicated VPC, an [EKS](https://aws.amazon.com/eks/) cluster, Terraform state in S3, and the `core` blueprint's services reconciled by Flux. It targets a **non-workstation context**: there is no local VM, so the lifecycle is `init` → `bootstrap` → `apply` → `destroy`. For the concepts behind those verbs, see [Command model](../provisioning/workflow.md).
+This guide stands up a production-style Windsor stack on AWS: a dedicated VPC, an [EKS](https://aws.amazon.com/eks/) cluster, Terraform state in S3, and the `core` blueprint's services reconciled by Flux. It targets a **non-workstation context**: there is no local VM, so the lifecycle is `init` → `bootstrap` → `apply` → `destroy`. For the concepts behind those verbs, see [Lifecycle](../provisioning/workflow.md).
 
 ## Prerequisites
 
@@ -167,7 +167,7 @@ windsor destroy --confirm=aws-prod
 
 ## Where to next
 
-- [Command model](../provisioning/workflow.md) — the full command model
+- [Lifecycle](../provisioning/workflow.md) — the commands from `init` to `destroy`
 - [Destroy](../maintenance/destroy.md) — safety behaviors and locking on teardown
 - [Terraform](../components/terraform.md) — state backends, the bootstrap two-phase apply, cross-component outputs
 - [SOPS](../secrets/sops.md), [1Password](../secrets/1password.md) — for sensitive values

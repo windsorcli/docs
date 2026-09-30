@@ -46,4 +46,4 @@ Pruning is disabled on CRD kustomizations: pruning a CRD deletes every custom re
 - [The _template folder](../blueprints/templates.md): `blueprint.yaml`, `schema.yaml`, and `facets/` structure
 - [Facets](../blueprints/facets.md): `when` expressions, ordinals, and merge strategies
 - [Components](../components/terraform.md): adding your own Terraform and Kustomize without a template
-- [Command model](../provisioning/workflow.md): the command model that applies a composed blueprint
+- [Lifecycle](../provisioning/workflow.md): the commands that apply a composed blueprint

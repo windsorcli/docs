@@ -3,7 +3,7 @@ title: GCP
 description: Deploy a Windsor stack to GCP, with a GKE cluster on a dedicated VPC, GCS state, Cloud DNS, and Flux-managed workloads.
 ---
 
-A Windsor context on GCP is a dedicated VPC, a [GKE](https://cloud.google.com/kubernetes-engine) cluster, Terraform state in a GCS bucket, and the `core` blueprint's services reconciled by Flux. With no local VM to bring up, the lifecycle is `init` → `bootstrap` → `apply` → `destroy`. For the concepts behind those verbs, see [Command model](../provisioning/workflow.md).
+A Windsor context on GCP is a dedicated VPC, a [GKE](https://cloud.google.com/kubernetes-engine) cluster, Terraform state in a GCS bucket, and the `core` blueprint's services reconciled by Flux. With no local VM to bring up, the lifecycle is `init` → `bootstrap` → `apply` → `destroy`. For the concepts behind those verbs, see [Lifecycle](../provisioning/workflow.md).
 
 ## Prerequisites
 
@@ -164,7 +164,7 @@ windsor destroy --confirm=gcp-prod
 
 ## Where to next
 
-- [Command model](../provisioning/workflow.md): the full command model
+- [Lifecycle](../provisioning/workflow.md): the commands from `init` to `destroy`
 - [Destroy](../maintenance/destroy.md): safety behaviors and locking on teardown
 - [Terraform](../components/terraform.md): state backends, the bootstrap two-phase apply, cross-component outputs
 - [SOPS](../secrets/sops.md), [1Password](../secrets/1password.md): for sensitive values
