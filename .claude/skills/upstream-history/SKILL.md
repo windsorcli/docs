@@ -114,10 +114,10 @@ Don't write speculative docs against unmerged code.
 
 The investigation produces three kinds of doc work:
 
-**Match reality.** The most common case — the page describes an
-older shape of the feature. Update the prose and code samples to
-match HEAD. Cite the PR that changed things in your own PR
-description so reviewers can sanity-check.
+**Match reality.** The most common case: the page describes an older
+version of the feature. Update the prose and code samples to match
+HEAD. Cite the PR that changed things in your own PR description so
+reviewers can sanity-check.
 
 **Mark in-flux content.** If a feature is mid-rework, narrow the
 page's scope to what's stable. Use specific version references

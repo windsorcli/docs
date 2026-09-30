@@ -24,9 +24,17 @@ Banned words (Vale rejects these — list in `styles/Windsor/MarketingWords.yml`
 Hedges to drop (`Hedging.yml`): `basically`, `just`, `really`,
 `simply`, `essentially`, `obviously`, `clearly`, `of course`.
 
+Never write "shape" for structure, layout, format, schema, or
+signature — it's a lazy stand-in Vale can't catch. Avoid em-dashes in
+prose; when one shows up, restructure the sentence instead of trading
+it for a colon or semicolon in the same spot — that swaps the
+punctuation and keeps the tell. See
+[`docs-style`](.claude/skills/docs-style/SKILL.md) (the anti-voice
+section) for the full catalog and worked examples.
+
 ## 2. Page structure
 
-A general page (overview, how-to, concept) follows this shape:
+A general page (overview, how-to, concept) follows this structure:
 
 ````markdown
 ---
