@@ -62,7 +62,7 @@ dns:
 email: platform@example.com                 # required when public_domain is set
 ```
 
-Set `azure.region` to choose the region once. It's exported to every Terraform component as `TF_VAR_region`. Without it, the network, cluster, and backend modules each default independently (`eastus` for network and cluster, `eastus2` for the backend). To override a single component instead of the whole context, use a `contexts/azure-prod/terraform/<component>.tfvars` file (`region = "westus2"`, or `location` for the backend). See [Terraform reference](https://www.windsorcli.dev/reference/cli/terraform).
+Set `azure.region` to choose the region once. It's exported to every Terraform component as `TF_VAR_region`. Without it, the network, cluster, and backend modules each default independently (`eastus` for network and cluster, `eastus2` for the backend). To override a single component instead of the whole context, use a `contexts/azure-prod/terraform/<component>.tfvars` file (`region = "westus2"`, or `location` for the backend). See [Per-context overrides](../components/terraform.md#per-context-overrides).
 
 `azure.subscription_id`/`azure.tenant_id` activate Azure integration alongside (or instead of) `platform: azure`. Either is sufficient.
 
