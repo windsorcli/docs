@@ -12,7 +12,7 @@ flowchart TB
     direction LR
     Up["up<br/>VM + Terraform"] --> CN["configure network<br/>host route + DNS (sudo)"] --> Up2["up<br/>re-run: install Flux"] --> Down["down<br/>stop VM, keep state"]
   end
-  subgraph Cloud["Non-workstation (cloud / metal)"]
+  subgraph Cloud["Deployed (cloud, hypervisor, metal)"]
     direction LR
     Boot["bootstrap<br/>first run + backend"] --> Apply["apply<br/>reconcile"]
   end
@@ -106,7 +106,7 @@ Windsor never writes the `local` override to `windsor.yaml`. A later `bootstrap`
 |---|---|---|
 | Scaffold | [`init`](https://www.windsorcli.dev/reference/cli/commands/init) | Creates the context, writes `windsor.yaml`, marks the directory trusted. |
 | Workstation | [`up`](https://www.windsorcli.dev/reference/cli/commands/up) / [`down`](https://www.windsorcli.dev/reference/cli/commands/down) | Starts/stops the local VM and container runtime. Workstation contexts only. |
-| First-run | [`bootstrap`](https://www.windsorcli.dev/reference/cli/commands/bootstrap) | End-to-end install for non-workstation contexts. Two-phase apply when a `backend` component is in play. |
+| First-run | [`bootstrap`](https://www.windsorcli.dev/reference/cli/commands/bootstrap) | End-to-end install for deployed contexts. Two-phase apply when a `backend` component is in play. |
 | Install | [`apply`](https://www.windsorcli.dev/reference/cli/commands/apply) | Runs Terraform components, then installs the Flux blueprint. |
 | Inspect | [`plan`](https://www.windsorcli.dev/reference/cli/commands/plan) / [`show`](https://www.windsorcli.dev/reference/cli/commands/show) / [`explain`](https://www.windsorcli.dev/reference/cli/commands/explain) | Previews changes, prints rendered resources, traces values. |
 | Upgrade | [`upgrade`](https://www.windsorcli.dev/reference/cli/commands/upgrade) / [`upgrade cluster`](https://www.windsorcli.dev/reference/cli/commands/upgrade-cluster) / [`upgrade node`](https://www.windsorcli.dev/reference/cli/commands/upgrade-node) | Moves sources to a new version and reconciles; upgrades Talos nodes. |
@@ -114,7 +114,7 @@ Windsor never writes the `local` override to `windsor.yaml`. A later `bootstrap`
 | Tear down | [`destroy`](https://www.windsorcli.dev/reference/cli/commands/destroy) | Destroys live infrastructure (Terraform + Flux). |
 
 - [First project](../getting-started/first-project.md) — the hands-on walkthrough this page generalizes
-- [Contexts](../contexts/overview.md) — workstation vs non-workstation, switching contexts
-- [Workstation overview](../workstation/overview.md) — VM driver options and topology
+- [Contexts](../contexts/overview.md) — workstation and deployed contexts, switching contexts
+- [Workstation overview](../workstation/overview.md): the runtimes and what gets built
 - [Upgrade](../maintenance/upgrade.md) — moving a context to a newer blueprint version
 - [Destroy](../maintenance/destroy.md) — safety behaviors and locking on teardown

@@ -3,7 +3,7 @@ title: Azure
 description: Deploy a Windsor stack to Azure, with an AKS cluster on a dedicated VNet, Storage Account state, Azure DNS, and Flux-managed workloads.
 ---
 
-This guide stands up a production-style Windsor stack on Azure: a dedicated VNet, an [AKS](https://azure.microsoft.com/products/kubernetes-service) cluster, Terraform state in a Storage Account, and the `core` blueprint's services reconciled by Flux. It targets a **non-workstation context**: there is no local VM, so the lifecycle is `init` → `bootstrap` → `apply` → `destroy`. For the concepts behind those verbs, see [Lifecycle](../provisioning/workflow.md).
+This guide stands up a production-style Windsor stack on Azure: a dedicated VNet, an [AKS](https://azure.microsoft.com/products/kubernetes-service) cluster, Terraform state in a Storage Account, and the `core` blueprint's services reconciled by Flux. It targets a **deployed context**: there is no local VM, so the lifecycle is `init` → `bootstrap` → `apply` → `destroy`. For the concepts behind those verbs, see [Lifecycle](../provisioning/workflow.md).
 
 ## Prerequisites
 

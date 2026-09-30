@@ -190,7 +190,7 @@ windsor bootstrap --platform aws --blueprint ghcr.io/org/blueprint:v1.2.0
 
 When the blueprint includes a Terraform component representing the workstation itself (component id `workstation`), host and guest networking and DNS are deferred until after that component applies. A hook then configures host routes, guest networking, and DNS for the active platform (Colima or Docker), using the DNS address from the component's outputs when it is available.
 
-This is workstation-context behavior only; non-workstation contexts skip the callback.
+This is workstation-context behavior only; deployed contexts skip the callback.
 
 ### OpenTofu (experimental)
 

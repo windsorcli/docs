@@ -40,11 +40,19 @@ To switch contexts, run `windsor set context <context-name>`. You may also pass 
 
 Contexts usually map to an SDLC stage (`development`, `staging`, `production`), a slice of infrastructure (`admin`, `web`, `observability`), or both, like `web-staging`.
 
-## Workstation vs non-workstation
+## Workstation and deployed contexts
 
-A context named `local`, or starting with `local-`, is a **workstation context**. It runs a VM-backed Kubernetes cluster on your machine and uses [`windsor up`](https://www.windsorcli.dev/reference/cli/commands/up) and [`windsor down`](https://www.windsorcli.dev/reference/cli/commands/down). See [Workstation overview](../workstation/overview.md).
+There are some special considerations to keep in mind for contexts that represent a local workstation.
 
-Every other context is **non-workstation**: staging, production, anything on real cloud infrastructure. It has no local VM and uses [`windsor apply`](https://www.windsorcli.dev/reference/cli/commands/apply) and [`windsor destroy`](https://www.windsorcli.dev/reference/cli/commands/destroy) directly.
+A **workstation context**, named `local` or starting with `local-`, runs a Kubernetes cluster in a VM on your machine. Windsor starts and stops that VM. Every other context, like `staging` or `production`, is **deployed**. It targets a cloud, a hypervisor, or bare metal, so there's no VM to start and Windsor provisions the infrastructure directly.
+
+| | Workstation | Deployed |
+|---|---|---|
+| Cluster runs on | A VM on your machine | A cloud, hypervisor, or bare metal |
+| First run | [`windsor up`](https://www.windsorcli.dev/reference/cli/commands/up) | [`windsor bootstrap`](https://www.windsorcli.dev/reference/cli/commands/bootstrap) |
+| Tear down | [`windsor destroy`](https://www.windsorcli.dev/reference/cli/commands/destroy), then [`windsor down`](https://www.windsorcli.dev/reference/cli/commands/down) | `windsor destroy` |
+
+See [Workstation overview](../workstation/overview.md) for the runtimes and what gets built, and [Lifecycle](../provisioning/workflow.md) for how each path runs.
 
 ## Create a context
 
