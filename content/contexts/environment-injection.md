@@ -5,8 +5,6 @@ description: Windsor keeps your KUBECONFIG and cloud profile in sync with the ac
 
 Windsor manages a set of environment variables for the active context: `KUBECONFIG`, the cloud profile, and others. On a context switch they update on the next shell prompt, so `kubectl` and the cloud CLIs target the new context's cluster and account. It works like [direnv](https://github.com/direnv/direnv), except the variables follow the active context rather than the current directory.
 
-![Terminal: KUBECONFIG unset outside a trusted project, then set automatically on the next prompt after cd-ing into one, with no windsor command run by hand](../assets/environment-injection.gif)
-
 ## Set it up once
 
 Injection needs two things, each done once: the shell hook installed, and the project trusted.
