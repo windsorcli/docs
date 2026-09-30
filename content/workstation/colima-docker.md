@@ -1,117 +1,67 @@
 ---
 title: Colima + Docker
-description: Full local virtualization with Colima and Docker.
+description: Run a workstation context on Colima with Docker, with the supported systems, recommended resources, and what gets built.
 ---
 
-On macOS and Linux, [Colima](https://github.com/abiosoft/colima) wraps [Lima](https://github.com/lima-vm/lima) to give full virtualization on the platform's hypervisor. The result is a local environment that closely matches production: DNS to service IPs, full registry support, and a local Git server you can clone from another folder.
+Colima runs the cluster inside its own Linux VM, and Windsor adds a route so your machine can reach the cluster network directly. It's the closest workstation setup to production that still uses containers for nodes.
 
-## Comparison with Docker Desktop
+## Supported systems
 
-| Feature | Colima (full virtualization) | Docker Desktop |
-|---------|------------------------------|-----------------|
-| DNS | Routes to service IPs | Routes to localhost |
-| Docker registries | Full registry support | Full registry support (local: registry.test:5002) |
-| Local Git | Full support | Full support |
-| Kubernetes node type | Container host nodes | Container host nodes |
-| Device emulation | Filesystem only | Filesystem only |
-| Network | Addressable IP range, L2 LB | Localhost, port-forward, NodePort |
+macOS on Apple silicon, and Linux.
 
-## Prerequisites
+## Install
 
-Complete [First project](../getting-started/first-project.md). Then (Apple silicon, Linux):
+[Colima](https://github.com/abiosoft/colima#installation) wraps [Lima](https://lima-vm.io/) to start a Linux VM and run a container runtime inside it. Install it with its own instructions. Windsor writes a Colima profile for each context (`windsor-<context>`) and starts and stops the VM for you. On Apple silicon the VM uses Apple's virtualization framework, and elsewhere it uses QEMU.
+
+## Resources
+
+Windsor sizes the VM from the cluster you ask for:
+
+```text
+cpu    = (controlplanes × controlplane cpu) + (workers × worker cpu) + 1
+memory = (controlplanes × controlplane memory) + (workers × worker memory) + 3 GB
+```
+
+The extra 1 CPU and 3 GB cover the VM itself and the support containers. Windsor never goes below 2 CPUs and 4 GB, and gives the VM 100 GB of disk.
+
+For a single control plane that runs workloads, Windsor assumes 8 CPUs and 12 GB, so the default VM gets 9 CPUs and 15 GB. If that's more than the host can spare, `windsor up` warns. A VM larger than your CPU count, or memory beyond your total minus a 4 GB reserve, is what triggers it.
+
+To change the size, either set the node sizes in `contexts/local/values.yaml` and let the formula follow, or set the VM directly when you initialize:
+
+```bash
+windsor init local --vm-driver colima --vm-cpu 6 --vm-memory 10 --vm-disk 80
+```
+
+## Start it
 
 ```bash
 windsor init local --vm-driver colima
-windsor up                       # halts: "Run 'windsor configure network', then re-run 'windsor up'"
-windsor configure network        # host route + DNS (prompts for sudo)
-windsor up                       # re-run to install the blueprint
+windsor up                       # halts: the host needs a route to the cluster
+windsor configure network        # host route and DNS; prompts for sudo
+windsor up --wait
 ```
 
-Colima is VM-backed, so cluster reachability needs a host route in addition to the `*.test` DNS resolver entry. Because both need elevation and `up` won't prompt for sudo, the first `up` provisions what it can and then **halts**. Run `configure network` to install the host route and resolver entry, then re-run `up` to finish the install. Subsequent `up` runs don't repeat the step. Use `--dry-run` to preview or `--revert` to remove it.
+Both the route and the DNS rule need elevation, and `up` doesn't ask for it, so the first `up` stops and prints the command to run. Later runs don't repeat it.
 
-See [First project — VM driver](../getting-started/first-project.md) for other drivers.
+## What gets built
 
-## DNS
-
-The CLI configures your resolver so the reserved local domain (default `test`) points at CoreDNS. With Colima you can see real service IPs (for example, 10.5.0.3) in the ANSWER section:
-
-```bash
-dig @dns.test registry.test
+```mermaid
+flowchart TB
+  subgraph Host["Your machine"]
+    CLI["windsor · kubectl · docker"]
+    Route["host route + DNS rule<br/>*.test → service IPs"]
+  end
+  subgraph Lima["Colima VM (Lima)"]
+    subgraph Net["Docker · windsor-local · 10.5.0.0/16"]
+      Support["dns.test · registry mirrors · git.test"]
+      Node["controlplane-1<br/>Talos container"]
+    end
+  end
+  CLI -.->|DOCKER_HOST| Lima
+  Route -.->|routed to| Net
 ```
 
-To change the domain, set `dns.domain` in `values.yaml`.
-
-## Registries
-
-Full registry support means the environment runs **local registry caches (mirrors)** of major registries (GCR, GHCR, Quay, Docker Hub, `registry.k8s.io`), so image pulls use local mirrors. A generic local registry is also available. Local registries run as containerized services. Common endpoints:
-
-| Registry | Local endpoint |
-|----------|-----------------|
-| GCR, GHCR, Quay, Docker Hub, `registry.k8s.io` | http://*.test:5000 |
-| Local generic | `http://registry.test:5000` |
-
-Add mirrors in `windsor.yaml`:
-
-```yaml
-docker:
-  registries:
-    1234567890.dkr.ecr.us-east-1.amazonaws.com:
-      remote: https://1234567890.dkr.ecr.us-east-1.amazonaws.com
-```
-
-`REGISTRY_URL` is set automatically. Cache lives in `.windsor/.docker-cache`.
-
-## Build ID
-
-```bash
-windsor build-id                    # current build ID
-windsor build-id --new              # generate new ID
-```
-
-Format: `YYMMDD.RANDOM.#`. Use with the local registry:
-
-```bash
-BUILD_ID=$(windsor build-id --new)
-docker build -t ${REGISTRY_URL}/myapp:$BUILD_ID .
-docker push ${REGISTRY_URL}/myapp:$BUILD_ID
-```
-
-## Local GitOps
-
-[git-livereload](https://github.com/windsorcli/git-livereload) serves your repo at `http://git.test`. Flux reconciles from it; a webhook speeds up reconciliation. From another folder (Colima only):
-
-```bash
-git clone http://local@git.test/git/my-project
-```
-
-## Kubernetes cluster
-
-A container-based cluster runs locally (for example, [Sidero Talos](https://github.com/siderolabs/talos)). Configure in `windsor.yaml`:
-
-```yaml
-cluster:
-  enabled: true
-  driver: talos
-  controlplanes:
-    count: 1
-    cpu: 2
-    memory: 2
-  workers:
-    count: 1
-    cpu: 4
-    memory: 4
-    hostports:
-    - 80:30080/tcp
-    - 443:30443/tcp
-    # ...
-    volumes:
-    - ${project_root}/.volumes:/var/mnt/local
-```
-
-Kubeconfig: `contexts/local/.kube/config`; `KUBECONFIG` is set automatically. List nodes:
-
-```bash
-kubectl get nodes
-```
-
-The default stack includes Istio BookInfo. Visit `http://bookinfo.test:8080` and `https://bookinfo.test:8443` (or `:80`/`:443` if hostports are set).
+- **The Docker daemon lives in the VM.** `DOCKER_HOST` points your `docker` commands at it. The nodes and support containers join the `windsor-local` bridge, as described in the [overview](overview.md#what-every-workstation-builds).
+- **Real service IPs.** The host route makes `10.5.0.0/16` reachable from your machine, and `*.test` names resolve to addresses on it. You can open a service by its cluster IP, and a layer 2 load balancer works.
+- **A git server you can clone from.** `git.test` serves your project, so another folder can clone it: `git clone http://local@git.test/git/<project>`.
+- **No block devices.** Nodes are containers, so storage is filesystem-only. [Colima + Incus](colima-incus.md) gives you block devices.

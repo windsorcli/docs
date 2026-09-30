@@ -25,6 +25,7 @@ Jsonnet
 Kustomize
 Kustomization
 kustomizations
+Kyverno
 mDNS
 OpenTofu
 Renovate

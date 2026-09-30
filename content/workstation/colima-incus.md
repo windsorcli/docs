@@ -1,43 +1,55 @@
 ---
 title: Colima + Incus
-description: Run Windsor locally with Colima and Incus (LXC).
+description: Run a workstation context on Colima with Incus, with the supported systems, recommended resources, and what gets built.
 ---
 
-You can run Windsor's local workstation using [Colima](https://github.com/abiosoft/colima) with [Incus](https://linuxcontainers.org/incus/) (LXC) as the container runtime instead of Docker. This option is useful when you want full virtualization with an LXC-based stack.
+Colima + Incus swaps the container nodes for virtual machines. It's the closest workstation setup to a real datacenter, and the slowest, because the nodes are VMs running inside the Colima VM.
 
-## Comparison with other runtimes
+## Supported systems
 
-| Feature | Colima + Incus | Colima + Docker | Docker Desktop |
-|---------|----------------|-----------------|-----------------|
-| DNS | Routes to service IPs | Routes to service IPs | Routes to localhost |
-| Docker registries | Full registry support (LXC/Incus image semantics) | Full registry support | Full registry support (local: registry.test:5002) |
-| Local Git | Full support | Full support | Full support |
-| Kubernetes node type | VM host nodes | Container host nodes | Container host nodes |
-| Device emulation | Block devices | Filesystem only | Filesystem only |
-| Network | Addressable IP range, L2 LB | Addressable IP range, L2 LB | Localhost, port-forward, NodePort |
+macOS on Apple silicon with nested virtualization, and Linux. You need `limactl` 2.0.3 or newer. Older versions can hang at "Terminal is not available".
 
-In all cases, full registry support means local **registry caches (mirrors)** of major registries (GCR, GHCR, Quay, Docker Hub, `registry.k8s.io`). Configure mirrors in `windsor.yaml`; see [Colima + Docker — Registries](colima-docker.md#registries) for details (endpoints differ by runtime).
+## Install
 
-## When to use
+[Colima](https://github.com/abiosoft/colima#installation) wraps [Lima](https://lima-vm.io/) to start a Linux VM. With this driver Windsor configures that VM to run [Incus](https://linuxcontainers.org/incus/), the LXC and VM manager, instead of Docker, and turns on nested virtualization so Incus can start VMs inside it. Install Colima and Incus with their own instructions. Windsor writes the Colima profile (`windsor-<context>`) and starts and stops the VM.
 
-- You prefer Incus/LXC over Docker for local workloads.
-- You need full virtualization (like [Colima + Docker](colima-docker.md)) with a different runtime.
+## Resources
 
-## Setup
+The VM is sized the same way as [Colima + Docker](colima-docker.md#resources): the node resources plus 1 CPU and 3 GB, with a floor of 2 CPUs and 4 GB and 100 GB of disk. The default one-node cluster gets a 9 CPU, 15 GB VM.
 
-Install Colima and Incus, then (Apple silicon with nested virtualization, Linux):
+To change it, set `--vm-cpu`, `--vm-memory`, or `--vm-disk` when you initialize, or set the node sizes in `contexts/local/values.yaml`.
+
+## Start it
 
 ```bash
 windsor init local --vm-driver colima-incus
-windsor up                       # halts for network setup
-windsor configure network        # host route + DNS (prompts for sudo)
-windsor up                       # re-run to install the blueprint
+windsor up                       # halts: the host needs a route to the cluster
+windsor configure network        # host route and DNS; prompts for sudo
+windsor up --wait
 ```
 
-Like [Colima + Docker](colima-docker.md), the `colima-incus` driver runs on a Colima VM, so it needs a host route plus the DNS resolver entry. The first `up` halts because both need elevation; run `configure network`, then re-run `up` to finish.
+The first `up` stops because the route and DNS rule need elevation. Run `configure network`, then `up` again to finish.
 
-Exact install steps depend on your Colima and Windsor version; refer to the [CLI repo](https://github.com/windsorcli/cli) and [Colima documentation](https://github.com/abiosoft/colima). See [First project — VM driver](../getting-started/first-project.md) for all drivers.
+## What gets built
 
-## Differences from Colima + Docker
+```mermaid
+flowchart TB
+  subgraph Host["Your machine"]
+    CLI["windsor · kubectl"]
+    Route["host route + DNS rule<br/>*.test → service IPs"]
+  end
+  subgraph Lima["Colima VM (Lima) · nested virtualization"]
+    subgraph Net["LXC bridge · 10.5.0.0/16"]
+      Support["dns.test · registry mirrors · git.test"]
+      Node["Incus VM<br/>Talos node"]
+    end
+  end
+  Route -.->|routed to| Net
+  CLI -.-> Node
+```
 
-Runtime and container semantics differ (LXC vs Docker). Registry usage, build ID, and Kubernetes behavior may vary. For the most common local-dev workflow (Docker images, local registry, Kubernetes), [Colima + Docker](colima-docker.md) is the primary supported path.
+- **Nodes are VMs.** Each Kubernetes node is an Incus VM instance running Talos, not a container. DNS, the registry mirrors, and the git mirror run alongside it, as described in the [overview](overview.md#what-every-workstation-builds).
+- **An LXC bridge.** The private network is an Incus bridge instead of a Docker one. The host route and DNS rule work the same as with Colima + Docker, so `*.test` resolves to service IPs and a layer 2 load balancer works.
+- **Block devices.** Because the nodes are VMs, they can attach block devices, which storage drivers and CSIs need.
+
+Docker image semantics differ here. The registry mirrors still work, but for the most common local workflow (Docker images, a local registry, Kubernetes), [Colima + Docker](colima-docker.md) is the better-supported path.

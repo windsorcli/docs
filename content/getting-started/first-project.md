@@ -5,7 +5,7 @@ description: Install the CLI, start a project, and run your first local stack.
 
 Install Windsor, start a project, and launch a local Kubernetes cluster with a single worker and controlplane.
 
-Recommended: 8 CPU cores, 8GB RAM, 60GB free storage.
+The cluster needs about 6 CPU cores and 14 GB of RAM, plus 60 GB of free storage, on top of what your system already uses.
 
 ## 1. Install the CLI
 
@@ -107,5 +107,5 @@ windsor down
 
 - [Lifecycle](../provisioning/workflow.md): the commands behind what you just ran, and how it differs for a cloud or metal context
 - [Contexts](../contexts/overview.md): multiple environments and switching
-- [Workstation](../workstation/colima-docker.md): local virtualization (Colima, Docker Desktop)
+- [Workstation](../workstation/overview.md): the local runtimes and what `windsor up` builds
 - [Components](../components/terraform.md): adding your own Terraform and Kustomize to a consumed blueprint
