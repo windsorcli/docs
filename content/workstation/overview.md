@@ -19,7 +19,7 @@ The cluster can be hosted three ways. They differ in what the cluster nodes are 
 | Block devices | Filesystem only | Filesystem only | Yes |
 | Closest to production | Least | Middle | Most |
 
-`windsor init local` picks Docker Desktop on macOS and Windows, and Docker on Linux. Docker Desktop is the quickest to set up and suits application work. Choose Colima + Docker when you're working on networking, DNS, load balancing, or a CNI. Choose Colima + Incus for storage and CSI work, or when you want constraints close to a real datacenter. Nested virtualization makes it the slowest of the three.
+`windsor init local` picks Docker Desktop on macOS and Windows, and Docker on Linux. Docker Desktop is the quickest to set up and suits application work. Choose Colima + Docker when you're working on networking, DNS, load balancing, or a CNI. Choose Colima + Incus for storage and CSI work, or when you want realistic hosts. Nested virtualization makes it the slowest of the three.
 
 On Linux with Docker Engine on the host, use `--vm-driver docker`. It uses the host's Docker Engine directly, with no VM in between.
 
