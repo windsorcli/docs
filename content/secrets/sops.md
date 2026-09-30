@@ -3,11 +3,21 @@ title: SOPS
 description: Encrypt secrets to a file with SOPS, commit them safely, and reference them in a context's environment.
 ---
 
-Windsor reads secrets from a `secrets.yaml` encrypted with [SOPS](https://github.com/getsops/sops), so the encrypted file can live in git. Add a `sops.yaml` to your project, then start with a plaintext file locally:
+Windsor reads secrets from a `secrets.yaml` encrypted with [SOPS](https://github.com/getsops/sops), so the encrypted file can live in git. Add a `sops.yaml` to your project, create the file in plaintext, and [encrypt it](#encrypt-and-commit) before Windsor loads it:
 
 ```bash
 $EDITOR contexts/<context>/secrets.yaml
 ```
+
+Enable the provider in `contexts/<context>/windsor.yaml`. Without it, `sops.*` references fail with `no provider found for vault "sops"`:
+
+```yaml
+secrets:
+  sops:
+    enabled: true
+```
+
+The same key under `contexts.<name>` in the project's root `windsor.yaml` is not read ([windsorcli/cli#3469](https://github.com/windsorcli/cli/issues/3469)).
 
 Nested keys flatten to dot-path lookups, so a `streaming: {criterion: {password: ...}}` entry resolves as `streaming.criterion.password`. Reference it in a context's `environment` in `windsor.yaml`:
 
@@ -21,7 +31,7 @@ contexts:
 
 ## Encrypt and commit
 
-`secrets.yaml` is auto-git-ignored, the same as `.env`, and holds local-only or pre-encryption values. Encrypt it before committing:
+`secrets.yaml` is auto-git-ignored, the same as `.env`. Encrypt it before committing or loading it:
 
 ```bash
 sops -e contexts/<context>/secrets.yaml > contexts/<context>/secrets.enc.yaml

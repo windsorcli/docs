@@ -114,7 +114,7 @@ Raising `cluster.workers.count` adds VMs on the next `apply`. There's no autosca
 windsor destroy --confirm=hyperv-prod
 ```
 
-`destroy` removes the Flux kustomizations, then the VMs and virtual switch in reverse order. It cleans up VHDs and downloaded images under `hyperv.base_dir` along with their owning VM. The exception is a switch you didn't let Windsor create (`create_network: false` against an existing switch): Windsor leaves that one alone.
+`destroy` removes the Flux kustomizations, then the VMs and virtual switch in reverse order. It removes the VHDs and CIDATA seed ISOs under `hyperv.base_dir` along with their owning VM. The downloaded Talos ISO is kept in `hyperv.base_dir/images`.
 
 ## Troubleshooting
 

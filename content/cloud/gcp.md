@@ -35,7 +35,7 @@ flowchart TB
   Addons -.TLS + records.-> CDNS
 ```
 
-Nodes are always private (`enable_private_nodes: true`); the control plane's API endpoint is public by default, open to `0.0.0.0/0`. There's no schema knob to restrict it yet. Persistent Disk CSI and `metrics-server` ship built into GKE, so Windsor suppresses its own `metrics-server` copy for this platform rather than run two. Disks use Google's default managed encryption; there's no customer-managed-key wiring yet, unlike AWS and Azure.
+Nodes are always private (`enable_private_nodes: true`); the control plane's API endpoint is public by default, open to `0.0.0.0/0`. There's no schema knob to restrict it yet. Persistent Disk CSI and `metrics-server` ship built into GKE, so Windsor suppresses its own `metrics-server` copy for this platform rather than run two. Disks use Google's default managed encryption; there's no customer-managed-key wiring for disks yet, unlike AWS and Azure. The GCS state bucket supports an optional `enable_cmek` through a raw tfvars override.
 
 Unlike AWS and Azure, there's no CNI choice: GKE always runs Dataplane V2, Google's managed Cilium integration, wired inline on the cluster module. `cluster.cni.driver` has nothing to select here, and Windsor's own `cni`/Cilium kustomize component never installs on this platform.
 
@@ -74,7 +74,7 @@ Common additional knobs:
 | `topology: ha` | The system pool grows from 1 node to 2 (a leader-election standby, not quorum), and every pool becomes eligible to spread across all of the VPC's zones instead of just one. Doesn't by itself change `cluster.pools` counts; see [Node pools](#node-pools). |
 | `observability.enabled: true` | Grafana, Prometheus, and the logging stack. |
 
-`dns.private_domain` and `gateway.access: private` have no effect on this platform yet, because GCP has no private-zone wiring, unlike AWS and Azure.
+`dns.private_domain` creates a VPC-linked Cloud DNS private zone. With `gateway.access: private` also set, external-dns publishes to that zone and the gateway gets an internal load balancer. The internal gateway needs both settings.
 
 ### Node pools
 

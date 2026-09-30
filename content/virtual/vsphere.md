@@ -52,14 +52,13 @@ windsor set context vsphere-prod
 
 ## 2. Configure values
 
-Set vCenter credentials as environment variables. Windsor exports `VSPHERE_SERVER`/`VSPHERE_USER`/`VSPHERE_ALLOW_UNVERIFIED_SSL` from the `vsphere.*` block below, and the password from a `${secret(...)}` reference. Neither ever lands in `values.yaml` in plaintext:
+Windsor exports `VSPHERE_SERVER`, `VSPHERE_USER`, and `VSPHERE_ALLOW_UNVERIFIED_SSL` from the `server`, `user`, and `insecure` keys of the `vsphere.*` block below. The password is not a config key. Provide it as `VSPHERE_PASSWORD` in your shell, or in the context's `environment` from a secrets provider such as [SOPS](../secrets/sops.md) or [1Password](../secrets/1password.md), so it never lands in `values.yaml`:
 
 ```yaml
 platform: vsphere
 vsphere:
   server: vcenter.plant.local
   user: administrator@vsphere.local
-  password: ${secret("MyVault", "vsphere", "password")}
   datacenter: dc-prod
   cluster: cluster-01
   datastore: datastore-01
@@ -91,12 +90,17 @@ Other common knobs:
 vSphere VMs get real routed IPs on your network, so an in-cluster load balancer works the way it would on bare metal. `kube-vip` in ARP mode is the usual choice for a plant network. It needs no switch configuration, just a reserved IP range on the same subnet as the nodes:
 
 ```yaml
+cluster:
+  cni:
+    driver: flannel
 network:
   loadbalancer_driver: kube-vip
   loadbalancer_ips:
     start: 10.5.0.100
     end: 10.5.0.120
 ```
+
+The load balancer isn't installed under the default `cilium` CNI, so the example also sets `cluster.cni.driver` to `flannel`.
 
 MetalLB (also ARP mode) is supported as an alternative.
 

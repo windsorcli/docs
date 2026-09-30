@@ -9,7 +9,7 @@ Composition turns a base template and a set of facets into the blueprint Windsor
 
 ```mermaid
 flowchart LR
-  OCI["OCI sources<br/>deploy: true"] --> Base["base template<br/>_template/blueprint.yaml"]
+  OCI["installed sources<br/>install: true"] --> Base["base template<br/>_template/blueprint.yaml"]
   Base --> Facets["facets<br/>ordinal order, when-gated"]
   Facets --> User["context blueprint<br/>user overrides"]
   User --> Result["composed blueprint<br/>windsor show blueprint"]
@@ -17,12 +17,12 @@ flowchart LR
 
 Windsor builds the final blueprint in four layers:
 
-1. **OCI sources with `deploy: true`**: components from these sources are merged. Sources with `deploy: false` are index-only; their components aren't merged but components elsewhere can reference them via `source: <name>`. Non-OCI sources (Git URLs) are always index-only.
+1. **Sources with `install: true`**: components from these sources are merged. Sources with `install: false` are index-only; their components aren't merged but components elsewhere can reference them via `source: <name>`.
 2. **Base template**: `_template/blueprint.yaml` merges in full.
 3. **Facets**: processed in ordinal order, with strategies and `when` expressions applied.
 4. **User blueprint**: `contexts/<name>/blueprint.yaml` overrides without filtering. Components from earlier layers remain unless this layer sets `destroy: false` or omits them by name when the merge strategy is `replace`. See [Facets — merge strategies](../blueprints/facets.md).
 
-Only OCI sources can have their components merged; the `deploy` flag only applies to OCI sources and defaults to `true` when omitted.
+`install` defaults to `true` for OCI sources and applies only to them: `install: true` on a Git or local-path source fails composition with "install is only supported for OCI sources".
 
 ## CRD layers
 

@@ -14,10 +14,10 @@ contexts:
         vaults:
           personal:
             url: my.1password.com
-            vault: "Personal"
+            name: "Personal"
           development:
             url: my-company.1password.com
-            vault: "Development"
+            name: "Development"
 ```
 
 Reference an item in a context's `environment`:
@@ -32,13 +32,7 @@ environment:
 
 ## Caching
 
-Secrets are cached in memory for the session. To force a refresh, start a new shell, or set:
-
-**Bash:** `NO_CACHE=true windsor init`
-
-**PowerShell:** `$env:NO_CACHE = "true"; windsor init`
-
-Passing `--no-cache` on any command does the same for that run; see [Global flags](https://www.windsorcli.dev/reference/cli/global-flags).
+Secrets are cached in memory for the session. To force a refresh, start a new shell.
 
 ## Troubleshooting
 

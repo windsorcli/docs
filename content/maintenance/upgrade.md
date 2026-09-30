@@ -9,7 +9,7 @@ description: Moving a running context to a newer blueprint version and reconcili
 windsor upgrade --yes
 ```
 
-With no flags, it moves every declared OCI source to its latest stable tag. It then applies Terraform, installs the updated Flux blueprint, waits for it to become ready, and prunes any kustomization the new blueprint no longer declares. `--yes` is required whenever the run would prune something; without it, `upgrade` stops and shows what it would remove first. `apply --prune` does the same pruning on a plain apply, for that behavior without also moving source versions.
+With no flags, it moves every declared OCI source to its latest stable tag. It then applies Terraform, installs the updated Flux blueprint, waits for it to become ready, and prunes any kustomization the new blueprint no longer declares. `--yes` is required on every run; without it, `upgrade` exits with an error and points to `windsor plan` to preview the change. `apply --prune` does the same pruning on a plain apply, for that behavior without also moving source versions.
 
 Move one source instead of all of them with `--source name=url`, which persists to `blueprint.yaml`:
 

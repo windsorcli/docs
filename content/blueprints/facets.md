@@ -53,7 +53,7 @@ Three blocks share the name `pki_effective` here, each contributing under its ow
 
 ### Merge precedence
 
-Within one facet, later entries win: the last block whose `when:` matches is the one that applies, same as the `pki_effective` example above. Across facets, the facet that composes later wins, the same rule `terraform:` and `kustomize:` entries already follow (see [Ordinals](#ordinals)). `strategy: replace` or `strategy: remove` change that behavior for one block, but the default (`merge`) is right for almost every case.
+Within one facet, matching blocks with the same name apply in order. Map values deep-merge; for a scalar or list, the last block whose `when:` matches wins, as in the `pki_effective` example above. Across facets, the higher ordinal takes precedence, the same rule `terraform:` and `kustomize:` entries follow (see [Ordinals](#ordinals)), and the default `merge` strategy deep-merges maps the same way. `strategy: replace` or `strategy: remove` change that for one block; `merge` is right for almost every case.
 
 ### Evaluation order
 

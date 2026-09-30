@@ -86,7 +86,7 @@ Set the backend in the context's `windsor.yaml`:
 ```yaml
 terraform:
   backend:
-    type: s3              # local | s3 | kubernetes | azurerm
+    type: s3              # local | s3 | kubernetes | azurerm | gcs
     s3:
       bucket: my-tf-state
       key: contexts/staging
@@ -101,8 +101,9 @@ State is keyed per-component and isolated within a single context. Windsor write
 |----------|-----------------|
 | `aws` | `s3` |
 | `azure` | `azurerm` |
-| `metal`, `docker`, `incus` | `kubernetes` (each component's state is stored as a Secret in the cluster) |
-| `gcp`, `none`, unset | not defaulted (effectively `local`) |
+| `gcp` | `gcs` |
+| `metal`, `docker`, `incus`, `hetzner`, `hyperv`, `vsphere` | `kubernetes` (each component's state is stored as a Secret in the cluster) |
+| `none`, unset | not defaulted (effectively `local`) |
 
 Override it at init with `--backend`, with `--set terraform.backend.type=...` on `bootstrap`, or by editing `windsor.yaml` directly.
 

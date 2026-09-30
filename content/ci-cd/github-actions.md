@@ -17,7 +17,7 @@ The [Windsor GitHub Action](https://github.com/windsorcli/action) installs and c
 
 `ref` defaults to the action's own pinned CLI release. `context` sets the context every later step runs against; `install-only: true` skips context init and environment injection if you only need the binary on `PATH`. Every sub-action below expects `windsor` already installed this way. None of them install the CLI, and each fails fast with an actionable message if it can't find one on `PATH`.
 
-Every sub-action, including this one, emits a `context` output (`windsor get context` after the command runs), so a later step can label an artifact or log line without an extra call.
+Every sub-action emits a `context` output (`windsor get context` after the command runs), so a later step can label an artifact or log line without an extra call.
 
 ## Cloud authentication
 
@@ -37,9 +37,8 @@ Only the inputs for your platform are required; leave the rest unset. Each platf
 | `aws` | [`aws-actions/configure-aws-credentials`](https://github.com/aws-actions/configure-aws-credentials) | `aws-role-arn`, `aws-region` |
 | `azure` | [`azure/login`](https://github.com/Azure/login) + [`azure/use-kubelogin`](https://github.com/Azure/use-kubelogin) | `azure-client-id`, `azure-tenant-id`, `azure-subscription-id` |
 | `gcp` | [`google-github-actions/auth`](https://github.com/google-github-actions/auth) + `gke-gcloud-auth-plugin` | `gcp-workload-identity-provider`, `gcp-service-account` |
-| `hetzner` | a plain `HCLOUD_TOKEN` env var | `hetzner-token` |
 
-A platform that needs no cloud credentials (`none`, `docker`, `incus`, `metal`, `hyperv`, `vsphere`) is a no-op. An unrecognized platform, or a missing required input for the detected one, fails immediately rather than surfacing as an opaque auth error later.
+A platform that needs no cloud credentials (`none`, `docker`, `incus`, `metal`, `hyperv`, `vsphere`) is a no-op. An unrecognized platform, `hetzner` (which has no OIDC and needs `HCLOUD_TOKEN` set directly), or a missing required input for the detected one fails immediately rather than surfacing as an opaque auth error later.
 
 ### Setting up the trust relationship
 
@@ -48,7 +47,7 @@ This action only removes the per-platform `if:` branching. It still expects the 
 - AWS: an IAM OIDC identity provider trusting `token.actions.githubusercontent.com`, and a role with a trust policy scoped to your repo (and branch, if you want that granularity). See [`aws-actions/configure-aws-credentials`](https://github.com/aws-actions/configure-aws-credentials#sample-iam-role-cloudformation-template).
 - Azure: a federated credential on an app registration, scoped to the repo and ref. See [`azure/login`](https://github.com/Azure/login#login-with-openid-connect-oidc-recommended).
 - GCP: a Workload Identity Pool and provider trusting GitHub's OIDC issuer, attached to a service account. See [`google-github-actions/auth`](https://github.com/google-github-actions/auth#setting-up-workload-identity-federation).
-- Hetzner: no OIDC. `hetzner-token` is a plain API token from a repo secret, with no short-lived-credential option.
+- Hetzner: no OIDC, and `cloud-auth` doesn't handle it. Export `HCLOUD_TOKEN` from a repo secret through `$GITHUB_ENV`. There is no short-lived-credential option.
 
 Job permissions need `id-token: write` for the OIDC-based platforms (AWS, Azure, GCP). Without it, the upstream action has nothing to exchange.
 

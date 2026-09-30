@@ -31,10 +31,10 @@ Reference OCI blueprints in your blueprint sources:
 sources:
   - name: shared-blueprint
     url: oci://ghcr.io/myorg/myblueprint:v1.0.0
-    deploy: true   # default for OCI sources; set false to reference without merging components
+    install: true   # default for OCI sources; set false to reference without merging components
 ```
 
-Windsor downloads the artifact, extracts the template, processes [facets](facets.md), and validates config and CLI version. OCI sources with `deploy: true` (default) have their Terraform and Kustomize components merged. With `deploy: false` the blueprint is index-only: components elsewhere can reference it via `source: <name>`, but its own components don't get merged. See [Blueprint templates — Composition order](templates.md#composition-order).
+Windsor downloads the artifact, extracts the template, processes [facets](facets.md), and validates config and CLI version. OCI sources with `install: true` (the default for OCI) have their Terraform and Kustomize components merged. With `install: false` the blueprint is index-only: components elsewhere can reference it via `source: <name>`, but its own components don't get merged. See [Blueprint templates — Composition order](templates.md#composition-order).
 
 ## Caching and private registries
 
