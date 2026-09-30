@@ -3,7 +3,7 @@ title: Colima + Incus
 description: Run a workstation context on Colima with Incus, with the supported systems, recommended resources, and what gets built.
 ---
 
-Colima + Incus swaps the container nodes for virtual machines. It's the closest workstation setup to realistic hosts, and the slowest, because the nodes are VMs running inside the Colima VM.
+Colima + Incus swaps the container nodes for virtual machines, which behave more like real servers than containers do. It's also the slowest of the three, because the nodes are VMs running inside the Colima VM.
 
 ## Supported systems
 
