@@ -42,4 +42,4 @@ The output names each contributing facet or context file with its `file:line`, e
 
 - [`windsor plan`](https://www.windsorcli.dev/reference/cli/commands/plan), [`windsor show`](https://www.windsorcli.dev/reference/cli/commands/show), [`windsor explain`](https://www.windsorcli.dev/reference/cli/commands/explain)
 - [Explain](explain.md) — reading an explain trace in detail
-- [Command model](../provisioning/workflow.md) — where `plan` fits in the apply flow
+- [Command model](../provisioning/workflow.md): where `plan` fits in the apply flow

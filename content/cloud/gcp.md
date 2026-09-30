@@ -35,9 +35,9 @@ flowchart TB
   Addons -.TLS + records.-> CDNS
 ```
 
-Nodes are always private (`enable_private_nodes: true`); the control plane's API endpoint is public by default, open to `0.0.0.0/0`. There's no schema knob to restrict it yet. Persistent Disk CSI and `metrics-server` ship built into GKE — Windsor suppresses its own `metrics-server` copy for this platform rather than run two. Disks use Google's default managed encryption; there's no customer-managed-key wiring yet, unlike AWS and Azure.
+Nodes are always private (`enable_private_nodes: true`); the control plane's API endpoint is public by default, open to `0.0.0.0/0`. There's no schema knob to restrict it yet. Persistent Disk CSI and `metrics-server` ship built into GKE, so Windsor suppresses its own `metrics-server` copy for this platform rather than run two. Disks use Google's default managed encryption; there's no customer-managed-key wiring yet, unlike AWS and Azure.
 
-Unlike AWS and Azure, there's no CNI choice: GKE always runs Dataplane V2, Google's managed Cilium integration, wired inline on the cluster module. `cluster.cni.driver` has nothing to select here — Windsor's own `cni`/Cilium kustomize component never installs on this platform.
+Unlike AWS and Azure, there's no CNI choice: GKE always runs Dataplane V2, Google's managed Cilium integration, wired inline on the cluster module. `cluster.cni.driver` has nothing to select here, and Windsor's own `cni`/Cilium kustomize component never installs on this platform.
 
 ## 1. Create the context
 
@@ -63,7 +63,7 @@ dns:
 email: platform@example.com              # required when public_domain is set
 ```
 
-`gcp.project_id` is required — every GCP API call needs it, and there's no fallback. `gcp.region` defaults to `us-central1` when unset; the network module reads it directly, and the cluster module derives its own region from network's output rather than `gcp.region` again, so cluster and network always colocate regardless of how region was set.
+`gcp.project_id` is required. Every GCP API call needs it, and there's no fallback. `gcp.region` defaults to `us-central1` when unset; the network module reads it directly, and the cluster module derives its own region from network's output rather than `gcp.region` again, so cluster and network always colocate regardless of how region was set.
 
 When `dns.public_domain` is set, Windsor provisions a public Cloud DNS zone, wires `external-dns` to manage records in it, and issues real TLS certificates through Let's Encrypt (ACME) using a DNS-01 challenge scoped to that zone via Workload Identity. `email` is required in that case.
 
@@ -74,7 +74,7 @@ Common additional knobs:
 | `topology: ha` | The system pool grows from 1 node to 2 (a leader-election standby, not quorum), and every pool becomes eligible to spread across all of the VPC's zones instead of just one. Doesn't by itself change `cluster.pools` counts; see [Node pools](#node-pools). |
 | `observability.enabled: true` | Grafana, Prometheus, and the logging stack. |
 
-`dns.private_domain` and `gateway.access: private` have no effect on this platform yet — GCP has no private-zone wiring, unlike AWS and Azure.
+`dns.private_domain` and `gateway.access: private` have no effect on this platform yet, because GCP has no private-zone wiring, unlike AWS and Azure.
 
 ### Node pools
 
@@ -93,9 +93,9 @@ cluster:
 
 `count` is required on every pool; `autoscaling` is optional and defaults on (min 1, max 3, seeded from `count`) for every class except `system`. When `cluster.pools` is unset, the cluster falls back to one autoscaling `general` pool (1-3 nodes). Each class resolves to a fallback-ordered machine-type list, so an autoscaling pool tolerates single-type capacity shortages by falling over to the next entry; a fixed-count pool only ever uses the first.
 
-GKE's system pool doesn't go through `cluster.pools` at all — it's a separate, always-created pool wired inline on the cluster module (`e2-standard-2`, fixed at 1 node, 2 under `topology: ha`), the same way AKS carries its own built-in system pool outside `cluster.pools`. A `cluster.pools.system` entry creates a second, additional pool rather than resizing it. Changing the inline system pool's size or machine type needs a raw `contexts/<context>/terraform/cluster.tfvars` setting `system_node_pool` directly — there's no portable schema path for it yet.
+GKE's system pool doesn't go through `cluster.pools` at all. It's a separate, always-created pool wired inline on the cluster module (`e2-standard-2`, fixed at 1 node, 2 under `topology: ha`), the same way AKS carries its own built-in system pool outside `cluster.pools`. A `cluster.pools.system` entry creates a second, additional pool rather than resizing it. Changing the inline system pool's size or machine type needs a raw `contexts/<context>/terraform/cluster.tfvars` setting `system_node_pool` directly. There's no portable schema path for it yet.
 
-`topology: ha` widens `node_locations` from one zone to every zone the VPC exposes, for the system pool and every `cluster.pools` entry alike. It doesn't raise a `cluster.pools` `count` or `autoscaling` minimum on its own — a `topology: ha` cluster with the default pool still starts at one `general` node, just now eligible to land in any zone instead of one. That eligibility alone isn't node-level HA: if that node's zone goes down, the autoscaler has to notice and provision a replacement, rather than a standby already running. For genuine node-level redundancy, pair `topology: ha` with an explicit multi-node `count` or `autoscaling.min`:
+`topology: ha` widens `node_locations` from one zone to every zone the VPC exposes, for the system pool and every `cluster.pools` entry alike. It doesn't raise a `cluster.pools` `count` or `autoscaling` minimum on its own. A `topology: ha` cluster with the default pool still starts at one `general` node, now eligible to land in any zone. That eligibility alone isn't node-level HA: if that node's zone goes down, the autoscaler has to notice and provision a replacement, rather than a standby already running. For genuine node-level redundancy, pair `topology: ha` with an explicit multi-node `count` or `autoscaling.min`:
 
 ```yaml
 topology: ha
@@ -158,14 +158,14 @@ windsor destroy --confirm=gcp-prod
 ## Troubleshooting
 
 - **`bootstrap` fails on the backend stage.** Confirm credentials are active (`gcloud auth application-default print-access-token`) and `gcp.project_id` is set. The backend stack runs first; a credential or project error stops everything else.
-- **`gcp.project_id` validation error.** The GCP facet requires it explicitly — there's no environment-variable fallback the way `AWS_REGION` works for AWS.
+- **`gcp.project_id` validation error.** The GCP facet requires it explicitly. Unlike `AWS_REGION` for AWS, there's no environment-variable fallback.
 - **TLS certificates stay pending.** ACME needs the public zone reachable; verify the registrar's NS records point at the Cloud DNS zone, that `email` is set, and that cert-manager's Workload Identity binding landed (`windsor show kustomization pki-install`).
-- **A `cluster.pools.system` entry didn't change the system pool.** GKE's system pool is wired inline on the cluster module, not reachable through `cluster.pools` — see [Node pools](#node-pools).
+- **A `cluster.pools.system` entry didn't change the system pool.** GKE's system pool is wired inline on the cluster module, not reachable through `cluster.pools`. See [Node pools](#node-pools).
 
 ## Where to next
 
-- [Command model](../provisioning/workflow.md) — the full command model
-- [Destroy](../maintenance/destroy.md) — safety behaviors and locking on teardown
-- [Terraform](../components/terraform.md) — state backends, the bootstrap two-phase apply, cross-component outputs
-- [SOPS](../secrets/sops.md), [1Password](../secrets/1password.md) — for sensitive values
-- [AWS](aws.md), [Azure](azure.md), [Hetzner](hetzner.md), [Hyper-V](../virtual/hyperv.md), and [vSphere](../virtual/vsphere.md) — the other deployment targets
+- [Command model](../provisioning/workflow.md): the full command model
+- [Destroy](../maintenance/destroy.md): safety behaviors and locking on teardown
+- [Terraform](../components/terraform.md): state backends, the bootstrap two-phase apply, cross-component outputs
+- [SOPS](../secrets/sops.md), [1Password](../secrets/1password.md): for sensitive values
+- [AWS](aws.md), [Azure](azure.md), [Hetzner](hetzner.md), [Hyper-V](../virtual/hyperv.md), and [vSphere](../virtual/vsphere.md): the other deployment targets

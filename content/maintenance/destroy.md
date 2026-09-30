@@ -29,5 +29,5 @@ A holder can die before releasing the lock (CI cancellation, an OOM, a crash). I
 
 ## See also
 
-- [Command model](../provisioning/workflow.md) — where `destroy` fits among the other commands
-- [Upgrade](upgrade.md) — moving a context forward instead of tearing it down
+- [Command model](../provisioning/workflow.md): where `destroy` fits among the other commands
+- [Upgrade](upgrade.md): moving a context forward instead of tearing it down

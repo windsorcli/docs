@@ -21,7 +21,7 @@ value: "${cluster.controlplanes.count ?? 1}"
 |---|---|
 | `env(name)` | Reads an environment variable. Returns nothing when unset. |
 | `secret(provider, name, field)` | Resolves a value from a configured secret store at apply time. |
-| `terraform_output(component, output)` | Reads an output from an already-applied Terraform component. Returns nothing until that component has run — see [Deferred evaluation](#deferred-evaluation). |
+| `terraform_output(component, output)` | Reads an output from an already-applied Terraform component. Returns nothing until that component has run. See [Deferred evaluation](#deferred-evaluation). |
 | `yaml(pathOrContent, [input])` | Parses YAML from a file path or an inline string. |
 | `yamlString(value)` / `yamlString(path, input)` | The inverse: marshals a value to a YAML string. |
 | `jsonString(value)` | Marshals a value to a JSON string. |
@@ -49,18 +49,18 @@ A missing or misspelled path resolves to nil, not an error:
 - Inside a `${...}` substitution embedded in a larger string, it's an empty string.
 - Combined with `??`, the fallback wins, the same as if the path had resolved to nil on purpose.
 
-This is intentional for `when:` — a facet has to evaluate cleanly against a blueprint that doesn't declare a given config section at all, not error out.
+This is intentional for `when:`: a facet has to evaluate cleanly against a blueprint that doesn't declare a given config section at all, not error out.
 
 For a Terraform `inputs:` field, a nil result is dropped from the generated `.tfvars` entirely, rather than written as an empty value. If the module's own `variable` block has no `default`, Terraform's own "no value for required variable" check catches it. If the module does have a default, the input silently falls back to it, which is quiet but not corrupting: the operator's override just didn't take effect.
 
 Kustomize `substitutions:` and any `${...}` embedded inside a larger string have no such backstop: a nil result there is written through as a literal empty string, with nothing downstream positioned to reject it.
 
-If a value genuinely must be present, don't rely on an expression to catch it. Declare it under a facet's `requires:` block instead — that path does a real presence check on the composed scope and fails composition with a clear message, rather than resolving quietly to nil. See [Facets reference](https://www.windsorcli.dev/reference/cli/facets).
+If a value genuinely must be present, don't rely on an expression to catch it. Declare it under a facet's `requires:` block instead. That path does a real presence check on the composed scope and fails composition with a clear message, rather than resolving quietly to nil. See [Facets reference](https://www.windsorcli.dev/reference/cli/facets).
 
 ## Where expressions run
 
-- **`when:`** on a facet, a config block, a Terraform or Flux entry — must evaluate to a boolean. See [Facets](facets.md).
-- **`value:`** inside a facet's `config:` blocks — any expression, including nested maps and lists built from `fromPairs`/`map`.
+- **`when:`** on a facet, a config block, or a Terraform or Flux entry must evaluate to a boolean. See [Facets](facets.md).
+- **`value:`** inside a facet's `config:` blocks accepts any expression, including nested maps and lists built from `fromPairs`/`map`.
 - **`${...}` substitutions** inside schema values, Terraform `inputs:`, and Kustomize `substitutions:`. A string that's exactly one `${...}` expression evaluates to that expression's own type (a map, a number, a bool); `${...}` embedded alongside other text interpolates as a string, with a nil result rendering as empty (`"prefix-${cluster.undefined}-suffix"` becomes `"prefix--suffix"`).
 
 ## Deferred evaluation
@@ -69,7 +69,7 @@ If a value genuinely must be present, don't rely on an expression to catch it. D
 
 ## Reference
 
-- [expr language definition](https://expr-lang.org/docs/language-definition) — full syntax and standard library
-- [Facets](facets.md) — `when:` conditions, ordinals, config blocks
-- [Blueprint templates](templates.md) — composition order and substitution merging
-- [Blueprint reference](https://www.windsorcli.dev/reference/cli/blueprint) — every field that accepts an expression
+- [expr language definition](https://expr-lang.org/docs/language-definition): full syntax and standard library
+- [Facets](facets.md): `when:` conditions, ordinals, config blocks
+- [Blueprint templates](templates.md): composition order and substitution merging
+- [Blueprint reference](https://www.windsorcli.dev/reference/cli/blueprint): every field that accepts an expression

@@ -144,8 +144,8 @@ windsor destroy --confirm=vsphere-prod
 
 ## Where to next
 
-- [Command model](../provisioning/workflow.md) — the full command model
-- [Destroy](../maintenance/destroy.md) — safety behaviors and locking on teardown
-- [Terraform](../components/terraform.md) — state backends and cross-component outputs
-- [Hyper-V](hyperv.md) — the other on-premises VM platform
-- [AWS](../cloud/aws.md), [Azure](../cloud/azure.md), [GCP](../cloud/gcp.md), and [Hetzner](../cloud/hetzner.md) — the other deployment targets
+- [Command model](../provisioning/workflow.md): the full command model
+- [Destroy](../maintenance/destroy.md): safety behaviors and locking on teardown
+- [Terraform](../components/terraform.md): state backends and cross-component outputs
+- [Hyper-V](hyperv.md): the other on-premises VM platform
+- [AWS](../cloud/aws.md), [Azure](../cloud/azure.md), [GCP](../cloud/gcp.md), and [Hetzner](../cloud/hetzner.md): the other deployment targets

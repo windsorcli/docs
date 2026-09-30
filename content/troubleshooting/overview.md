@@ -71,6 +71,6 @@ Run `windsor check` to validate the toolchain; it names what's missing or needs 
 
 ## Where to next
 
-- [Command model](../provisioning/workflow.md) — the command model and safety behaviors
+- [Command model](../provisioning/workflow.md): the command model and safety behaviors
 - [Environment injection](../contexts/environment-injection.md) — the shell hook and trust gate
-- [Terraform](../components/terraform.md) — state backends and the bootstrap flow
+- [Terraform](../components/terraform.md): state backends and the bootstrap flow

@@ -67,7 +67,7 @@ dns:
 email: platform@example.com
 ```
 
-`cluster.pools` is for elastic providers (AWS, Azure, GCP); Hetzner ignores it. `cluster.controlplanes.count` and `cluster.workers.count` set node counts directly — `workers.count` defaults to `1` when unset — and each sizes from `cluster.{controlplanes,workers}.instance_type` (a Hetzner server type, `cpx31` by default) rather than a portable class name.
+`cluster.pools` is for elastic providers (AWS, Azure, GCP); Hetzner ignores it. `cluster.controlplanes.count` and `cluster.workers.count` set node counts directly (`workers.count` defaults to `1` when unset), and each sizes from `cluster.{controlplanes,workers}.instance_type` (a Hetzner server type, `cpx31` by default) rather than a portable class name.
 
 `topology` defaults from those counts when you don't set it explicitly: one node total resolves to `single-node`, three or more controlplanes to `ha`, anything else to `multi-node`. The minimal config above (1 controlplane, 2 workers) resolves to `multi-node`.
 
@@ -75,12 +75,12 @@ Common additional knobs:
 
 | Key | Effect |
 |-----|--------|
-| `cluster.api_allowed_cidrs` | CIDRs allowed to reach the Talos API (`50000`) and Kubernetes API (`6443`) on each node's public interface. Defaults to `["0.0.0.0/0"]` — open to the internet. Restrict this before going to production. |
+| `cluster.api_allowed_cidrs` | CIDRs allowed to reach the Talos API (`50000`) and Kubernetes API (`6443`) on each node's public interface. Defaults to `["0.0.0.0/0"]`, open to the internet. Restrict this before going to production. |
 | `hetzner.network_zone` | Network zone the private network spans. Defaults to the zone matching `hetzner.location` (see the table below); set it only to override that. |
 | `hetzner.dns_parent_zone` | An existing Hetzner-managed parent zone to auto-delegate `dns.public_domain` from, instead of delegating manually. |
 | `cluster.controlplanes.instance_type` / `cluster.workers.instance_type` | Hetzner server type (`cpx31`, `ccx23`, …); drives both the servers Terraform creates and the CPU/memory Flux's own concurrency tuning assumes. |
 | `cluster.storage.driver` | Swaps Hetzner Volumes (`hcloud-csi`) for a Talos-native driver (`openebs`, `longhorn`, `mayastor`). |
-| `gateway.access: private` | Skips the public ACME issuer. external-dns still runs in public mode only — Hetzner DNS has no private-zone equivalent. |
+| `gateway.access: private` | Skips the public ACME issuer. external-dns still runs in public mode only, because Hetzner DNS has no private-zone equivalent. |
 | `observability.enabled: true` | Grafana, Prometheus, and the logging stack. |
 
 ### Locations and instance types
@@ -96,7 +96,7 @@ Six locations are available, each tied to a network zone:
 | `hil` | US West | `us-west` |
 | `sin` | Singapore | `ap-southeast` |
 
-The two US locations (`ash`, `hil`) offer a narrower instance catalog than the rest: only `cpx11`-`cpx51` and `ccx13`-`ccx63`. Every other line — Gen2 `cpx*2`, the shared-vCPU `cx*` line, and ARM `cax*` — fails there. Windsor validates this: setting `cluster.controlplanes.instance_type` or `cluster.workers.instance_type` outside that list while `hetzner.location` is `ash` or `hil` fails composition before Terraform ever runs, citing a `hetzner_us_instance_type_ok` requirement with the restriction spelled out. Pick a `cpx11`-`cpx51` or `ccx` type for a US location, or a EU/Asia location for the wider catalog.
+The two US locations (`ash`, `hil`) offer a narrower instance catalog than the rest: only `cpx11`-`cpx51` and `ccx13`-`ccx63`. Every other line fails there: Gen2 `cpx*2`, the shared-vCPU `cx*` line, and ARM `cax*`. Windsor validates this: setting `cluster.controlplanes.instance_type` or `cluster.workers.instance_type` outside that list while `hetzner.location` is `ash` or `hil` fails composition before Terraform ever runs, citing a `hetzner_us_instance_type_ok` requirement with the restriction spelled out. Pick a `cpx11`-`cpx51` or `ccx` type for a US location, or a EU/Asia location for the wider catalog.
 
 ## 3. Bootstrap
 
@@ -128,7 +128,7 @@ windsor apply --wait
 
 Raising `cluster.workers.count` adds servers on the next `apply`. There's no separate autoscaling group to configure: Hetzner has no managed node group concept.
 
-Changing `cluster.workers.instance_type` replaces worker servers — an in-place hcloud resize reboots the server and can corrupt Talos's container image store. The same change to `cluster.controlplanes.instance_type` resizes in place.
+Changing `cluster.workers.instance_type` replaces worker servers, because an in-place hcloud resize reboots the server and can corrupt Talos's container image store. The same change to `cluster.controlplanes.instance_type` resizes in place.
 
 ## 6. Tear down
 
@@ -149,8 +149,8 @@ There's a separate `dns-zone` component when `dns.public_domain` is set. It's in
 
 ## Where to next
 
-- [Command model](../provisioning/workflow.md) — the full command model
-- [Destroy](../maintenance/destroy.md) — safety behaviors and locking on teardown
-- [Terraform](../components/terraform.md) — state backends and cross-component outputs
-- [SOPS](../secrets/sops.md), [1Password](../secrets/1password.md) — for `hetzner.token`
-- [AWS](aws.md), [Azure](azure.md), and [GCP](gcp.md) — the other deployment targets
+- [Command model](../provisioning/workflow.md): the full command model
+- [Destroy](../maintenance/destroy.md): safety behaviors and locking on teardown
+- [Terraform](../components/terraform.md): state backends and cross-component outputs
+- [SOPS](../secrets/sops.md), [1Password](../secrets/1password.md): for `hetzner.token`
+- [AWS](aws.md), [Azure](azure.md), and [GCP](gcp.md): the other deployment targets

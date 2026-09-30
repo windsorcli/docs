@@ -21,7 +21,7 @@ contexts:
 
 ## Encrypt and commit
 
-`secrets.yaml` is auto-git-ignored, the same as `.env` — it's for local-only or pre-encryption values. Encrypt it before committing:
+`secrets.yaml` is auto-git-ignored, the same as `.env`, and holds local-only or pre-encryption values. Encrypt it before committing:
 
 ```bash
 sops -e contexts/<context>/secrets.yaml > contexts/<context>/secrets.enc.yaml
@@ -30,7 +30,7 @@ rm contexts/<context>/secrets.yaml
 
 Windsor decides whether a `secrets*.yaml` file is encrypted by its content, not its filename, so an operator's own SOPS output can carry either name. A `secrets.yaml` that still contains plaintext is refused with an explicit error rather than a raw SOPS failure, since the likely cause is a file that was never encrypted. See [Contexts directory reference](https://www.windsorcli.dev/reference/cli/contexts) for the full file layout and error text.
 
-Rotating a value means decrypting, editing, and re-encrypting — there's no separate rotation command.
+Rotating a value means decrypting, editing, and re-encrypting; there's no separate rotation command.
 
 ## Troubleshooting
 
@@ -41,11 +41,11 @@ A secret that fails to resolve shows up in the environment as an error marker in
 
 ## Security
 
-Windsor scrubs any value it reads from SOPS out of command output — Terraform runs, error messages, and `windsor env` all show `********` instead of the real value. Use `windsor env --decrypt` only when you need the plaintext in your shell; the shell hook decrypts for the session automatically, and `windsor env` without it shows cached secrets as `********`. Limit environment injection to development secrets where you can, and close a shell once you're done with it.
+Windsor scrubs any value it reads from SOPS out of command output. Terraform runs, error messages, and `windsor env` all show `********` instead of the real value. Use `windsor env --decrypt` only when you need the plaintext in your shell; the shell hook decrypts for the session automatically, and `windsor env` without it shows cached secrets as `********`. Limit environment injection to development secrets where you can, and close a shell once you're done with it.
 
 A blueprint facet or Terraform input reads the same store through `${secret(provider, name, field)}` instead of `${{ }}`; see [Expressions](../blueprints/expressions.md).
 
 ## See also
 
-- [1Password](1password.md) — the other supported secrets provider
-- [Contexts directory reference](https://www.windsorcli.dev/reference/cli/contexts) — full file layout
+- [1Password](1password.md): the other supported secrets provider
+- [Contexts directory reference](https://www.windsorcli.dev/reference/cli/contexts): full file layout

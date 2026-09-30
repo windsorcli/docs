@@ -15,7 +15,7 @@ The [Windsor GitHub Action](https://github.com/windsorcli/action) installs and c
     workdir: terraform/cluster/eks
 ```
 
-`ref` defaults to the action's own pinned CLI release. `context` sets the context every later step runs against; `install-only: true` skips context init and environment injection if you only need the binary on `PATH`. Every sub-action below expects `windsor` already installed this way — none of them install the CLI themselves, and each fails fast with an actionable message if it can't find one on `PATH`.
+`ref` defaults to the action's own pinned CLI release. `context` sets the context every later step runs against; `install-only: true` skips context init and environment injection if you only need the binary on `PATH`. Every sub-action below expects `windsor` already installed this way. None of them install the CLI, and each fails fast with an actionable message if it can't find one on `PATH`.
 
 Every sub-action, including this one, emits a `context` output (`windsor get context` after the command runs), so a later step can label an artifact or log line without an extra call.
 
@@ -30,7 +30,7 @@ Every sub-action, including this one, emits a `context` output (`windsor get con
     aws-region: ${{ vars.AWS_REGION }}
 ```
 
-Only the inputs for your platform are required — leave the rest unset. Each platform delegates to the upstream action that already handles it well, rather than reimplementing OIDC exchange itself:
+Only the inputs for your platform are required; leave the rest unset. Each platform delegates to the upstream action that already handles it well, rather than reimplementing OIDC exchange itself:
 
 | Platform | Delegates to | Required inputs |
 |---|---|---|
@@ -43,16 +43,16 @@ A platform that needs no cloud credentials (`none`, `docker`, `incus`, `metal`, 
 
 ### Setting up the trust relationship
 
-This action only removes the per-platform `if:` branching — it still expects the OIDC trust relationship configured on the cloud side, the same as if you called the upstream action directly. Set that up once, following that platform's own docs, before the inputs above have anything to authenticate against:
+This action only removes the per-platform `if:` branching. It still expects the OIDC trust relationship configured on the cloud side, as if you called the upstream action directly. Set that up once, following that platform's own docs, before the inputs above have anything to authenticate against:
 
-- AWS: an IAM OIDC identity provider trusting `token.actions.githubusercontent.com`, and a role with a trust policy scoped to your repo (and branch, if you want that granularity) — see [`aws-actions/configure-aws-credentials`](https://github.com/aws-actions/configure-aws-credentials#sample-iam-role-cloudformation-template).
-- Azure: a federated credential on an app registration, scoped to the repo and ref — see [`azure/login`](https://github.com/Azure/login#login-with-openid-connect-oidc-recommended).
-- GCP: a Workload Identity Pool and provider trusting GitHub's OIDC issuer, attached to a service account — see [`google-github-actions/auth`](https://github.com/google-github-actions/auth#setting-up-workload-identity-federation).
-- Hetzner: no OIDC — `hetzner-token` is a plain API token from a repo secret. There's no short-lived-credential option here.
+- AWS: an IAM OIDC identity provider trusting `token.actions.githubusercontent.com`, and a role with a trust policy scoped to your repo (and branch, if you want that granularity). See [`aws-actions/configure-aws-credentials`](https://github.com/aws-actions/configure-aws-credentials#sample-iam-role-cloudformation-template).
+- Azure: a federated credential on an app registration, scoped to the repo and ref. See [`azure/login`](https://github.com/Azure/login#login-with-openid-connect-oidc-recommended).
+- GCP: a Workload Identity Pool and provider trusting GitHub's OIDC issuer, attached to a service account. See [`google-github-actions/auth`](https://github.com/google-github-actions/auth#setting-up-workload-identity-federation).
+- Hetzner: no OIDC. `hetzner-token` is a plain API token from a repo secret, with no short-lived-credential option.
 
-Job permissions need `id-token: write` for the OIDC-based platforms (AWS, Azure, GCP) — without it, the upstream action has nothing to exchange.
+Job permissions need `id-token: write` for the OIDC-based platforms (AWS, Azure, GCP). Without it, the upstream action has nothing to exchange.
 
-Short-lived credentials expire. Call `cloud-auth` again later in a long job to refresh them. One gap this doesn't cover: `kubelogin`'s `workloadidentity` mode reads Azure's federated token from a file once and never refreshes it, while GitHub's own OIDC token lasts about 5 minutes — a long `up`, `bootstrap`, or `apply` against AKS can fail partway through once it expires. The [action's README](https://github.com/windsorcli/action#refreshing-kubelogins-azure-token-on-a-long-job) has a wrapper-script recipe for it; it's a real gap, not something `cloud-auth` papers over.
+Short-lived credentials expire. Call `cloud-auth` again later in a long job to refresh them. One gap this doesn't cover: `kubelogin`'s `workloadidentity` mode reads Azure's federated token from a file once and never refreshes it, while GitHub's own OIDC token lasts about 5 minutes, so a long `up`, `bootstrap`, or `apply` against AKS can fail partway through once it expires. The [action's README](https://github.com/windsorcli/action#refreshing-kubelogins-azure-token-on-a-long-job) has a wrapper-script recipe for it. `cloud-auth` doesn't close this gap.
 
 ## The lifecycle sub-actions
 
@@ -83,7 +83,7 @@ Each wraps one `windsor` command, taking the same `workdir` input as the root ac
 
 ## Posting plan output to a pull request
 
-`windsorcli/action/plan-comment` runs `windsor plan --summary --no-color` and posts the result as a sticky PR comment — a later push updates that same comment instead of piling up new ones, matched by a hidden marker keyed on the context name so a matrix of contexts each get their own. It defaults to the triggering PR, so it's meant for a `pull_request`-triggered workflow; pass `pr-number` to target another one. A failed `windsor plan` still gets posted with its real error, then the step fails so the job goes red too.
+`windsorcli/action/plan-comment` runs `windsor plan --summary --no-color` and posts the result as a sticky PR comment. A later push updates that same comment instead of piling up new ones; a hidden marker keyed on the context name gives each context in a matrix its own. It defaults to the triggering PR, so it's meant for a `pull_request`-triggered workflow; pass `pr-number` to target another one. A failed `windsor plan` still gets posted with its real error, then the step fails so the job goes red too.
 
 ```yaml
 permissions:
@@ -162,10 +162,10 @@ The action repo's own [`examples/bootstrap-and-destroy.yaml`](https://github.com
 
 The root action masks secrets automatically: it scans `windsor.yaml` for `${{ }}`-templated environment variables, registers their values with GitHub's built-in log masking, and logs only variable names, never values. It calls out to [`actions/github-script`](https://github.com/actions/github-script) with a pinned SHA rather than a mutable tag, to keep that surface minimal.
 
-That covers what the action does — it doesn't cover the workflow you write around it. Pin every third-party action by commit SHA, not a mutable tag (`actions/checkout@<sha> # v7`, not `@v7`), and do your own threat modeling for the systems a workflow can reach. See [GitHub's security hardening guide](https://docs.github.com/en/actions/security-for-github-actions/security-guides/security-hardening-for-github-actions).
+That covers what the action does, not the workflow you write around it. Pin every third-party action by commit SHA, not a mutable tag (`actions/checkout@<sha> # v7`, not `@v7`), and do your own threat modeling for the systems a workflow can reach. See [GitHub's security hardening guide](https://docs.github.com/en/actions/security-for-github-actions/security-guides/security-hardening-for-github-actions).
 
 ## See also
 
-- [Global flags](https://www.windsorcli.dev/reference/cli/global-flags) — every flag the underlying commands accept, beyond what a sub-action exposes
-- [Command model](../provisioning/workflow.md) — what `bootstrap`, `apply`, `destroy`, and `up` each actually do
-- [Action repo README](https://github.com/windsorcli/action) — support-bundle collection on failure, and Terraform provider caching across runs
+- [Global flags](https://www.windsorcli.dev/reference/cli/global-flags): every flag the underlying commands accept, beyond what a sub-action exposes
+- [Command model](../provisioning/workflow.md): what `bootstrap`, `apply`, `destroy`, and `up` each actually do
+- [Action repo README](https://github.com/windsorcli/action): support-bundle collection on failure, and Terraform provider caching across runs

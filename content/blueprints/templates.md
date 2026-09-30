@@ -94,13 +94,13 @@ See [Facets](facets.md) for the full authoring model: `when` expressions, ordina
 
 ## Composition order
 
-See [Composition workflow](../composition/workflow.md) for the merge order — OCI sources, base template, facets, user blueprint — and how CRD layers sequence ahead of the stack.
+See [Composition workflow](../composition/workflow.md) for the merge order (OCI sources, base template, facets, user blueprint) and how CRD layers sequence ahead of the stack.
 
 ## See also
 
-- [Composition workflow](../composition/workflow.md) — merge order and CRD layers
+- [Composition workflow](../composition/workflow.md): merge order and CRD layers
 - [Schema](schema.md) — Validation and defaults.
 - [Facets](facets.md) — Conditional composition and expression authoring.
-- [Expressions](expressions.md) — the `when:` / `${...}` language and Windsor's added functions
-- [Registries](sharing.md) — Pushing and bundling.
-- [Testing](testing.md) — Static tests for blueprint composition.
+- [Expressions](expressions.md): the `when:` / `${...}` language and Windsor's added functions
+- [Registries](sharing.md): Pushing and bundling.
+- [Testing](testing.md): Static tests for blueprint composition.

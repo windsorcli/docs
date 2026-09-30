@@ -17,13 +17,13 @@ Move one source instead of all of them with `--source name=url`, which persists 
 windsor upgrade --source core=oci://ghcr.io/windsorcli/core:v0.8.0 --yes
 ```
 
-`upgrade` refuses to move a source backward by default — a blueprint author raises a version floor for a reason. Pass `--allow-downgrade` to override it. This only reverts infrastructure declaratively; it does not undo changes an add-on already made to application data (a migrated database schema, for example).
+`upgrade` refuses to move a source backward by default, because a blueprint author raises a version floor for a reason. Pass `--allow-downgrade` to override it. This only reverts infrastructure declaratively; it does not undo changes an add-on already made to application data (a migrated database schema, for example).
 
 Before moving anything, `upgrade` checks the target blueprint's own `cliVersion` constraint (set in its `metadata.yaml`) against your installed CLI, and fails with an explanatory error if your CLI is too old. See [CLI version compatibility](../blueprints/sharing.md#cli-version-compatibility).
 
 ## Talos nodes
 
-Blueprint upgrades don't touch the Talos nodes themselves — that's a separate step, split into two commands depending on how much parallelism you want:
+Blueprint upgrades don't touch the Talos nodes themselves. That's a separate step, split into two commands depending on how much parallelism you want:
 
 ```bash
 # Roll every controlplane node at once; returns once requests are accepted
@@ -39,5 +39,5 @@ windsor upgrade node --node=10.0.0.5 \
 
 ## See also
 
-- [Command model](../provisioning/workflow.md) — where `upgrade` fits among the other commands
-- [Destroy](destroy.md) — the other maintenance action on a running context
+- [Command model](../provisioning/workflow.md): where `upgrade` fits among the other commands
+- [Destroy](destroy.md): the other maintenance action on a running context

@@ -32,7 +32,7 @@ When `platform` is `aws`, the VPC Terraform component from `core` is included. E
 
 ## Config blocks
 
-A `config:` entry computes a named value from expressions and exposes it at scope root, alongside `values.yaml` properties like `cluster.driver` — so `terraform:` inputs, `kustomize:` substitutions, and other facets' own expressions can reference it the same way. This is different from a `values.yaml` default: a schema default is only visible where the property itself is read, but a config block's value is visible to *every* facet that composes after it, including facets from a different blueprint source. That cross-facet visibility is the reason this mechanism exists — see [Schema](schema.md) for `values.yaml` properties and their defaults.
+A `config:` entry computes a named value from expressions and exposes it at scope root, alongside `values.yaml` properties like `cluster.driver`, so `terraform:` inputs, `kustomize:` substitutions, and other facets' own expressions can reference it the same way. This is different from a `values.yaml` default: a schema default is only visible where the property itself is read, but a config block's value is visible to *every* facet that composes after it, including facets from a different blueprint source. That cross-facet visibility is the reason this mechanism exists. See [Schema](schema.md) for `values.yaml` properties and their defaults.
 
 ```yaml
 config:
@@ -49,11 +49,11 @@ config:
       issuer_component: ""
 ```
 
-Three blocks share the name `pki_effective` here, each contributing under its own `when:`. A scalar or list value is read as `${pki_effective}`; a map value like this one is read key by key — `${pki_effective.issuer_component}` — from a `terraform:` input, a `kustomize:` substitution, or another config block's own `value:`.
+Three blocks share the name `pki_effective` here, each contributing under its own `when:`. A scalar or list value is read as `${pki_effective}`; a map value like this one is read key by key (`${pki_effective.issuer_component}`) from a `terraform:` input, a `kustomize:` substitution, or another config block's own `value:`.
 
 ### Merge precedence
 
-Within one facet, later entries win: the last block whose `when:` matches is the one that applies, same as the `pki_effective` example above. Across facets, the facet that composes later wins — the same rule `terraform:` and `kustomize:` entries already follow (see [Ordinals](#ordinals) below). `strategy: replace` or `strategy: remove` change that behavior for one block, but the default (`merge`) is right for almost every case.
+Within one facet, later entries win: the last block whose `when:` matches is the one that applies, same as the `pki_effective` example above. Across facets, the facet that composes later wins, the same rule `terraform:` and `kustomize:` entries already follow (see [Ordinals](#ordinals)). `strategy: replace` or `strategy: remove` change that behavior for one block, but the default (`merge`) is right for almost every case.
 
 ### Evaluation order
 
@@ -72,7 +72,7 @@ If a facet does not set `ordinal`, it is derived from the filename:
 | `addon-*` / `addons-*` | 400 |
 | anything else | 0 |
 
-Higher ordinal means higher precedence when merging (addons override platform-base for same-name entries). A filename matching none of these patterns gets ordinal 0 — lower than even `config-*` — so it's worth naming facets to match one of these prefixes rather than relying on the fallback.
+Higher ordinal means higher precedence when merging (addons override platform-base for same-name entries). A filename matching none of these patterns gets ordinal 0, lower than even `config-*`. Name facets to match one of these prefixes rather than relying on the fallback.
 
 ## File resolution
 
@@ -97,7 +97,7 @@ An optional `namespaces:` list targets more than one namespace; empty means auto
 
 ## See also
 
-- [Expressions](expressions.md) — the `when:` / `${...}` language and Windsor's added functions
+- [Expressions](expressions.md): the `when:` / `${...}` language and Windsor's added functions
 - [Blueprint templates](templates.md) — How the _template folder and composition order work.
-- [Testing](testing.md) — Testing facet conditions and expected components.
-- [Schema — Marking a property sensitive](schema.md#marking-a-property-sensitive) — the `sensitive: true` flag this section's `data:` values must carry
+- [Testing](testing.md): Testing facet conditions and expected components.
+- [Schema — Marking a property sensitive](schema.md#marking-a-property-sensitive): the `sensitive: true` flag this section's `data:` values must carry

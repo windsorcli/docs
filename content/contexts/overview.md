@@ -58,5 +58,5 @@ windsor get context
 ## Reference
 
 - [`windsor init`](https://www.windsorcli.dev/reference/cli/commands/init), [`windsor set`](https://www.windsorcli.dev/reference/cli/commands/set), [`windsor get`](https://www.windsorcli.dev/reference/cli/commands/get)
-- [Contexts reference](https://www.windsorcli.dev/reference/cli/contexts) — on-disk layout of `contexts/`, including what lives in each context's `values.yaml`
-- [Configuration reference](https://www.windsorcli.dev/reference/cli/configuration) — full schema for values a context accepts
+- [Contexts reference](https://www.windsorcli.dev/reference/cli/contexts): on-disk layout of `contexts/`, including what lives in each context's `values.yaml`
+- [Configuration reference](https://www.windsorcli.dev/reference/cli/configuration): full schema for values a context accepts

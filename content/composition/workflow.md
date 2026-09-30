@@ -3,7 +3,7 @@ title: Workflow
 description: How a blueprint composes from sources through facets to a running stack, and how CRD layers order ahead of it.
 ---
 
-Composition turns a base template and a set of facets into the blueprint Windsor applies. This page covers the merge order and how CRDs are sequenced ahead of the stack that depends on them. For the template structure itself — `blueprint.yaml`, `schema.yaml`, `facets/` — see [The _template folder](../blueprints/templates.md).
+Composition turns a base template and a set of facets into the blueprint Windsor applies. This page covers the merge order and how CRDs are sequenced ahead of the stack that depends on them. For the template structure itself (`blueprint.yaml`, `schema.yaml`, `facets/`), see [The _template folder](../blueprints/templates.md).
 
 ## Composition order
 
@@ -30,20 +30,20 @@ A source can vendor CRDs alongside its components. Windsor installs these ahead 
 
 Windsor assigns each CRD reference to exactly one owner: the default project list (`crds:` in a blueprint) claims first, then each install-eligible source claims alphabetically by name. A reference already claimed by an earlier owner is dropped from later ones, so the same CRD is never installed twice.
 
-Each owner becomes one synthesized kustomization, named `crds` for the project list and `crds-<source>` for a named source. These are real kustomizations — target them like any other:
+Each owner becomes one synthesized kustomization, named `crds` for the project list and `crds-<source>` for a named source. These are real kustomizations, so target them like any other:
 
 ```bash
 windsor plan crds
 windsor apply kustomize crds-core
 ```
 
-Every root kustomization or Flux system — one with no `dependsOn` of its own — is made to depend on all the CRD kustomizations. Anything that depends on a root reaches the CRD layer transitively, so the stack always reconciles after the CRDs are Established. No facet needs to name a CRD kustomization in `dependsOn`.
+Windsor makes every root kustomization or Flux system (one with no `dependsOn` of its own) depend on all the CRD kustomizations. Anything that depends on a root reaches the CRD layer transitively, so the stack always reconciles after the CRDs are Established. No facet needs to name a CRD kustomization in `dependsOn`.
 
 Pruning is disabled on CRD kustomizations: pruning a CRD deletes every custom resource of that kind, cluster-wide. `windsor destroy` leaves them in place.
 
 ## See also
 
-- [The _template folder](../blueprints/templates.md) — `blueprint.yaml`, `schema.yaml`, and `facets/` structure
-- [Facets](../blueprints/facets.md) — `when` expressions, ordinals, and merge strategies
-- [Components](../components/terraform.md) — adding your own Terraform and Kustomize without a template
-- [Command model](../provisioning/workflow.md) — the command model that applies a composed blueprint
+- [The _template folder](../blueprints/templates.md): `blueprint.yaml`, `schema.yaml`, and `facets/` structure
+- [Facets](../blueprints/facets.md): `when` expressions, ordinals, and merge strategies
+- [Components](../components/terraform.md): adding your own Terraform and Kustomize without a template
+- [Command model](../provisioning/workflow.md): the command model that applies a composed blueprint

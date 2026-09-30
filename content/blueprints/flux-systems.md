@@ -64,6 +64,6 @@ A `flux:` system can also declare a `secrets:` block to land a `sensitive: true`
 
 ## See also
 
-- [Kustomize](../components/kustomize.md) — the `kustomize:` 1:1 passthrough, and how substitutions and patches work for either layer
+- [Kustomize](../components/kustomize.md): the `kustomize:` 1:1 passthrough, and how substitutions and patches work for either layer
 - [Facets](facets.md) — how facets contribute `flux:` entries, ordinals, and Kubernetes Secrets
 - [Blueprint reference](https://www.windsorcli.dev/reference/cli/blueprint) — full `flux[]` schema

@@ -14,7 +14,7 @@ Either section can be empty, so a blueprint can be a full Kubernetes platform or
 
 Windsor reads a blueprint, fills in the values for the current context, and deploys the platform to your chosen target. Most projects start with the default [`core`](https://github.com/windsorcli/core) blueprint and customize a few values.
 
-A blueprint lives in `contexts/_template/`. The directory always contains a `blueprint.yaml` — the same `terraform:`/`kustomize:` shape as [Components](../components/terraform.md), now written once and inherited by every context. The other files in `_template/` are optional.
+A blueprint lives in `contexts/_template/`. The directory always contains a `blueprint.yaml` with the same `terraform:` and `kustomize:` entries as [Components](../components/terraform.md), written once and inherited by every context. The other files in `_template/` are optional.
 
 | File | Purpose |
 |---|---|
