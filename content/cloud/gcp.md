@@ -3,7 +3,7 @@ title: GCP
 description: Deploy a Windsor stack to GCP, with a GKE cluster on a dedicated VPC, GCS state, Cloud DNS, and Flux-managed workloads.
 ---
 
-This guide stands up a production-style Windsor stack on GCP: a dedicated VPC, a [GKE](https://cloud.google.com/kubernetes-engine) cluster, Terraform state in a GCS bucket, and the `core` blueprint's services reconciled by Flux. It targets a **non-workstation context**: there is no local VM, so the lifecycle is `init` → `bootstrap` → `apply` → `destroy`. For the concepts behind those verbs, see [Command model](../provisioning/workflow.md).
+A Windsor context on GCP is a dedicated VPC, a [GKE](https://cloud.google.com/kubernetes-engine) cluster, Terraform state in a GCS bucket, and the `core` blueprint's services reconciled by Flux. With no local VM to bring up, the lifecycle is `init` → `bootstrap` → `apply` → `destroy`. For the concepts behind those verbs, see [Command model](../provisioning/workflow.md).
 
 ## Prerequisites
 

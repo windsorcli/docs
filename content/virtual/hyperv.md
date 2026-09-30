@@ -3,7 +3,7 @@ title: Hyper-V
 description: Deploy a Windsor stack to Hyper-V, with Talos VMs on a Windows host and a choice of host-only or LAN-bridged networking.
 ---
 
-This guide stands up a Windsor stack on [Hyper-V](https://learn.microsoft.com/en-us/virtualization/hyper-v-on-windows/), the hypervisor built into Windows Pro, Enterprise, and Server: Talos Linux VMs, full-VM isolation rather than containers, and the `core` blueprint's services reconciled by Flux. It targets a **non-workstation context**. Hyper-V has no `windsor up`/`down` overlay, so the lifecycle is `init` → `bootstrap` → `apply` → `destroy`, the same as a cloud platform. For the concepts behind those verbs, see [Command model](../provisioning/workflow.md).
+[Hyper-V](https://learn.microsoft.com/en-us/virtualization/hyper-v-on-windows/), the hypervisor built into Windows Pro, Enterprise, and Server, runs Talos Linux VMs with full-VM isolation rather than containers, and Flux reconciles the `core` blueprint's services on top. Hyper-V has no `windsor up`/`down` overlay, so the lifecycle is `init` → `bootstrap` → `apply` → `destroy`, the same as a cloud platform. For the concepts behind those verbs, see [Command model](../provisioning/workflow.md).
 
 Hyper-V only runs on a Windows host. `cluster.driver` is always `talos`: Hyper-V has no managed Kubernetes offering to target instead.
 

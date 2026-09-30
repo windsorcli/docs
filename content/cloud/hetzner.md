@@ -3,7 +3,7 @@ title: Hetzner
 description: Deploy a Windsor stack to Hetzner Cloud, with Talos nodes on a private network, Hetzner DNS, and Flux-managed workloads.
 ---
 
-This guide stands up a Windsor stack on [Hetzner Cloud](https://www.hetzner.com/cloud/): Talos Linux servers on a private network, Hetzner's Cloud Load Balancer and Volumes, and the `core` blueprint's services reconciled by Flux. It targets a **non-workstation context**. There is no local VM, so the lifecycle is `init` → `bootstrap` → `apply` → `destroy`. For the concepts behind those verbs, see [Command model](../provisioning/workflow.md).
+Windsor deploys to [Hetzner Cloud](https://www.hetzner.com/cloud/) as Talos Linux servers on a private network, with Hetzner's Cloud Load Balancer and Volumes and the `core` blueprint's services reconciled by Flux. There is no local VM, so the lifecycle is `init` → `bootstrap` → `apply` → `destroy`. For the concepts behind those verbs, see [Command model](../provisioning/workflow.md).
 
 Unlike AWS or Azure, Hetzner has no managed Kubernetes offering. `cluster.driver` is always `talos`, and Windsor builds the cluster itself from bare servers.
 
