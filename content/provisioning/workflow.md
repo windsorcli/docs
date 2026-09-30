@@ -84,6 +84,20 @@ To inspect the composition itself, render it with `windsor show` or trace a valu
 
 `bootstrap` handles the case where the remote Terraform backend, an S3 bucket or DynamoDB table, is itself created by Terraform. It applies the `backend` component against local state, migrates state to the configured backend, then runs the rest of `apply`. With no `backend` component declared, `bootstrap` is the same as `apply`.
 
+```mermaid
+flowchart TB
+  Start["windsor bootstrap"] --> Q{"blueprint declares<br/>a backend component?"}
+  Q -->|no| Plain["apply --wait<br/>against the configured backend"]
+  Q -->|yes| P1["Phase 1<br/>terraform.backend.type = local, in memory<br/>apply only the backend component"]
+  P1 --> Store[("remote state store exists<br/>S3 bucket, Storage account, GCS bucket")]
+  Store --> P2["Phase 2<br/>restore the configured backend<br/>init -migrate-state -force-copy<br/>backend state moves to remote"]
+  P2 --> Rest["remaining components init<br/>directly against the remote backend"]
+  Rest --> Flux["install Flux, wait for kustomizations"]
+  Plain --> Flux
+```
+
+Windsor never writes the `local` override to `windsor.yaml`. A later `bootstrap` run detects the migrated backend and skips Phase 1.
+
 `plan` sorts its output destructive-first. The summary renders per-component rows with affected resources indented underneath, and a single replace shows as `±1` rather than `+1 -1`. Add `--summary` for the compact table, `--json` for machine-readable output in CI, or `--no-color` to disable color.
 
 ## Reference
