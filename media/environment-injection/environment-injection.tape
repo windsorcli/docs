@@ -1,10 +1,10 @@
-# Renders content/assets/environment-injection.gif.
-# Regenerate: vhs content/contexts/environment-injection.tape
+# Renders environment-injection.gif in this directory.
+# Regenerate from this directory: vhs environment-injection.tape
 #
-# Shows environment injection for real: KUBECONFIG is unset outside a
+# Mockup of the target recording: KUBECONFIG is unset outside a
 # trusted project, and populated automatically on the next prompt after
 # cd-ing into one. No windsor command is run by hand.
-Output ../assets/environment-injection.gif
+Output environment-injection.gif
 
 Set Shell "zsh"
 Set FontSize 20
