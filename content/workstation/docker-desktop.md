@@ -52,7 +52,7 @@ flowchart TB
   Resolver -.-> Support
 ```
 
-- **Nodes are containers.** `controlplane-1` runs Talos as a privileged container on the `windsor-local` bridge, next to the support containers described in the [overview](overview.md#what-every-workstation-builds).
+- **Nodes are containers.** `controlplane-1` runs Talos as a privileged container on the `windsor-local` bridge, next to the support containers described in the [overview](overview.md#what-gets-built).
 - **Localhost access.** The container publishes the Kubernetes API on `6443`, the Talos API on `50000`, and the cluster's HTTP and HTTPS ports on `8080` and `8443`. That's why the demo is at `http://bookinfo.test:8080`.
 - **DNS answers `127.0.0.1`.** Every `*.test` name resolves to localhost, and the published ports do the routing. There's no route to the cluster network, so the host can't reach service IPs or a layer 2 load balancer.
 - **Flannel, not Cilium.** Cilium has no working transport over Docker Desktop's loopback, so Windsor sets the CNI to Flannel for this runtime.

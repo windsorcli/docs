@@ -36,10 +36,10 @@ A composed value can come from several places: a facet, a context file, a deferr
 windsor explain terraform.cluster.inputs.cluster_endpoint
 ```
 
-The output names each contributing facet or context file with its `file:line`, expands the expression chain, and marks values that are deferred or form a cycle. [Explain](explain.md) covers reading the output in full, including every status marker.
+The output names each contributing facet or context file with its `file:line`, expands the expression chain, and marks values that are deferred or form a cycle. [Debug](explain.md) covers reading the output in full, including every status marker.
 
 ## Reference
 
 - [`windsor plan`](https://www.windsorcli.dev/reference/cli/commands/plan), [`windsor show`](https://www.windsorcli.dev/reference/cli/commands/show), [`windsor explain`](https://www.windsorcli.dev/reference/cli/commands/explain)
-- [Explain](explain.md) — reading an explain trace in detail
+- [Debug](explain.md) — reading an explain trace in detail
 - [Lifecycle](../provisioning/workflow.md): where `plan` fits in the apply flow

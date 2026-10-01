@@ -61,7 +61,7 @@ flowchart TB
   Route -.->|routed to| Net
 ```
 
-- **The Docker daemon lives in the VM.** `DOCKER_HOST` points your `docker` commands at it. The nodes and support containers join the `windsor-local` bridge, as described in the [overview](overview.md#what-every-workstation-builds).
+- **The Docker daemon lives in the VM.** `DOCKER_HOST` points your `docker` commands at it. The nodes and support containers join the `windsor-local` bridge, as described in the [overview](overview.md#what-gets-built).
 - **Real service IPs.** The host route makes `10.5.0.0/16` reachable from your machine, and `*.test` names resolve to addresses on it. You can open a service by its cluster IP, and a layer 2 load balancer works.
 - **A git server you can clone from.** `git.test` serves your project, so another folder can clone it: `git clone http://local@git.test/git/<project>`.
 - **No block devices.** Nodes are containers, so storage is filesystem-only. [Colima + Incus](colima-incus.md) gives you block devices.

@@ -23,9 +23,9 @@ The cluster can be hosted three ways. They differ in what the cluster nodes are 
 
 On Linux with Docker Engine on the host, use `--vm-driver docker`. It uses the host's Docker Engine directly, with no VM in between.
 
-## What every workstation builds
+## What gets built
 
-Whichever runtime you pick, `windsor up` builds the same set of pieces on one private network, `windsor-local`, which uses `10.5.0.0/16`.
+On any of the three runtimes, `windsor up` ends up with the same layout: a private Docker network, `windsor-local` (`10.5.0.0/16`), holding a Kubernetes cluster and a few support services.
 
 ```mermaid
 flowchart TB
@@ -48,15 +48,13 @@ flowchart TB
   Flux -.->|polls| Git
 ```
 
-Your shell hook exports `KUBECONFIG`, `DOCKER_HOST`, and the rest on each prompt, so plain `kubectl` and `docker` commands reach this environment. Without the hook, prefix them with `windsor exec --`. See [Environment injection](../contexts/environment-injection.md).
+Your shell hook exports `KUBECONFIG` and `DOCKER_HOST` on every prompt, so plain `kubectl` and `docker` commands reach this environment. Without the hook, prefix them with `windsor exec --`. See [Environment injection](../contexts/environment-injection.md).
 
-- **A Talos cluster.** [Talos](https://github.com/siderolabs/talos) runs Kubernetes. The default is one node, a schedulable control plane with no workers. Change the node count and size in `contexts/local/values.yaml`.
-- **DNS for `*.test`.** `dns.test` is a CoreDNS container. `windsor configure network` points your resolver's `test` domain at it, so `git.test` and `bookinfo.test` resolve from your browser and shell. Set `dns.domain` in `values.yaml` to use another domain.
-- **Registry mirrors.** The other `*.test` containers mirror `gcr.io`, `ghcr.io`, `quay.io`, Docker Hub, and `registry.k8s.io`, and image pulls go through them. The cache lives in `.windsor/.docker-cache`, and `REGISTRY_URL` points at the local registry for your own images. See [Build ID](build-id.md) for tagging them.
-- **A git mirror.** `git.test` runs [git-livereload](https://github.com/windsorcli/git-livereload), which serves your working tree at `http://git.test/git/<project>`. Flux reconciles from it, and a webhook fires on each change, so saving a file reaches the cluster without a push.
-- **The default blueprint's workloads.** Flux installs Kyverno, OpenEBS, ingress, cert-manager, and the BookInfo demo. Open `http://bookinfo.test:8080/productpage` to see it running.
+The cluster is [Talos](https://github.com/siderolabs/talos) running Kubernetes. By default it's a single node that is both control plane and worker. Node count and size are set in `contexts/local/values.yaml`.
 
-To look at any of this, `docker ps` lists the containers and `kubectl get kustomizations -A` shows what Flux installed. The `core` blueprint's [workstation](https://github.com/windsorcli/core/tree/main/terraform/workstation), [dns](https://github.com/windsorcli/core/tree/main/kustomize/dns), and [demo](https://github.com/windsorcli/core/tree/main/kustomize/demo) READMEs cover the modules behind these pieces.
+Three kinds of container run beside it. `dns.test` is a CoreDNS server, and `windsor configure network` points your resolver's `test` domain at it, which is why `git.test` and `bookinfo.test` open in a browser. Set `dns.domain` in `values.yaml` to use a different domain. The registry mirrors stand in for `gcr.io`, `ghcr.io`, `quay.io`, Docker Hub, and `registry.k8s.io`, and image pulls go through them. Their cache lives in `.windsor/.docker-cache`, and `REGISTRY_URL` points at the local registry for images you build (see [Build ID](build-id.md)). `git.test` runs [git-livereload](https://github.com/windsorcli/git-livereload), which serves your working tree as a git repository at `http://git.test/git/<project>`. Flux pulls from it and gets a webhook on every change, so saving a file reaches the cluster without a push.
+
+Flux then installs the default blueprint's workloads: Kyverno, OpenEBS, ingress, cert-manager, and the BookInfo demo, which you can open at `http://bookinfo.test:8080/productpage`. `docker ps` lists the containers and `kubectl get kustomizations -A` shows what Flux installed. For the modules behind all of this, see the `core` blueprint's [workstation](https://github.com/windsorcli/core/tree/main/terraform/workstation), [dns](https://github.com/windsorcli/core/tree/main/kustomize/dns), and [demo](https://github.com/windsorcli/core/tree/main/kustomize/demo) READMEs.
 
 ## See also
 

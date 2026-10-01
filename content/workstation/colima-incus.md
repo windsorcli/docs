@@ -48,7 +48,7 @@ flowchart TB
   CLI -.-> Node
 ```
 
-- **Nodes are VMs.** Each Kubernetes node is an Incus VM instance running Talos, not a container. DNS, the registry mirrors, and the git mirror run alongside it, as described in the [overview](overview.md#what-every-workstation-builds).
+- **Nodes are VMs.** Each Kubernetes node is an Incus VM instance running Talos, not a container. DNS, the registry mirrors, and the git mirror run alongside it, as described in the [overview](overview.md#what-gets-built).
 - **An LXC bridge.** The private network is an Incus bridge instead of a Docker one. The host route and DNS rule work the same as with Colima + Docker, so `*.test` resolves to service IPs and a layer 2 load balancer works.
 - **Block devices.** Because the nodes are VMs, they can attach block devices, which storage drivers and CSIs need.
 

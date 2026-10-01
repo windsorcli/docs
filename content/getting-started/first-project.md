@@ -3,7 +3,7 @@ title: First project
 description: Install the CLI, start a project, and run your first local stack.
 ---
 
-Install Windsor, start a project, and launch a local Kubernetes cluster with a single worker and controlplane.
+Install Windsor, start a project, and launch a local single-node Kubernetes cluster.
 
 The cluster needs about 6 CPU cores and 14 GB of RAM, plus 60 GB of free storage, on top of what your system already uses.
 
@@ -13,7 +13,11 @@ The cluster needs about 6 CPU cores and 14 GB of RAM, plus 60 GB of free storage
 
 ## 2. Terraform and a Docker runtime
 
-You need Terraform and a Docker runtime (Colima, Docker Desktop, or another [supported option](../workstation/colima-docker.md)). Install them however you prefer. When you run `windsor init`, it will tell you if a required tool is missing or needs upgrading.
+This guide uses Docker Desktop, which `windsor init local` picks by default on macOS and Windows. Install Terraform and [Docker Desktop](https://docs.docker.com/desktop/), and start Docker Desktop. When you run `windsor init`, it tells you if a required tool is missing or needs upgrading.
+
+Docker Desktop's VM needs at least 6 CPUs and 14 GB of memory for the cluster, and the default limits can be lower. Set them under **Settings → Resources** in Docker Desktop before you run `windsor up`. See [Docker Desktop](../workstation/docker-desktop.md#resources) for the figures and why.
+
+On Linux, `windsor init local` uses Docker Engine on the host instead. Colima is another option on macOS and Linux. The [workstation overview](../workstation/overview.md) compares the runtimes.
 
 ## 3. Start a project
 

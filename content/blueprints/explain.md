@@ -1,5 +1,5 @@
 ---
-title: Explain
+title: Debug
 description: Trace blueprint values back to their sources to debug composition.
 ---
 
