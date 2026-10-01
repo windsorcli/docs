@@ -59,7 +59,7 @@ windsor get context
 
 ## Workstation vs. deployed contexts
 
-There are some special considerations to keep in mind for contexts that represent a local workstation.
+Contexts that represent a local workstation work a little differently, so keep a few things in mind.
 
 A **workstation context**, named `local` or starting with `local-`, runs a Kubernetes cluster in a VM on your machine. Windsor starts and stops that VM. Every other context, like `staging` or `production`, is **deployed**. It targets a cloud, a hypervisor, or bare metal, so there's no VM to start and Windsor provisions the infrastructure directly.
 
