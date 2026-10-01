@@ -4,7 +4,7 @@ description: Windsor loads a project's configuration only from folders you've tr
 ---
 
 A Windsor project runs Terraform, resolves secrets, and sets shell variables from files in its repository. These activities take place in response to the contents in the project folder. It is important that you
-trust the project you're working with before executing Windsor commands. You must trust a project before 
+trust the project you're working with before executing Windsor commands. You must trust a project before
 environment injection will activate.
 
 ## Trust a project
