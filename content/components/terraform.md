@@ -1,9 +1,9 @@
 ---
 title: Terraform
-description: How Windsor drives Terraform, from components and generated tfvars to backend configuration and the bootstrap workflow.
+description: Declaring, running, and operating Terraform components in a blueprint.yaml — entries, outputs, the state backend, and bootstrap.
 ---
 
-Windsor manages a Terraform stack defined in a [blueprint](overview.md). Stacks are built sequentially, threading Terraform output values to corresponding input values according to the [facet](facets.md) definition.
+This is the entry point if you already have Terraform modules — or are about to write them — and want Windsor to run them, without authoring a reusable blueprint. You're consuming `core` (or another blueprint) and adding your own modules on top, directly in one context's `blueprint.yaml`. No facets, no schema, no `_template/` folder, and no other context has to share what you write here. That's [Blueprints](../blueprints/overview.md), for when the same components need to work across contexts you haven't written yet. See [Kustomize](kustomize.md) for the other half of a component.
 
 ## Declare components
 
@@ -27,9 +27,23 @@ terraform:
 
 A component with no `source:` resolves to `terraform/<path>` in your project; with `source:`, it resolves into the named blueprint source. `inputs` takes literal values or `${...}` expressions evaluated at compose time. The full schema is in the [blueprint reference](https://www.windsorcli.dev/reference/cli/blueprint).
 
+### Per-context overrides
+
+`contexts/<name>/terraform/<component-id>.tfvars` (or `.tfvars.json`) overrides one component's inputs, on top of whatever `inputs:` already set in `blueprint.yaml`. Windsor passes it as an extra `-var-file`, not instead of the generated one — Terraform applies var-files in order and the last one wins per variable, so the override file only needs the variables it's actually changing. `<component-id>` is the component's `name` if it has one, else its `path`:
+
+```text
+contexts/staging/terraform/
+├── cluster.tfvars              # overrides a component named "cluster"
+└── cluster/talos.tfvars        # overrides the same component by path, if unnamed
+```
+
+The override only reaches `plan`, `refresh`, `destroy`, and `import`. `apply` takes no var-files — it applies the plan `plan` already produced, so set the override before planning, not between plan and apply. See [Lifecycle](../provisioning/workflow.md) for what each command does.
+
+`contexts/<name>/backend.tfvars` overrides the Terraform backend config the same way, checked before the equivalent `contexts/<name>/terraform/backend.tfvars`. `contexts/<name>/terraform/.env` sets environment variables for every Terraform command run in that context — the same idea as a project `.env` file, scoped one level deeper. See [Environment injection](../contexts/environment-injection.md) for what else Windsor exports, including `TF_VAR_*`.
+
 ## Run components
 
-These commands drive the components you declared:
+Windsor builds the stack sequentially, threading each component's Terraform output values to the input values of the components that depend on it. These commands drive it:
 
 | Command | Effect |
 |---------|--------|
@@ -40,11 +54,11 @@ These commands drive the components you declared:
 | [`windsor up`](https://www.windsorcli.dev/reference/cli/commands/up) / [`windsor down`](https://www.windsorcli.dev/reference/cli/commands/down) | Workstation contexts only. `up` drives Terraform + Flux for the workstation; `down` stops the VM. |
 | [`windsor bootstrap`](https://www.windsorcli.dev/reference/cli/commands/bootstrap) | First-run setup — see [Bootstrap](#bootstrap) below. |
 
-`apply` runs against a saved plan, so Terraform never prompts for approval. `destroy` is different: it passes `-auto-approve` and gates on a confirmation token (`--confirm=<token>` or an interactive prompt). A `terraform destroy` run directly in a `windsor env`-managed shell gets no `-auto-approve` in `TF_CLI_ARGS_destroy`, so Terraform's own prompt appears.
+`apply` runs against a saved plan, so Terraform never prompts for approval. `destroy` is different: it passes `-auto-approve` and gates on a confirmation token (`--confirm=<token>` or an interactive prompt). A `terraform destroy` run directly in a [`windsor env`](https://www.windsorcli.dev/reference/cli/commands/env)-managed shell gets no `-auto-approve` in `TF_CLI_ARGS_destroy`, so Terraform's own prompt appears.
 
 ## Read another component's outputs
 
-A component can read another's outputs through the `terraform_output` helper, inside a [facet](facets.md) expression:
+A component can read another's outputs through the `terraform_output` helper, inside a [facet](../blueprints/facets.md) expression:
 
 ```yaml
 terraform:
@@ -63,6 +77,8 @@ Windsor walks components in dependency order. By the time `app` evaluates `terra
 
 There is no bare-path form. `${terraform.<other>.outputs.<key>}` does not exist; the `terraform_output()` helper is the only access, and only inside facet expressions.
 
+For a value computed once and shared across many components instead — not read from a specific component's own outputs — see [Facets — Config blocks](../blueprints/facets.md#config-blocks).
+
 ## State backend
 
 Set the backend in the context's `windsor.yaml`:
@@ -70,7 +86,7 @@ Set the backend in the context's `windsor.yaml`:
 ```yaml
 terraform:
   backend:
-    type: s3              # local | s3 | kubernetes | azurerm
+    type: s3              # local | s3 | kubernetes | azurerm | gcs
     s3:
       bucket: my-tf-state
       key: contexts/staging
@@ -85,8 +101,9 @@ State is keyed per-component and isolated within a single context. Windsor write
 |----------|-----------------|
 | `aws` | `s3` |
 | `azure` | `azurerm` |
-| `metal`, `docker`, `incus` | `kubernetes` (each component's state is stored as a Secret in the cluster) |
-| `gcp`, `none`, unset | not defaulted (effectively `local`) |
+| `gcp` | `gcs` |
+| `metal`, `docker`, `incus`, `hetzner`, `hyperv`, `vsphere` | `kubernetes` (each component's state is stored as a Secret in the cluster) |
+| `none`, unset | not defaulted (effectively `local`) |
 
 Override it at init with `--backend`, with `--set terraform.backend.type=...` on `bootstrap`, or by editing `windsor.yaml` directly.
 
@@ -124,7 +141,7 @@ terraform/
 
 Modules under `terraform/` are local to the project, referenced with a `path:` and no `source:`. Modules pulled from blueprint sources (OCI artifacts or Git repositories) are unpacked as shims into `.windsor/contexts/<name>/terraform/<component>/`. Each shim carries a generated `terraform.tfvars` and a `backend_override.tf` pointing at the configured [state backend](#state-backend).
 
-`contexts/<name>/terraform/<component>.tfvars` is an optional hand-authored override. When it's present, Windsor consumes it instead of the generated tfvars.
+The `terraform/` folder under a context holds hand-authored overrides — per-component tfvars, backend config, a scoped `.env` file. See [Per-context overrides](#per-context-overrides) above.
 
 ### Generated tfvars and variables
 
@@ -148,7 +165,7 @@ terraform:
     timeout: 10m
 ```
 
-This is separate from Windsor's own per-context [stack lock](../contexts/lifecycle.md#safety-and-concurrency), which serializes concurrent `windsor` commands before Terraform's state lock ever engages.
+This is separate from Windsor's own per-context [stack lock](../maintenance/destroy.md#safety-and-concurrency), which serializes concurrent `windsor` commands before Terraform's state lock ever engages.
 
 ### Bootstrap
 
@@ -173,15 +190,17 @@ windsor bootstrap --platform aws --blueprint ghcr.io/org/blueprint:v1.2.0
 
 When the blueprint includes a Terraform component representing the workstation itself (component id `workstation`), host and guest networking and DNS are deferred until after that component applies. A hook then configures host routes, guest networking, and DNS for the active platform (Colima or Docker), using the DNS address from the component's outputs when it is available.
 
-This is workstation-context behavior only; non-workstation contexts skip the callback.
+This is workstation-context behavior only; deployed contexts skip the callback.
 
 ### OpenTofu (experimental)
 
 Windsor can drive OpenTofu instead of Terraform. Setting `terraform.driver: opentofu` in the root `windsor.yaml` selects it; otherwise Windsor auto-detects from `$PATH`, preferring `terraform` and falling back to `tofu`. Support is experimental, and behavior may diverge from Terraform on edge cases.
 
-## Reference
+## See also
 
-- [Lifecycle](../contexts/lifecycle.md) — phase-by-phase command map
-- [Environment injection](../contexts/environment-injection.md) — how context env vars are managed
+- [Kustomize](kustomize.md) — the other half of a component
+- [Blueprints](../blueprints/overview.md) — turning a componentized context into a reusable, multi-context template
+- [Lifecycle](../provisioning/workflow.md) — the commands that apply what you declared here
+- [Environment injection](../contexts/environment-injection.md) — what Windsor exports into your shell
 - [Workstation overview](../workstation/overview.md) — workstation-specific Terraform components
 - [Blueprint reference](https://www.windsorcli.dev/reference/cli/blueprint) — `TerraformComponent` schema

@@ -98,7 +98,7 @@ genuinely reads better with the change.
 
 ### Pass 4 — Rhythm and AI-tells
 
-Vale catches words; it does not catch *shape*. This is the read-aloud
+Vale catches words; it does not catch *cadence*. This is the read-aloud
 pass — the gate that separates prose that reads as human from prose
 that reads as generated. Nothing here trips CI, which is exactly why a
 deliberate read is the only thing that catches it.
@@ -138,16 +138,21 @@ Then read the rest of the changed prose and flag:
   over-explaining a step the
   [reader baseline](../../../adrs/0001-guide-first-two-tier-pages.md)
   already knows; rule-of-three lists where the third item is padding;
-  "not just X, but Y"; em-dashes in prose (convert to colon / semicolon
-  / comma / parens — only `[Page — Section]` link labels and code keep
-  them; in YAML frontmatter use comma/parens, never a colon).
+  "not just X, but Y"; the word "shape" where structure, layout,
+  format, schema, or signature is meant; em-dashes in prose (only
+  `[Page — Section]` link labels and code keep them; frontmatter uses
+  comma/parens, never a colon). Flag a dash by proposing a real
+  rewrite, not a punctuation swap — trading the dash for a colon or
+  semicolon in the same spot keeps the same clause-stitching and
+  doesn't fix anything; the fix is to split the sentence, reorder the
+  clause, or cut what wasn't carrying weight.
 
 Findings here are `should-fix` or `consider`, never `must-fix`. Quote
 the sentence and propose the rewrite — don't just name the smell.
 
 ### Pass 5 — Page structure
 
-Skim each changed page against the canonical shape:
+Skim each changed page against the canonical structure:
 
 1. Frontmatter
 2. Lead (2-3 sentences)
@@ -162,8 +167,8 @@ a *lead*, that's always a problem.
 
 For the how-to + explanation pages,
 [ADR 0001](../../../adrs/0001-guide-first-two-tier-pages.md) sets the
-two-tier shape: guide tier first, then a `## Under the hood` seam
-(that exact text — it's part of the page API) before the mechanism. A
+two-tier structure: guide tier first, then a `## Under the hood` seam
+(that exact text; it's part of the page API) before the mechanism. A
 reader who stops at the seam should already have what they came for.
 Don't require the seam on a short pure how-to.
 

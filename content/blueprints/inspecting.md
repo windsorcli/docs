@@ -14,7 +14,7 @@ windsor plan                    # summary across all components
 windsor plan terraform cluster  # full plan for one component
 ```
 
-Output is sorted destructive-first. Add `--summary` for the compact table, `--json` for machine-readable output in CI, or `--no-color` to disable color. See [Lifecycle](../contexts/lifecycle.md) for where `plan` fits in the apply flow.
+Output is sorted destructive-first. Add `--summary` for the compact table, `--json` for machine-readable output in CI, or `--no-color` to disable color. See [Lifecycle](../provisioning/workflow.md) for where `plan` fits in the apply flow.
 
 ## Render the composition with `windsor show`
 
@@ -36,10 +36,10 @@ A composed value can come from several places: a facet, a context file, a deferr
 windsor explain terraform.cluster.inputs.cluster_endpoint
 ```
 
-The output names each contributing facet or context file with its `file:line`, expands the expression chain, and marks values that are deferred or form a cycle. [Explain](explain.md) covers reading the output in full, including every status marker.
+The output names each contributing facet or context file with its `file:line`, expands the expression chain, and marks values that are deferred or form a cycle. [Debug](explain.md) covers reading the output in full, including every status marker.
 
 ## Reference
 
 - [`windsor plan`](https://www.windsorcli.dev/reference/cli/commands/plan), [`windsor show`](https://www.windsorcli.dev/reference/cli/commands/show), [`windsor explain`](https://www.windsorcli.dev/reference/cli/commands/explain)
-- [Explain](explain.md) — reading an explain trace in detail
-- [Lifecycle](../contexts/lifecycle.md) — where `plan` fits in the apply flow
+- [Debug](explain.md) — reading an explain trace in detail
+- [Lifecycle](../provisioning/workflow.md): where `plan` fits in the apply flow

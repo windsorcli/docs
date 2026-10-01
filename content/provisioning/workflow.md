@@ -1,9 +1,9 @@
 ---
 title: Lifecycle
-description: The lifecycle commands grouped by purpose, and which ones a workstation context uses versus a cloud or metal context.
+description: How a context moves from init to teardown, which commands provision and remove it, and how a workstation context differs from a cloud one.
 ---
 
-A Windsor context has a short lifecycle: scaffold it, provision its infrastructure and install the blueprint, then tear it down. Which commands do that work depends on whether the context runs a local workstation VM or targets cloud infrastructure. The path splits right after `windsor init`:
+[First project](../getting-started/first-project.md) ran `init`, `up`, and `destroy` against a local workstation. Every context follows the same short lifecycle: scaffold it, provision its infrastructure and install the blueprint, then tear it down. Which commands do that work depends on whether the context runs a local workstation VM or targets cloud infrastructure. The path splits right after `windsor init`:
 
 ```mermaid
 flowchart TB
@@ -12,7 +12,7 @@ flowchart TB
     direction LR
     Up["up<br/>VM + Terraform"] --> CN["configure network<br/>host route + DNS (sudo)"] --> Up2["up<br/>re-run: install Flux"] --> Down["down<br/>stop VM, keep state"]
   end
-  subgraph Cloud["Non-workstation (cloud / metal)"]
+  subgraph Cloud["Deployed (cloud, hypervisor, metal)"]
     direction LR
     Boot["bootstrap<br/>first run + backend"] --> Apply["apply<br/>reconcile"]
   end
@@ -80,33 +80,25 @@ windsor plan terraform cluster  # full plan for one component
 
 To inspect the composition itself, render it with `windsor show` or trace a value with `windsor explain`. See [Inspecting](../blueprints/inspecting.md).
 
-## Tear down
-
-`destroy` removes live infrastructure: every Flux kustomization, then every Terraform component in reverse-dependency order. Before it touches anything it shows a destroy plan (the Terraform resources it will remove and the live Flux inventory queried from the cluster) and waits for confirmation.
-
-Confirmation is always required. Type the context name (layer-wide) or component name (targeted) at the prompt, or pass `--confirm=<expected>` for CI. The value must match the prompt token exactly, or the run aborts. There is no `--force`.
-
-A workstation context needs `destroy` then `down` for a full teardown. A cloud or metal context has no VM, so `destroy` is the whole teardown:
-
-```bash
-windsor destroy --confirm=local
-windsor down
-```
-
 ## Under the hood
 
 `bootstrap` handles the case where the remote Terraform backend, an S3 bucket or DynamoDB table, is itself created by Terraform. It applies the `backend` component against local state, migrates state to the configured backend, then runs the rest of `apply`. With no `backend` component declared, `bootstrap` is the same as `apply`.
 
+```mermaid
+flowchart TB
+  Start["windsor bootstrap"] --> Q{"blueprint declares<br/>a backend component?"}
+  Q -->|no| Plain["apply --wait<br/>against the configured backend"]
+  Q -->|yes| P1["Phase 1<br/>terraform.backend.type = local, in memory<br/>apply only the backend component"]
+  P1 --> Store[("remote state store exists<br/>S3 bucket, Storage account, GCS bucket")]
+  Store --> P2["Phase 2<br/>restore the configured backend<br/>init -migrate-state -force-copy<br/>backend state moves to remote"]
+  P2 --> Rest["remaining components init<br/>directly against the remote backend"]
+  Rest --> Flux["install Flux, wait for kustomizations"]
+  Plain --> Flux
+```
+
+Windsor never writes the `local` override to `windsor.yaml`. A later `bootstrap` run detects the migrated backend and skips Phase 1.
+
 `plan` sorts its output destructive-first. The summary renders per-component rows with affected resources indented underneath, and a single replace shows as `±1` rather than `+1 -1`. Add `--summary` for the compact table, `--json` for machine-readable output in CI, or `--no-color` to disable color.
-
-### Safety and concurrency
-
-`destroy` has two safety behaviors:
-
-- If a Terraform resource carries `lifecycle { prevent_destroy = true }`, `destroy` names it up front and warns the run may halt partway through. It does not override the protection; remove the lifecycle block in HCL to actually destroy.
-- By default `destroy` aborts on the first component failure. `--continue` keeps going, collects failures, and prints a one-line summary. It is layer-wide only, and is refused with a component argument. When a non-tier component is left un-destroyed, the backend tier is deferred so the state store isn't removed out from under components that still depend on it. Rerun to converge.
-
-A per-context lock guards concurrent runs. `up`, `apply`, `bootstrap`, `destroy`, and any `plan` that touches Terraform take a single-writer stack lock at `.windsor/contexts/<context>/.stacklock` before they run. A second `windsor` command on the same context fails immediately and names the holder (`user@host`, PID, operation), unless `--lock-timeout` is passed, in which case it waits up to that duration before failing. See [Global flags](https://www.windsorcli.dev/reference/cli/global-flags). Different contexts never contend, and a read-only `plan kustomize` does not lock. Terraform's own state lock follows `terraform.lock.timeout` (default `5m`), applied as `-lock-timeout` to every state-mutating Terraform command, so contended state waits rather than failing immediately.
 
 ## Reference
 
@@ -114,10 +106,15 @@ A per-context lock guards concurrent runs. `up`, `apply`, `bootstrap`, `destroy`
 |---|---|---|
 | Scaffold | [`init`](https://www.windsorcli.dev/reference/cli/commands/init) | Creates the context, writes `windsor.yaml`, marks the directory trusted. |
 | Workstation | [`up`](https://www.windsorcli.dev/reference/cli/commands/up) / [`down`](https://www.windsorcli.dev/reference/cli/commands/down) | Starts/stops the local VM and container runtime. Workstation contexts only. |
-| First-run | [`bootstrap`](https://www.windsorcli.dev/reference/cli/commands/bootstrap) | End-to-end install for non-workstation contexts. Two-phase apply when a `backend` component is in play. |
+| First-run | [`bootstrap`](https://www.windsorcli.dev/reference/cli/commands/bootstrap) | End-to-end install for deployed contexts. Two-phase apply when a `backend` component is in play. |
 | Install | [`apply`](https://www.windsorcli.dev/reference/cli/commands/apply) | Runs Terraform components, then installs the Flux blueprint. |
 | Inspect | [`plan`](https://www.windsorcli.dev/reference/cli/commands/plan) / [`show`](https://www.windsorcli.dev/reference/cli/commands/show) / [`explain`](https://www.windsorcli.dev/reference/cli/commands/explain) | Previews changes, prints rendered resources, traces values. |
+| Upgrade | [`upgrade`](https://www.windsorcli.dev/reference/cli/commands/upgrade) / [`upgrade cluster`](https://www.windsorcli.dev/reference/cli/commands/upgrade-cluster) / [`upgrade node`](https://www.windsorcli.dev/reference/cli/commands/upgrade-node) | Moves sources to a new version and reconciles; upgrades Talos nodes. |
+| Recovery | [`unlock`](https://www.windsorcli.dev/reference/cli/commands/unlock) | Force-releases a stuck stack lock. |
 | Tear down | [`destroy`](https://www.windsorcli.dev/reference/cli/commands/destroy) | Destroys live infrastructure (Terraform + Flux). |
 
-- [Contexts](overview.md) — workstation vs non-workstation, switching contexts
-- [Workstation overview](../workstation/overview.md) — VM driver options and topology
+- [First project](../getting-started/first-project.md) — the hands-on walkthrough this page generalizes
+- [Contexts](../contexts/overview.md) — workstation and deployed contexts, switching contexts
+- [Workstation overview](../workstation/overview.md): the runtimes and what gets built
+- [Upgrade](../maintenance/upgrade.md) — moving a context to a newer blueprint version
+- [Destroy](../maintenance/destroy.md) — safety behaviors and locking on teardown

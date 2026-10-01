@@ -1,37 +1,50 @@
 ---
-title: Contexts
-description: Contexts are Windsor's named environments (local, staging, production), each mapping to a cloud role and a cluster.
+title: Overview
+description: A context is a named environment (local, staging, production) with its own blueprint, values, and credentials, and Windsor tracks which one is active.
 ---
 
-A **context** is a named environment that bundles a cluster, a cloud profile, and a secrets backend. Switching context switches all of them at once.
+Windsor uses **contexts** to make it easier to work across several environments.
 
-Contexts can map to SDLC stages (`development`, `staging`, `production`), to parts of your infrastructure (`admin`, `web`, `observability`), or a mix (`web-staging`, `web-production`). A context typically represents a single cloud role and a single cluster role: everything in it shares the same administrative access.
+It is common to reuse infrastructure code across several environments. For example, tests are often run against dedicated staging infrastructure. Replicas of production infrastructure may run in different regions, or be dedicated to single-tenant customers.
 
-## Workstation vs non-workstation
+Across each of the above targets, authentication, endpoints, and input parameters vary. Windsor
+keeps this organized by bundling these collections individually as contexts. Contexts are referenced when running commands that target a particular environment. Automatic environment variable injection configures your tool chain (for example, the `kubectl` or `aws` CLIs) to target the current context.
 
-How you operate a context depends on whether it runs on your machine.
+Contexts usually map to an SDLC stage (`development`, `staging`, `production`), a slice of infrastructure (`admin`, `web`, `observability`), or both, like `web-staging`.
 
-A context named `local`, or starting with `local-`, is a **workstation context**. It runs a VM-backed Kubernetes cluster on your machine and uses [`windsor up`](https://www.windsorcli.dev/reference/cli/commands/up) and [`windsor down`](https://www.windsorcli.dev/reference/cli/commands/down) for its lifecycle. See [Workstation overview](../workstation/overview.md).
+Windsor organizes context files under `<project-root>/contexts/<context-name>/`.
 
-Staging, production, and anything targeting real cloud infrastructure are **non-workstation** contexts. With no local VM, they use [`windsor apply`](https://www.windsorcli.dev/reference/cli/commands/apply) and [`windsor destroy`](https://www.windsorcli.dev/reference/cli/commands/destroy) directly. [Lifecycle](lifecycle.md) covers both paths.
+```text
+windsor.yaml                     project root; a version stamp
+contexts/
+└── local/
+    ├── blueprint.yaml           this context's blueprint
+    ├── values.yaml              values that feed the schema
+    ├── .gitignore               keeps sensitive context files out of commits
+    ├── secrets.enc.yaml         SOPS-encrypted secrets, safe to commit
+    ├── .env                     git-ignored environment variables
+    ├── terraform/               <component>.tfvars overrides for terraform components
+    ├── patches/                 <component>/patch.yaml patches for kustomize components
+    ├── .kube/config             kubeconfig, written by windsor up
+    └── .talos/config            talosconfig, written by windsor up
+.windsor/
+├── context                      the active context name
+└── contexts/local/              generated Terraform module shims, workstation config, and the stack lock
+```
 
 ## Create a context
 
-`windsor init` creates a project with a `local` context: a `contexts/local` folder and a `contexts.local` entry in `windsor.yaml`:
+`windsor init` creates the project and a `local` context: a `contexts/local` folder with a starter `blueprint.yaml`, plus a minimal `windsor.yaml` at the project root on the first run:
 
 ```bash
 windsor init
 ```
 
-To add another, name it and point it at a platform. This creates production targeting AWS, with a starter `blueprint.yaml` and `windsor.yaml`:
+To add another, use a different name (for example, `production`) and choose a platform. This command creates `contexts/production/` targeting AWS, with its own `blueprint.yaml`:
 
 ```bash
 windsor init production --platform aws
 ```
-
-`--platform` drives the defaults: AWS sets `terraform.backend.type: s3`; Azure sets `azurerm`; `metal`, `docker`, and `incus` use `kubernetes` (state stored as Secrets in the cluster).
-
-New contexts are generated from blueprint templates in `contexts/_template/`, which define the shared base blueprint, schema, and conditional facets every context inherits. See [Blueprint templates](../blueprints/templates.md).
 
 ## Switch contexts
 
@@ -42,15 +55,29 @@ windsor set context <context-name>
 windsor get context
 ```
 
-`WINDSOR_CONTEXT` reflects the active context. On your next prompt, the shell hook updates the per-context environment, including kubeconfig and the cloud profile. See [Environment injection](environment-injection.md).
+`windsor set context` writes the context name to `.windsor/context` and sets `WINDSOR_CONTEXT` for the current process. By your next prompt, the shell hook has refreshed the per-context environment, including kubeconfig and the cloud profile. See [Environment injection](environment-injection.md).
+
+## Workstation vs. deployed contexts
+
+Contexts that represent a local workstation work a little differently, so keep a few things in mind.
+
+A **workstation context**, named `local` or starting with `local-`, runs a Kubernetes cluster in a VM on your machine. Windsor starts and stops that VM. Every other context, like `staging` or `production`, is **deployed**. It targets a cloud, a hypervisor, or bare metal, so there's no VM to start and Windsor provisions the infrastructure directly.
+
+|                 | Workstation                                                                                          | Deployed                                                                           |
+| --------------- | ---------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| Cluster runs on | A VM on your machine                                                                                 | A cloud, hypervisor, or bare metal                                                 |
+| First run       | [`windsor up`](https://www.windsorcli.dev/reference/cli/commands/up)                                 | [`windsor bootstrap`](https://www.windsorcli.dev/reference/cli/commands/bootstrap) |
+| Tear down       | [`windsor destroy`](https://www.windsorcli.dev/reference/cli/commands/destroy), then [`windsor down`](https://www.windsorcli.dev/reference/cli/commands/down) | `windsor destroy`                                                                  |
+
+Read more about the [local workstation](../workstation/overview.md) and [provisioning lifecycle](../provisioning/workflow.md)
 
 ## In this section
 
-- [Lifecycle](lifecycle.md) — how `init`, `up`, `bootstrap`, `apply`, `plan`, `destroy`, and `down` fit together
-- [Environment injection](environment-injection.md) — per-context environment variables and the shell hook
-- [Trusted folders](trusted-folders.md) — the trust gate that guards environment injection
+- [Environment injection](environment-injection.md): per-context environment variables and the shell hook
+- [Trusted folders](trusted-folders.md): the trust gate that guards environment injection
 
 ## Reference
 
 - [`windsor init`](https://www.windsorcli.dev/reference/cli/commands/init), [`windsor set`](https://www.windsorcli.dev/reference/cli/commands/set), [`windsor get`](https://www.windsorcli.dev/reference/cli/commands/get)
-- [Contexts reference](https://www.windsorcli.dev/reference/cli/contexts) — full schema for `windsor.yaml` and `values.yaml`
+- [Contexts reference](https://www.windsorcli.dev/reference/cli/contexts): on-disk layout of `contexts/`, including what lives in each context's `values.yaml`
+- [Configuration reference](https://www.windsorcli.dev/reference/cli/configuration): full schema for values a context accepts

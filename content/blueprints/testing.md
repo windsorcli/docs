@@ -1,9 +1,9 @@
 ---
-title: Blueprint testing
+title: Testing
 description: Static testing for blueprint composition.
 ---
 
-Windsor's `windsor test` command validates blueprint composition without provisioning infrastructure. You define input values and expected components in YAML; the CLI checks that [facets](facets.md) and composition behave as expected.
+Windsor's [`windsor test`](https://www.windsorcli.dev/reference/cli/commands/test) command validates blueprint composition without provisioning infrastructure. You define input values and expected components in YAML; the CLI checks that [facets](facets.md) and composition behave as expected.
 
 ## What is validated
 
@@ -18,11 +18,11 @@ Windsor's `windsor test` command validates blueprint composition without provisi
 Create a test file under `contexts/_template/tests/`:
 
 ```yaml
-# contexts/_template/tests/provider.test.yaml
+# contexts/_template/tests/platform.test.yaml
 cases:
-  - name: aws-provider-includes-vpc
+  - name: aws-platform-includes-vpc
     values:
-      provider: aws
+      platform: aws
     expect:
       terraform:
         - name: vpc

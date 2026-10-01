@@ -1,0 +1,155 @@
+---
+title: vSphere
+description: Deploy a Windsor stack to VMware vSphere, with Talos VMs on existing inventory and an in-cluster load balancer.
+---
+
+Windsor can place Talos Linux VMs on [VMware vSphere](https://www.vmware.com/products/cloud-infrastructure/vsphere) infrastructure you already run, then have Flux reconcile the `core` blueprint's services on top. The lifecycle is `init` → `bootstrap` → `apply` → `destroy`, the same as a cloud platform. For the concepts behind those verbs, see [Lifecycle](../provisioning/workflow.md).
+
+vSphere is common for industrial and on-premises deployments with no public cloud reachable: plant networks, air-gapped-adjacent sites, and existing VMware estates. `cluster.driver` is always `talos`. vSphere has no managed Kubernetes offering to target instead.
+
+## Prerequisites
+
+vSphere is the one platform where Windsor reads existing inventory rather than creating it. Before you run anything, vCenter needs:
+
+- A **datacenter**.
+- A **compute cluster** (a `ClusterComputeResource`) with at least one ESXi host joined to it. A host added directly to the datacenter, not inside a cluster, doesn't satisfy this. Put it in a cluster even if that cluster has just the one host.
+- A **datastore** and a **port group** reachable from that host.
+- The ESXi host needs outbound access to `factory.talos.dev` to pull the Talos OVA on first apply.
+
+Beyond the inventory:
+
+- vCenter credentials with permission to deploy and manage VMs.
+- Terraform (or OpenTofu) and `kubectl` on your `PATH`. Run [`windsor check`](https://www.windsorcli.dev/reference/cli/commands/check) to validate the toolchain.
+- A git repository for the project ([`windsor init`](https://www.windsorcli.dev/reference/cli/commands/init) refuses to scaffold outside one).
+
+To inspect or prepare inventory out of band, [`govc`](https://github.com/vmware/govmomi/tree/main/govc) reads the same credentials via `GOVC_URL`/`GOVC_USERNAME`/`GOVC_PASSWORD`/`GOVC_INSECURE`. Mirror your `vsphere.*` values into those.
+
+## What gets created
+
+Setting `platform: vsphere` selects the vSphere path in the `core` blueprint. Nothing here provisions inventory. It deploys VMs onto what you already have:
+
+```mermaid
+flowchart TB
+  subgraph vC["vCenter · datacenter / cluster"]
+    subgraph VMs["VMs on existing datastore + port group"]
+      CP["Controlplane VM(s)"]
+      W["Worker VM(s)"]
+    end
+  end
+
+  VMs --> Flux["Flux (GitOps)<br/>reconciles core add-ons"]
+  Flux --> Addons["cert-manager · gateway<br/>kube-vip or MetalLB (ARP)"]
+```
+
+VMs deploy from the Talos OVA using vSphere's guestinfo mechanism, the vSphere equivalent of cloud-init on AWS or Azure. The deploy generates machine secrets and machine config inline, so there's no separate config-generation step like Hyper-V needs.
+
+## 1. Create the context
+
+```bash
+windsor init vsphere-prod --platform vsphere
+windsor set context vsphere-prod
+```
+
+## 2. Configure values
+
+Windsor exports `VSPHERE_SERVER`, `VSPHERE_USER`, and `VSPHERE_ALLOW_UNVERIFIED_SSL` from the `server`, `user`, and `insecure` keys of the `vsphere.*` block below. The password is not a config key. Provide it as `VSPHERE_PASSWORD` in your shell, or in the context's `environment` from a secrets provider such as [SOPS](../secrets/sops.md) or [1Password](../secrets/1password.md), so it never lands in `values.yaml`:
+
+```yaml
+platform: vsphere
+vsphere:
+  server: vcenter.plant.local
+  user: administrator@vsphere.local
+  datacenter: dc-prod
+  cluster: cluster-01
+  datastore: datastore-01
+  network: "VM Network"
+network:
+  cidr_block: 10.5.0.0/16
+cluster:
+  controlplanes:
+    count: 1
+  workers:
+    count: 2
+```
+
+`datacenter`, `cluster`, `datastore`, and `network` are all required. Windsor refuses to compose the blueprint without them: there's no sensible default for infrastructure it doesn't own. Names must match vCenter's inventory exactly.
+
+As on Hetzner and Hyper-V, there's no `cluster.pools`. `cluster.controlplanes.count` and `cluster.workers.count` set node counts directly, sized by `cluster.{controlplanes,workers}.cpu`/`memory`. `topology` is inferred from those counts.
+
+Other common knobs:
+
+| Key | Effect |
+|-----|--------|
+| `vsphere.folder` | VM folder path, relative to the datacenter root. Unset places VMs at the datacenter root. |
+| `vsphere.resource_pool` | Resource pool path, relative to the compute cluster. Unset uses the cluster's root pool. |
+| `vsphere.host_system` | Specific ESXi host to place VMs on. Required only when the datacenter has more than one host; a single-host datacenter auto-selects it. |
+| `observability.enabled: true` | Grafana, Prometheus, and the logging stack. |
+
+### Load balancing
+
+vSphere VMs get real routed IPs on your network, so an in-cluster load balancer works the way it would on bare metal. `kube-vip` in ARP mode is the usual choice for a plant network. It needs no switch configuration, just a reserved IP range on the same subnet as the nodes:
+
+```yaml
+cluster:
+  cni:
+    driver: flannel
+network:
+  loadbalancer_driver: kube-vip
+  loadbalancer_ips:
+    start: 10.5.0.100
+    end: 10.5.0.120
+```
+
+The load balancer isn't installed under the default `cilium` CNI, so the example also sets `cluster.cni.driver` to `flannel`.
+
+MetalLB (also ARP mode) is supported as an alternative.
+
+## 3. Bootstrap
+
+```bash
+windsor bootstrap vsphere-prod
+```
+
+`bootstrap` deploys the VMs from the OVA, waits for vCenter Tools to report each guest's IP, then installs the Flux blueprint and waits for every kustomization to report ready.
+
+## 4. Verify
+
+```bash
+kubectl get nodes                       # VMs Ready
+kubectl get kustomizations -A           # Flux reconciling
+windsor show blueprint                  # the fully composed blueprint
+```
+
+`kubectl` uses the context's `KUBECONFIG`; prefix with [`windsor exec --`](https://www.windsorcli.dev/reference/cli/commands/exec) or install the [shell hook](../contexts/environment-injection.md) so it's exported automatically.
+
+## 5. Day-two changes
+
+```bash
+windsor plan                            # summary across all components
+windsor apply --wait
+```
+
+Raising `cluster.workers.count` adds VMs on the next `apply`. There's no autoscaling group: each VM is a fixed Terraform resource sized by `cluster.workers.cpu`/`memory`.
+
+## 6. Tear down
+
+```bash
+windsor destroy --confirm=vsphere-prod
+```
+
+`destroy` removes the Flux kustomizations, then the VMs, in reverse order. Windsor never touches vCenter's own inventory (the datacenter, cluster, datastore, port group). It only ever reads it.
+
+## Troubleshooting
+
+- **`vsphere_compute_cluster` lookup fails.** The named cluster has to be an actual `ClusterComputeResource` in vCenter. A bare host added straight to the datacenter, outside any cluster, doesn't satisfy this. Wrap it in a cluster, even a single-host one.
+- **VMs never get an IP in [`windsor show`](https://www.windsorcli.dev/reference/cli/commands/show).** IPs come from `vmtoolsd` (VMware Tools) reporting back to vCenter. This needs the Talos OVA's bundled guest agent running, which can lag a boot or two. If it never resolves, confirm the ESXi host reached `factory.talos.dev` to pull the OVA in the first place.
+- **OVF deploy fails outbound.** The ESXi host itself needs the network path to `factory.talos.dev`, not the machine running `windsor`. This is a common gap in segmented plant networks.
+- **Composition fails demanding `vsphere.host_system`.** Set when the datacenter has more than one ESXi host; Windsor can't guess which one you mean.
+
+## Where to next
+
+- [Lifecycle](../provisioning/workflow.md): the commands from `init` to `destroy`
+- [Destroy](../maintenance/destroy.md): safety behaviors and locking on teardown
+- [Terraform](../components/terraform.md): state backends and cross-component outputs
+- [Hyper-V](hyperv.md): the other on-premises VM platform
+- [AWS](../cloud/aws.md), [Azure](../cloud/azure.md), [GCP](../cloud/gcp.md), and [Hetzner](../cloud/hetzner.md): the other deployment targets

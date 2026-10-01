@@ -1,5 +1,5 @@
 ---
-title: Explain
+title: Debug
 description: Trace blueprint values back to their sources to debug composition.
 ---
 
@@ -92,7 +92,7 @@ Each list element gets its own contributor line, so you can see which facet appe
 
 Resolved values may include a marker after the path or inside an expression chain:
 
-- `(deferred)`: depends on a Terraform output that hasn't been applied yet. Apply the dependency (or let `windsor apply` walk the graph) and re-run.
+- `(deferred)`: depends on a Terraform output that hasn't been applied yet. Apply the dependency (or let [`windsor apply`](https://www.windsorcli.dev/reference/cli/commands/apply) walk the graph) and re-run.
 - `(empty)`: the chain resolved, but the result is an empty string.
 - `(not set)`: the referenced facet config was never provided.
 - `(cycle)`: the expression chain forms a cycle. Windsor breaks the cycle and uses the literal fallback at that node.
@@ -101,5 +101,5 @@ Resolved values may include a marker after the path or inside an expression chai
 
 - [`windsor explain`](https://www.windsorcli.dev/reference/cli/commands/explain) — full path syntax, output markers, and examples.
 - [`windsor show`](https://www.windsorcli.dev/reference/cli/commands/show) — render the blueprint, kustomization, or values for the current context.
-- [Inspecting](inspecting.md) — `windsor plan`, `show`, and `explain` together.
+- [Inspecting](inspecting.md) — [`windsor plan`](https://www.windsorcli.dev/reference/cli/commands/plan), `show`, and `explain` together.
 - [Facets](facets.md) — where most contributions originate.

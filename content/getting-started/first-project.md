@@ -3,9 +3,9 @@ title: First project
 description: Install the CLI, start a project, and run your first local stack.
 ---
 
-Install Windsor, start a project, and launch a local Kubernetes cluster with a single worker and controlplane.
+Install Windsor, start a project, and launch a local single-node Kubernetes cluster.
 
-Recommended: 8 CPU cores, 8GB RAM, 60GB free storage.
+The cluster needs about 6 CPU cores and 14 GB of RAM, plus 60 GB of free storage, on top of what your system already uses.
 
 ## 1. Install the CLI
 
@@ -13,7 +13,11 @@ Recommended: 8 CPU cores, 8GB RAM, 60GB free storage.
 
 ## 2. Terraform and a Docker runtime
 
-You need Terraform and a Docker runtime (Colima, Docker Desktop, or another [supported option](../workstation/colima-docker.md)). Install them however you prefer. When you run `windsor init`, it will tell you if a required tool is missing or needs upgrading.
+This guide uses Docker Desktop, which [`windsor init local`](https://www.windsorcli.dev/reference/cli/commands/init) picks by default on macOS and Windows. Install Terraform and [Docker Desktop](https://docs.docker.com/desktop/), and start Docker Desktop. When you run `windsor init`, it tells you if a required tool is missing or needs upgrading.
+
+Docker Desktop's VM needs at least 6 CPUs and 14 GB of memory for the cluster, and the default limits can be lower. Set them under **Settings → Resources** in Docker Desktop before you run [`windsor up`](https://www.windsorcli.dev/reference/cli/commands/up). See [Docker Desktop](../workstation/docker-desktop.md#resources) for the figures and why.
+
+On Linux, `windsor init local` uses Docker Engine on the host instead. Colima is another option on macOS and Linux. The [workstation overview](../workstation/overview.md) compares the runtimes.
 
 ## 3. Start a project
 
@@ -63,7 +67,7 @@ windsor up --wait
 
 `--wait` blocks until every Kustomization reports ready. Expect roughly 5 minutes on a fast Mac.
 
-`up` does not prompt for elevation, so it defers host networking and DNS and prints a `windsor configure network` command (prompts for sudo on macOS/Linux; run from an Administrator PowerShell on Windows). On **Colima**, `up` halts until the host route is installed, so the first-run sequence is `up` → `configure network` → `up` again:
+`up` does not prompt for elevation, so it defers host networking and DNS and prints a [`windsor configure network`](https://www.windsorcli.dev/reference/cli/commands/configure-network) command (prompts for sudo on macOS/Linux; run from an Administrator PowerShell on Windows). On **Colima**, `up` halts until the host route is installed, so the first-run sequence is `up` → `configure network` → `up` again:
 
 ```bash
 windsor configure network
@@ -72,7 +76,7 @@ windsor up                      # re-run, if up halted asking for it
 
 On **Docker Desktop** `up` completes without halting; run `configure network` once afterward to activate `*.test` resolution. Either way, writing the DNS resolver entry needs elevation.
 
-While it runs, watch progress in another shell. These `kubectl` commands use your context's `KUBECONFIG`, so either prefix each with `windsor exec --` or set up the [shell hook](../contexts/environment-injection.md) once so it's exported automatically:
+While it runs, watch progress in another shell. These `kubectl` commands use your context's `KUBECONFIG`, so either prefix each with [`windsor exec --`](https://www.windsorcli.dev/reference/cli/commands/exec) or set up the [shell hook](../contexts/environment-injection.md) once so it's exported automatically:
 
 ```bash
 kubectl get kustomizations -A --watch
@@ -88,7 +92,7 @@ windsor show blueprint          # fully composed blueprint
 windsor show values             # effective context values
 ```
 
-`windsor explain <path>` traces a value back to its source in the composition:
+[`windsor explain <path>`](https://www.windsorcli.dev/reference/cli/commands/explain) traces a value back to its source in the composition:
 
 ```bash
 windsor explain terraform.cluster.inputs.cluster_endpoint
@@ -105,6 +109,7 @@ windsor down
 
 ## Next steps
 
-- [Contexts](../contexts/overview.md) — Multiple environments and switching
-- [Workstation](../workstation/colima-docker.md) — Local virtualization (Colima, Docker Desktop)
-- [Blueprints](../blueprints/overview.md) and [Components](../blueprints/terraform.md) — Terraform and Kustomize
+- [Lifecycle](../provisioning/workflow.md): the commands behind what you just ran, and how it differs for a cloud or metal context
+- [Contexts](../contexts/overview.md): multiple environments and switching
+- [Workstation](../workstation/overview.md): the local runtimes and what `windsor up` builds
+- [Components](../components/terraform.md): adding your own Terraform and Kustomize to a consumed blueprint

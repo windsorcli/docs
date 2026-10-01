@@ -117,7 +117,7 @@ The register shifts by page type (the types in
   `windsor.yaml`." Precise and unhurried, no second-person
   hand-holding.
 - **Section overviews — explanation.** Lead with the idea, not a
-  command — one strong definition sentence, then the shape of the
+  command: one strong definition sentence, then the structure of the
   thing.
 
 ### The anti-voice — don't write like an LLM
@@ -129,6 +129,9 @@ sight:
 - **Inflated vocabulary:** `delve`, `tapestry`, `testament to`,
   `realm`, `landscape`, `boasts`, `pivotal`, `vibrant` (and the
   banned marketing words above).
+- **The word "shape."** A lazy stand-in for whatever's actually meant:
+  structure, layout, format, schema, signature, outline. Name the
+  real one.
 - **Throat-clearing:** `it's worth noting that`, `it's important to
   understand`, `in today's fast-paced world`, `when it comes to`,
   `let's dive in`.
@@ -156,14 +159,18 @@ sight:
   its subject* ("Windsor wraps Terraform," "X is a Y that …") instead
   of stating what it does or the one fact the reader needs. Concept and
   `overview.md` leads are the exception — they're meant to define.
-- **Em-dashes in prose.** Avoid them. Convert to a colon, semicolon,
-  comma, or parentheses: `X — appositive — Y` → `X (appositive) Y`;
-  `statement — tacked-on clause` → `statement; clause`;
-  `**Term** — definition` (lists) → `**Term**: definition`. The only
-  em-dashes that stay are `[Page — Section]` link labels and text
-  inside code fences. In **YAML frontmatter** use a comma or
-  parentheses, never a colon — an unquoted `key: value` colon breaks
-  the parse.
+- **Em-dashes in prose.** Avoid them. Swapping the dash for a colon or
+  semicolon in the same spot isn't a fix — it keeps the exact same
+  two-clauses-glued-together cadence and just changes the punctuation
+  mark. Restructure instead: split into two sentences, reorder so the
+  aside isn't an aside anymore, or cut it if it wasn't carrying its
+  weight. `X — appositive — Y` becomes `X. Y is appositive.` or folds
+  the appositive into `X`'s own clause, not `X (appositive) Y`. A
+  glossary-style label list (`**Term**: definition`) is a different,
+  sanctioned pattern, not a dash rewritten. The only em-dashes that
+  stay are `[Page — Section]` link labels and text inside code fences.
+  In **YAML frontmatter** use a comma or parentheses, never a colon —
+  an unquoted `key: value` colon breaks the parse.
 
 The point isn't a banned-word list — it's that this register is vague
 and unearned, the opposite of the specific, calm voice above.
@@ -177,7 +184,7 @@ slightly technical docs — Django's tutorial, Stripe's quickstarts,
 the Rails getting-started guide — actually make. They're checkable:
 
 - **Show the payoff before the prose.** Lead with the command that
-  produces a result, then explain it. The page-shape template's
+  produces a result, then explain it. The page structure template's
   "minimal example up front" is this rule.
 - **Predict the reader's next question and answer it in the same
   sentence.** "which `up` does not request on its own" pre-empts "why
@@ -233,19 +240,19 @@ Why it works:
 Why it works:
 
 - **Mechanism first, third person about the system.** The subject is
-  Windsor and the verb is what it does — "walks up," "falls back." No
+  Windsor and the verb is what it does: "walks up," "falls back." No
   second-person hand-holding.
 - **Plain words for a precise idea.** "Walks up… looking for" beats
   "performs an upward traversal in search of."
-- **Sentence shape mirrors the logic.** "If it finds one… / If it
-  finds none…" — the parallel structure carries the branch so the
+- **Sentence structure mirrors the logic.** "If it finds one… / If it
+  finds none…": the parallel structure carries the branch so the
   reader doesn't have to reconstruct it.
 
-### Section / overview lead (explanation) — [`blueprints/terraform.md`](../../../content/blueprints/terraform.md)
+### Section / overview lead (explanation) — [`components/terraform.md`](../../../content/components/terraform.md)
 
-> Windsor manages a Terraform stack defined in a blueprint. Stacks are
-> built sequentially, threading Terraform output values to
-> corresponding input values according to the facet definition.
+> Windsor builds the stack sequentially, threading each component's
+> Terraform output values to the input values of the components that
+> depend on it.
 
 Why it works:
 
@@ -258,7 +265,7 @@ Why it works:
   plain declarative sentences. This is the truest target here: the docs
   owner wrote it, not a model.
 
-## Page shape
+## Page structure
 
 ````markdown
 ---

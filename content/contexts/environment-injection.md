@@ -1,58 +1,113 @@
 ---
 title: Environment injection
-description: Windsor keeps your KUBECONFIG and cloud profile in sync with the active context on every shell prompt.
+description: Windsor sets KUBECONFIG, your cloud profile, and Terraform variables for the active context, through a shell hook or windsor exec.
 ---
 
-Windsor manages a set of environment variables for the active context: `KUBECONFIG`, the cloud profile, and others. On a context switch they update on the next shell prompt, so `kubectl` and the cloud CLIs target the new context's cluster and account. It works like [direnv](https://github.com/direnv/direnv), except the variables follow the active context rather than the current directory.
+`kubectl`, `terraform`, and the cloud CLIs read their configuration from environment variables. Windsor sets those variables for the active [context](overview.md) so each tool targets the right cluster and account. You can apply them to a single command with [`windsor exec`](https://www.windsorcli.dev/reference/cli/commands/exec), or install a [shell hook](#set-up-the-shell-hook) that keeps them current on every prompt. It works like [direnv](https://github.com/direnv/direnv), except the variables follow the active context instead of the current directory.
 
-![Terminal: windsor set context staging, then kubectl on the next prompt hitting the staging cluster with no manual export](../assets/media-placeholder.svg)
+## Run a command with `windsor exec`
 
-## Set it up once
-
-Injection needs two things, each done once: the shell hook installed, and the project trusted.
-
-Install the hook so your shell asks Windsor for the current environment on each prompt:
+`windsor exec` runs one command with the active context's environment and decrypted secrets,
 
 ```bash
-windsor hook zsh >> ~/.zshrc      # or bash, fish, powershell
-exec $SHELL
+windsor exec -- kubectl get pods
+windsor exec --context staging -- kubectl get pods
 ```
 
-[Installation](https://www.windsorcli.dev/cli/installation) covers the profile path for each shell.
+The command executes against your current context. You may also set the context explicitly by passing in `--context`.
 
-Then trust the project by running `windsor init` in it. Windsor injects only in directories you've trusted, so a repo you clone and `cd` into does nothing until you initialize it:
+## Set up the shell hook
+
+If you'd rather drop `windsor exec` and always run commands against the active context, you should configure the shell hook. The hook sets the appropriate environment on every prompt, so plain `kubectl` and `terraform` commands always target the active context. Add it to your shell's startup file, then open a new shell.
+
+<!-- tabs -->
+
+<!-- tab:macos -->
+
+On macOS, zsh is the default shell. Add this line to `~/.zshrc`:
 
 ```bash
-windsor init local
+eval "$(windsor hook zsh)"
 ```
 
-After that, `windsor set context <name>` updates the environment on your next prompt.
+If you use bash instead, add `eval "$(windsor hook bash)"` to `~/.bash_profile`, because Terminal starts bash as a login shell.
+
+<!-- tab:linux -->
+
+On Linux, add this line to `~/.bashrc` for bash:
+
+```bash
+eval "$(windsor hook bash)"
+```
+
+For zsh, add `eval "$(windsor hook zsh)"` to `~/.zshrc`.
+
+<!-- tab:windows -->
+
+On Windows, add the hook to your PowerShell profile. The first command creates the profile if you don't have one:
+
+```powershell
+if (!(Test-Path $PROFILE)) { New-Item -ItemType File -Path $PROFILE -Force }
+Add-Content $PROFILE 'windsor hook powershell | Out-String | Invoke-Expression'
+```
+
+<!-- /tabs -->
+
+After that, [`windsor set context <name>`](https://www.windsorcli.dev/reference/cli/commands/set) updates the environment on your next prompt.
 
 ## What changes when you switch
 
-`windsor set context staging` changes the active context. On the next prompt the hook replaces the old context's variables with the new one's, among them `KUBECONFIG` and the cloud profile. The previous values are unset, not merged.
+[`windsor set context staging`](https://www.windsorcli.dev/reference/cli/commands/set) changes the active context. On the next prompt the hook unsets the old context's variables and sets staging's, including `KUBECONFIG` and the cloud profile. Nothing is merged.
 
-Whether anything is injected depends on two things. First, the directory has to be trusted; in an untrusted directory Windsor injects nothing (see [Trusted folders](trusted-folders.md)). Second, the variable set depends on whether you're inside a project. A project is any directory with a `windsor.yaml` above it, and there you get the full context environment. Outside a project, Windsor runs in global mode: the cloud CLIs and `kubectl` still target the managed context, but variables that point a tool at a project-local config or credential file are left out, so Windsor doesn't override your operator-level setup.
+Windsor injects only in trusted directories, and in an untrusted one it does nothing, even to clear what the last prompt set. If you `cd` from a trusted project into an untrusted directory, the old `KUBECONFIG` stays set until you `cd` somewhere trusted. See [Trusted folders](trusted-folders.md).
+
+Inside a project, meaning a directory with a `windsor.yaml` above it, you get the full environment. Outside one, Windsor runs in global mode. It still sets the variables that say which cluster or account to use, but it leaves out the ones that point a tool at a project-local config or credentials file, so it doesn't override your own setup.
+
+## Terraform folders and tfvars
+
+Your modules live in the project's `terraform/` folder, shared by every context. Each context keeps its own values for them in `contexts/<name>/terraform/`, in a tree that mirrors the module paths:
+
+```text
+terraform/                        # modules, shared by every context
+├── cluster/
+│   └── main.tf
+└── net/
+    └── vpc/
+        └── main.tf
+contexts/
+└── staging/
+    └── terraform/                # this context's values
+        ├── cluster.tfvars        # for terraform/cluster
+        └── net/
+            └── vpc.tfvars        # for terraform/net/vpc
+```
+
+When a blueprint [component](../components/terraform.md) points at one of these modules with `path:`, `cd` into the module and Windsor adds the matching tfvars file to the arguments Terraform reads from the environment. A `terraform plan` run by hand there uses the same values as [`windsor plan terraform`](https://www.windsorcli.dev/reference/cli/commands/plan):
+
+```bash
+cd terraform/cluster
+terraform plan        # picks up contexts/staging/terraform/cluster.tfvars
+```
+
+Terraform reads the file through `TF_CLI_ARGS_plan`, and Windsor sets the same `-var-file` for `destroy`, `import`, and `refresh`. A `.tfvars.json` file works too. Staging and production each keep their own `cluster.tfvars`, so the module stays the same and only the values change.
+
+Windsor also sets `TF_VAR_context`, `TF_VAR_context_id`, `TF_VAR_context_path`, `TF_VAR_project_root`, and `TF_VAR_os_type`, so a module can declare variables with those names and use them. The `TF_CLI_ARGS_init` setting carries the context's backend configuration, which is how a manual `terraform init` ends up using the right backend. The first time you enter a module folder, Windsor also writes a git-ignored `backend_override.tf` there so the module points at that backend. See [Lifecycle](../provisioning/workflow.md#under-the-hood) for how `bootstrap` creates and migrates that backend.
+
+Variables in `contexts/<name>/terraform/.env` are exported only inside these module directories, which makes it the place for credentials Terraform needs and nothing else should see.
 
 ## Under the hood
 
-The hook is a snippet that `windsor hook <shell>` emits for installation in `~/.zshrc`, `~/.bashrc`, or a PowerShell profile. On every prompt it calls `windsor env --hook`, and the shell evaluates the output:
+On every prompt the hook runs [`windsor env --hook`](https://www.windsorcli.dev/reference/cli/commands/env) and your shell evaluates what it prints. Each shell attaches differently:
 
-```mermaid
-flowchart LR
-  Prompt["shell prompt"] --> Hook["hook runs<br/>windsor env --hook"]
-  Hook --> Eval["shell evals output"]
-  Eval --> Vars["context env applied<br/>KUBECONFIG, cloud profile, Talos"]
-  Vars --> Prompt
-```
+| Shell | Runs the hook |
+|---|---|
+| zsh | Before each prompt (`precmd`) and when you change directory (`chpwd`) |
+| bash | Before each prompt, through `PROMPT_COMMAND`, preserving the last command's exit status |
+| PowerShell | In a wrapper around your existing `prompt` function, which still runs afterward |
 
-`WINDSOR_MANAGED_ENV` lists the variables Windsor owns. On a context switch the hook unsets that set before applying the new one. The `--hook` flag runs `env` in non-fatal mode: warnings are suppressed and errors exit 0, so a broken project can't break your prompt. Run `windsor env` without `--hook` to see the full output and any errors.
+`WINDSOR_MANAGED_ENV` lists the variables Windsor set, and the hook unsets that list before applying a new context's. The `--hook` flag makes `env` non-fatal: warnings are suppressed and errors exit 0, so a broken project can't break your prompt. Run `windsor env` without it to see the full output and any errors.
 
-`windsor env` emits nothing unless the current directory is trusted (recorded in `~/.config/windsor/.trusted`, added by `windsor init`). In an untrusted directory it exits silently. See [Trusted folders](trusted-folders.md).
-
-To choose project or global mode, Windsor walks up from the current directory looking for `windsor.yaml`. If it finds one, that directory is the project root and the shell is in project mode. If it finds none, Windsor falls back to `~/.config/windsor` and runs in global mode. The rule for what each mode emits is consistent: variables that say which account, cluster, or project the context targets are injected in both modes; variables that redirect a tool to a context-local credential or config file are injected only in project mode.
-
-A fresh `windsor init local` in a project directory produces output like this:
+In a fresh `local` context, `windsor env` prints:
 
 ```text
 $ windsor env
@@ -71,11 +126,12 @@ WINDSOR_PROJECT_ROOT=/path/to/project
 WINDSOR_SESSION_TOKEN=ldC26Dp
 ```
 
-`WINDSOR_MANAGED_ENV` is the comma-separated list of variables Windsor unsets on the next context switch, and `WINDSOR_MANAGED_ALIAS` is the same for shell aliases. Cloud-provider variables appear when the matching config block is present. Terraform variables appear when the current directory is inside a generated Terraform module shim.
+Cloud provider variables appear when the matching config block is present. Terraform variables appear when you're inside a component's directory. See [Terraform folders and tfvars](#terraform-folders-and-tfvars).
 
 ## Reference
 
-For the full per-tool catalog (every variable Windsor emits for AWS, Azure, GCP, Docker, Kubernetes/Talos, and Terraform, plus the project/global suppression matrix), run [`windsor env`](https://www.windsorcli.dev/reference/cli/commands/env) in the relevant context.
+For every variable Windsor sets per tool, and which of them global mode leaves out, run [`windsor env`](https://www.windsorcli.dev/reference/cli/commands/env) in the context you care about.
 
-- [`windsor env`](https://www.windsorcli.dev/reference/cli/commands/env), [`windsor hook`](https://www.windsorcli.dev/reference/cli/commands/hook)
+- [`windsor env`](https://www.windsorcli.dev/reference/cli/commands/env), [`windsor exec`](https://www.windsorcli.dev/reference/cli/commands/exec), [`windsor hook`](https://www.windsorcli.dev/reference/cli/commands/hook)
 - [Trusted folders](trusted-folders.md)
+- [Terraform components](../components/terraform.md)
