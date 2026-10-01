@@ -24,7 +24,7 @@ memory = (controlplanes × controlplane memory) + (workers × worker memory) + 3
 
 The extra 1 CPU and 3 GB cover the VM itself and the support containers. Windsor never goes below 2 CPUs and 4 GB, and gives the VM 100 GB of disk.
 
-For a single control plane that runs workloads, Windsor assumes 8 CPUs and 12 GB, so the default VM gets 9 CPUs and 15 GB. If that's more than the host can spare, `windsor up` warns. A VM larger than your CPU count, or memory beyond your total minus a 4 GB reserve, is what triggers it.
+For a single control plane that runs workloads, Windsor assumes 8 CPUs and 12 GB, so the default VM gets 9 CPUs and 15 GB. If that's more than the host can spare, [`windsor up`](https://www.windsorcli.dev/reference/cli/commands/up) warns. A VM larger than your CPU count, or memory beyond your total minus a 4 GB reserve, is what triggers it.
 
 To change the size, either set the node sizes in `contexts/local/values.yaml` and let the formula follow, or set the VM directly when you initialize:
 

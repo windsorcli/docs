@@ -39,7 +39,7 @@ windsor apply kustomize crds-core
 
 Windsor makes every root kustomization or Flux system (one with no `dependsOn` of its own) depend on all the CRD kustomizations. Anything that depends on a root reaches the CRD layer transitively, so the stack always reconciles after the CRDs are Established. No facet needs to name a CRD kustomization in `dependsOn`.
 
-Pruning is disabled on CRD kustomizations: pruning a CRD deletes every custom resource of that kind, cluster-wide. `windsor destroy` leaves them in place.
+Pruning is disabled on CRD kustomizations: pruning a CRD deletes every custom resource of that kind, cluster-wide. [`windsor destroy`](https://www.windsorcli.dev/reference/cli/commands/destroy) leaves them in place.
 
 ## See also
 

@@ -8,8 +8,8 @@ This guide stands up a production-style Windsor stack on AWS: a dedicated VPC, a
 ## Prerequisites
 
 - An AWS account and credentials on your shell. Windsor uses the standard AWS credential chain (`AWS_PROFILE`, environment variables, or SSO) and resolves the active profile from your environment, so any setup the AWS CLI accepts works.
-- Terraform (or OpenTofu) and `kubectl` on your `PATH`. Run `windsor check` to validate the toolchain.
-- A git repository for the project (`windsor init` refuses to scaffold outside one).
+- Terraform (or OpenTofu) and `kubectl` on your `PATH`. Run [`windsor check`](https://www.windsorcli.dev/reference/cli/commands/check) to validate the toolchain.
+- A git repository for the project ([`windsor init`](https://www.windsorcli.dev/reference/cli/commands/init) refuses to scaffold outside one).
 - For public DNS and TLS: a domain you can delegate to Route53.
 
 ## What gets created
@@ -132,7 +132,7 @@ windsor show blueprint                  # the fully composed blueprint
 windsor explain cluster.pools           # trace a value to its source
 ```
 
-`kubectl` uses the context's `KUBECONFIG`; prefix with `windsor exec --` or install the [shell hook](../contexts/environment-injection.md) so it's exported automatically.
+`kubectl` uses the context's `KUBECONFIG`; prefix with [`windsor exec --`](https://www.windsorcli.dev/reference/cli/commands/exec) or install the [shell hook](../contexts/environment-injection.md) so it's exported automatically.
 
 ## 5. Day-two changes
 
@@ -163,7 +163,7 @@ windsor destroy --confirm=aws-prod
 - **`bootstrap` fails on the backend stage.** Confirm credentials are active (`aws sts get-caller-identity`) and the region is set. The backend stack runs first; a credential or region error stops everything else.
 - **`aws.region` validation error.** The AWS facet requires `aws.region`; set it in `values.yaml` or export `AWS_REGION`.
 - **TLS certificates stay pending.** ACME needs the public zone reachable; verify the registrar's NS records point at the Route53 zone, and that `email` is set.
-- **Nodes don't join after a CNI change.** Switching `cluster.cni.driver` to `cilium` reorders the dependency graph (Cilium bootstraps before Flux). Re-run `windsor apply --wait` and check the `cni` component.
+- **Nodes don't join after a CNI change.** Switching `cluster.cni.driver` to `cilium` reorders the dependency graph (Cilium bootstraps before Flux). Re-run [`windsor apply --wait`](https://www.windsorcli.dev/reference/cli/commands/apply) and check the `cni` component.
 
 ## Where to next
 

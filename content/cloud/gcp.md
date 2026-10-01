@@ -8,8 +8,8 @@ A Windsor context on GCP is a dedicated VPC, a [GKE](https://cloud.google.com/ku
 ## Prerequisites
 
 - A GCP project and credentials on your shell (`gcloud auth application-default login`, or a service account key). Windsor uses the standard Google credential chain, so any setup `gcloud` accepts works.
-- Terraform (or OpenTofu) and `kubectl` on your `PATH`. Run `windsor check` to validate the toolchain.
-- A git repository for the project (`windsor init` refuses to scaffold outside one).
+- Terraform (or OpenTofu) and `kubectl` on your `PATH`. Run [`windsor check`](https://www.windsorcli.dev/reference/cli/commands/check) to validate the toolchain.
+- A git repository for the project ([`windsor init`](https://www.windsorcli.dev/reference/cli/commands/init) refuses to scaffold outside one).
 - For public DNS and TLS: a domain you can delegate to Cloud DNS.
 
 ## What gets created
@@ -129,7 +129,7 @@ windsor show blueprint                  # the fully composed blueprint
 windsor explain cluster.pools           # trace a value to its source
 ```
 
-`kubectl` uses the context's `KUBECONFIG`; prefix with `windsor exec --` or install the [shell hook](../contexts/environment-injection.md) so it's exported automatically.
+`kubectl` uses the context's `KUBECONFIG`; prefix with [`windsor exec --`](https://www.windsorcli.dev/reference/cli/commands/exec) or install the [shell hook](../contexts/environment-injection.md) so it's exported automatically.
 
 ## 5. Day-two changes
 
@@ -159,7 +159,7 @@ windsor destroy --confirm=gcp-prod
 
 - **`bootstrap` fails on the backend stage.** Confirm credentials are active (`gcloud auth application-default print-access-token`) and `gcp.project_id` is set. The backend stack runs first; a credential or project error stops everything else.
 - **`gcp.project_id` validation error.** The GCP facet requires it explicitly. Unlike `AWS_REGION` for AWS, there's no environment-variable fallback.
-- **TLS certificates stay pending.** ACME needs the public zone reachable; verify the registrar's NS records point at the Cloud DNS zone, that `email` is set, and that cert-manager's Workload Identity binding landed (`windsor show kustomization pki-install`).
+- **TLS certificates stay pending.** ACME needs the public zone reachable; verify the registrar's NS records point at the Cloud DNS zone, that `email` is set, and that cert-manager's Workload Identity binding landed ([`windsor show kustomization pki-install`](https://www.windsorcli.dev/reference/cli/commands/show-kustomization)).
 - **A `cluster.pools.system` entry didn't change the system pool.** GKE's system pool is wired inline on the cluster module, not reachable through `cluster.pools`. See [Node pools](#node-pools).
 
 ## Where to next

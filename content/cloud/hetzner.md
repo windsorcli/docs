@@ -10,8 +10,8 @@ Unlike AWS or Azure, Hetzner has no managed Kubernetes offering. `cluster.driver
 ## Prerequisites
 
 - A Hetzner Cloud project and an API token with read/write access. Set it via a `${secret(...)}` reference in `values.yaml`, or export `HCLOUD_TOKEN` in your shell. Either satisfies the requirement.
-- Terraform (or OpenTofu) and `kubectl` on your `PATH`. Run `windsor check` to validate the toolchain.
-- A git repository for the project (`windsor init` refuses to scaffold outside one).
+- Terraform (or OpenTofu) and `kubectl` on your `PATH`. Run [`windsor check`](https://www.windsorcli.dev/reference/cli/commands/check) to validate the toolchain.
+- A git repository for the project ([`windsor init`](https://www.windsorcli.dev/reference/cli/commands/init) refuses to scaffold outside one).
 - For public DNS and TLS: a domain, and (optionally) an existing Hetzner-managed parent zone to auto-delegate from.
 
 ## What gets created
@@ -117,7 +117,7 @@ windsor show blueprint                  # the fully composed blueprint
 windsor explain cluster.controlplanes.instance_type
 ```
 
-`kubectl` uses the context's `KUBECONFIG`; prefix with `windsor exec --` or install the [shell hook](../contexts/environment-injection.md) so it's exported automatically.
+`kubectl` uses the context's `KUBECONFIG`; prefix with [`windsor exec --`](https://www.windsorcli.dev/reference/cli/commands/exec) or install the [shell hook](../contexts/environment-injection.md) so it's exported automatically.
 
 ## 5. Day-two changes
 
@@ -138,7 +138,7 @@ windsor destroy --confirm=hetzner-prod
 
 `destroy` removes the Flux kustomizations, then the servers and private network in reverse order. Since every component's Terraform state lives on the cluster itself (the `kubernetes` backend), `destroy` migrates it all to local state first, before the cluster hosting it disappears.
 
-There's a separate `dns-zone` component when `dns.public_domain` is set. It's independent of the cluster, so a plain `destroy` removes it too. To keep a delegated zone while tearing down the cluster, target it separately: `windsor destroy terraform dns-zone --confirm=dns-zone`.
+There's a separate `dns-zone` component when `dns.public_domain` is set. It's independent of the cluster, so a plain `destroy` removes it too. To keep a delegated zone while tearing down the cluster, target it separately: [`windsor destroy terraform dns-zone --confirm=dns-zone`](https://www.windsorcli.dev/reference/cli/commands/destroy-terraform).
 
 ## Troubleshooting
 

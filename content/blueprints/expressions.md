@@ -65,7 +65,7 @@ If a value genuinely must be present, don't rely on an expression to catch it. D
 
 ## Deferred evaluation
 
-`terraform_output()` can't resolve before its component has actually applied. During `windsor plan`, or on a facet's first evaluation pass, the referenced component may not have run yet. Windsor handles this by deferring: it leaves an expression that depends on a not-yet-available output unevaluated, and retries it once its dependency resolves, rather than failing the whole composition. This is why facets that read `terraform_output()` almost always pair it with a fallback (`?? cluster.controlplanes.nodes`), so the blueprint still composes something sensible before that Terraform component exists.
+`terraform_output()` can't resolve before its component has actually applied. During [`windsor plan`](https://www.windsorcli.dev/reference/cli/commands/plan), or on a facet's first evaluation pass, the referenced component may not have run yet. Windsor handles this by deferring: it leaves an expression that depends on a not-yet-available output unevaluated, and retries it once its dependency resolves, rather than failing the whole composition. This is why facets that read `terraform_output()` almost always pair it with a fallback (`?? cluster.controlplanes.nodes`), so the blueprint still composes something sensible before that Terraform component exists.
 
 ## Reference
 

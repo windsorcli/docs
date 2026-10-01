@@ -94,7 +94,7 @@ A patch directory that doesn't match any kustomization or Flux tier name prints 
 
 ## Run components
 
-`windsor apply` (or `windsor up` for workstation contexts) installs every kustomization in dependency order. `windsor destroy` removes them all in reverse-topological order. Use `windsor apply kustomize <name>` or `windsor destroy kustomize <name>` to target a single kustomization.
+`windsor apply` (or [`windsor up`](https://www.windsorcli.dev/reference/cli/commands/up) for workstation contexts) installs every kustomization in dependency order. `windsor destroy` removes them all in reverse-topological order. Use `windsor apply kustomize <name>` or `windsor destroy kustomize <name>` to target a single kustomization.
 
 ## Add-on components
 

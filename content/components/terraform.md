@@ -54,7 +54,7 @@ Windsor builds the stack sequentially, threading each component's Terraform outp
 | [`windsor up`](https://www.windsorcli.dev/reference/cli/commands/up) / [`windsor down`](https://www.windsorcli.dev/reference/cli/commands/down) | Workstation contexts only. `up` drives Terraform + Flux for the workstation; `down` stops the VM. |
 | [`windsor bootstrap`](https://www.windsorcli.dev/reference/cli/commands/bootstrap) | First-run setup — see [Bootstrap](#bootstrap) below. |
 
-`apply` runs against a saved plan, so Terraform never prompts for approval. `destroy` is different: it passes `-auto-approve` and gates on a confirmation token (`--confirm=<token>` or an interactive prompt). A `terraform destroy` run directly in a `windsor env`-managed shell gets no `-auto-approve` in `TF_CLI_ARGS_destroy`, so Terraform's own prompt appears.
+`apply` runs against a saved plan, so Terraform never prompts for approval. `destroy` is different: it passes `-auto-approve` and gates on a confirmation token (`--confirm=<token>` or an interactive prompt). A `terraform destroy` run directly in a [`windsor env`](https://www.windsorcli.dev/reference/cli/commands/env)-managed shell gets no `-auto-approve` in `TF_CLI_ARGS_destroy`, so Terraform's own prompt appears.
 
 ## Read another component's outputs
 

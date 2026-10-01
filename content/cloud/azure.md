@@ -8,8 +8,8 @@ This guide stands up a production-style Windsor stack on Azure: a dedicated VNet
 ## Prerequisites
 
 - An Azure subscription and credentials on your shell (`az login`, a service principal, or workload identity). Windsor auto-detects the active credential mode for `kubelogin`; see [Configure values](#2-configure-values) below.
-- Terraform (or OpenTofu) and `kubectl` on your `PATH`. Run `windsor check` to validate the toolchain.
-- A git repository for the project (`windsor init` refuses to scaffold outside one).
+- Terraform (or OpenTofu) and `kubectl` on your `PATH`. Run [`windsor check`](https://www.windsorcli.dev/reference/cli/commands/check) to validate the toolchain.
+- A git repository for the project ([`windsor init`](https://www.windsorcli.dev/reference/cli/commands/init) refuses to scaffold outside one).
 - For public DNS and TLS: a domain you can delegate to Azure DNS.
 
 ## What gets created
@@ -140,7 +140,7 @@ windsor show blueprint                  # the fully composed blueprint
 windsor explain cluster.pools           # trace a value to its source
 ```
 
-`kubectl` uses the context's `KUBECONFIG`; prefix with `windsor exec --` or install the [shell hook](../contexts/environment-injection.md) so it's exported automatically.
+`kubectl` uses the context's `KUBECONFIG`; prefix with [`windsor exec --`](https://www.windsorcli.dev/reference/cli/commands/exec) or install the [shell hook](../contexts/environment-injection.md) so it's exported automatically.
 
 ## 5. Day-two changes
 
@@ -170,8 +170,8 @@ windsor destroy --confirm=azure-prod
 
 - **`bootstrap` fails on the backend stage.** Confirm credentials are active (`az account show`) and the subscription is set. The backend stack runs first; a credential error stops everything else.
 - **AKS create fails with "VM size not allowed."** The subscription or region doesn't have the newer VM generation enabled; the default pool classes already fall back to broadly available `v3` sizes, so this usually means an explicit `instance_types` override picked an unavailable SKU.
-- **TLS certificates stay pending.** ACME needs the public zone reachable; verify the registrar's NS records point at the Azure DNS zone, that `email` is set, and that the cert-manager Workload Identity role assignment landed (`windsor show kustomization pki-install`).
-- **Nodes don't join after a CNI change.** Switching `cluster.cni.driver` to `cilium` reorders the dependency graph (Cilium bootstraps before Flux). Re-run `windsor apply --wait` and check the `cni` component.
+- **TLS certificates stay pending.** ACME needs the public zone reachable; verify the registrar's NS records point at the Azure DNS zone, that `email` is set, and that the cert-manager Workload Identity role assignment landed ([`windsor show kustomization pki-install`](https://www.windsorcli.dev/reference/cli/commands/show-kustomization)).
+- **Nodes don't join after a CNI change.** Switching `cluster.cni.driver` to `cilium` reorders the dependency graph (Cilium bootstraps before Flux). Re-run [`windsor apply --wait`](https://www.windsorcli.dev/reference/cli/commands/apply) and check the `cni` component.
 
 ## Where to next
 

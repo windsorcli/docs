@@ -13,9 +13,9 @@ The cluster needs about 6 CPU cores and 14 GB of RAM, plus 60 GB of free storage
 
 ## 2. Terraform and a Docker runtime
 
-This guide uses Docker Desktop, which `windsor init local` picks by default on macOS and Windows. Install Terraform and [Docker Desktop](https://docs.docker.com/desktop/), and start Docker Desktop. When you run `windsor init`, it tells you if a required tool is missing or needs upgrading.
+This guide uses Docker Desktop, which [`windsor init local`](https://www.windsorcli.dev/reference/cli/commands/init) picks by default on macOS and Windows. Install Terraform and [Docker Desktop](https://docs.docker.com/desktop/), and start Docker Desktop. When you run `windsor init`, it tells you if a required tool is missing or needs upgrading.
 
-Docker Desktop's VM needs at least 6 CPUs and 14 GB of memory for the cluster, and the default limits can be lower. Set them under **Settings → Resources** in Docker Desktop before you run `windsor up`. See [Docker Desktop](../workstation/docker-desktop.md#resources) for the figures and why.
+Docker Desktop's VM needs at least 6 CPUs and 14 GB of memory for the cluster, and the default limits can be lower. Set them under **Settings → Resources** in Docker Desktop before you run [`windsor up`](https://www.windsorcli.dev/reference/cli/commands/up). See [Docker Desktop](../workstation/docker-desktop.md#resources) for the figures and why.
 
 On Linux, `windsor init local` uses Docker Engine on the host instead. Colima is another option on macOS and Linux. The [workstation overview](../workstation/overview.md) compares the runtimes.
 
@@ -67,7 +67,7 @@ windsor up --wait
 
 `--wait` blocks until every Kustomization reports ready. Expect roughly 5 minutes on a fast Mac.
 
-`up` does not prompt for elevation, so it defers host networking and DNS and prints a `windsor configure network` command (prompts for sudo on macOS/Linux; run from an Administrator PowerShell on Windows). On **Colima**, `up` halts until the host route is installed, so the first-run sequence is `up` → `configure network` → `up` again:
+`up` does not prompt for elevation, so it defers host networking and DNS and prints a [`windsor configure network`](https://www.windsorcli.dev/reference/cli/commands/configure-network) command (prompts for sudo on macOS/Linux; run from an Administrator PowerShell on Windows). On **Colima**, `up` halts until the host route is installed, so the first-run sequence is `up` → `configure network` → `up` again:
 
 ```bash
 windsor configure network
@@ -76,7 +76,7 @@ windsor up                      # re-run, if up halted asking for it
 
 On **Docker Desktop** `up` completes without halting; run `configure network` once afterward to activate `*.test` resolution. Either way, writing the DNS resolver entry needs elevation.
 
-While it runs, watch progress in another shell. These `kubectl` commands use your context's `KUBECONFIG`, so either prefix each with `windsor exec --` or set up the [shell hook](../contexts/environment-injection.md) once so it's exported automatically:
+While it runs, watch progress in another shell. These `kubectl` commands use your context's `KUBECONFIG`, so either prefix each with [`windsor exec --`](https://www.windsorcli.dev/reference/cli/commands/exec) or set up the [shell hook](../contexts/environment-injection.md) once so it's exported automatically:
 
 ```bash
 kubectl get kustomizations -A --watch
@@ -92,7 +92,7 @@ windsor show blueprint          # fully composed blueprint
 windsor show values             # effective context values
 ```
 
-`windsor explain <path>` traces a value back to its source in the composition:
+[`windsor explain <path>`](https://www.windsorcli.dev/reference/cli/commands/explain) traces a value back to its source in the composition:
 
 ```bash
 windsor explain terraform.cluster.inputs.cluster_endpoint

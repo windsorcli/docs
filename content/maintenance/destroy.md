@@ -3,7 +3,7 @@ title: Destroy
 description: Removing live infrastructure safely, and the safety and locking behaviors that guard a destroy run.
 ---
 
-`windsor destroy` removes a context's live infrastructure: every Flux kustomization first, then every Terraform component in reverse-dependency order. It shows what it will remove and waits for you to type the context name before touching anything.
+[`windsor destroy`](https://www.windsorcli.dev/reference/cli/commands/destroy) removes a context's live infrastructure: every Flux kustomization first, then every Terraform component in reverse-dependency order. It shows what it will remove and waits for you to type the context name before touching anything.
 
 ## Tear down
 
@@ -27,7 +27,7 @@ windsor down
 
 A per-context lock guards concurrent runs. `up`, `apply`, `bootstrap`, `upgrade`, `destroy`, and any `plan` that touches Terraform take a single-writer stack lock at `.windsor/contexts/<context>/.stacklock` before they run. A second `windsor` command on the same context fails immediately and names the holder (`user@host`, PID, operation). Pass `--lock-timeout` to wait up to that duration before failing instead. See [Global flags](https://www.windsorcli.dev/reference/cli/global-flags). Different contexts never contend, and a read-only `plan kustomize` does not lock. Terraform's own state lock follows `terraform.lock.timeout` (default `5m`), applied as `-lock-timeout` to every state-mutating Terraform command, so contended state waits rather than failing immediately.
 
-A holder that dies (CI cancellation, an OOM, a crash) normally releases the lock with the process. An orphaned child process that inherited it can keep it held, so later commands wait out the timeout and then fail. `windsor unlock` force-clears it after you type the context name; `--force` skips that prompt. It does not check whether the holder is still alive, so only run it once you're sure no other `windsor` process is using the context.
+A holder that dies (CI cancellation, an OOM, a crash) normally releases the lock with the process. An orphaned child process that inherited it can keep it held, so later commands wait out the timeout and then fail. [`windsor unlock`](https://www.windsorcli.dev/reference/cli/commands/unlock) force-clears it after you type the context name; `--force` skips that prompt. It does not check whether the holder is still alive, so only run it once you're sure no other `windsor` process is using the context.
 
 ## See also
 

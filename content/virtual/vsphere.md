@@ -19,8 +19,8 @@ vSphere is the one platform where Windsor reads existing inventory rather than c
 Beyond the inventory:
 
 - vCenter credentials with permission to deploy and manage VMs.
-- Terraform (or OpenTofu) and `kubectl` on your `PATH`. Run `windsor check` to validate the toolchain.
-- A git repository for the project (`windsor init` refuses to scaffold outside one).
+- Terraform (or OpenTofu) and `kubectl` on your `PATH`. Run [`windsor check`](https://www.windsorcli.dev/reference/cli/commands/check) to validate the toolchain.
+- A git repository for the project ([`windsor init`](https://www.windsorcli.dev/reference/cli/commands/init) refuses to scaffold outside one).
 
 To inspect or prepare inventory out of band, [`govc`](https://github.com/vmware/govmomi/tree/main/govc) reads the same credentials via `GOVC_URL`/`GOVC_USERNAME`/`GOVC_PASSWORD`/`GOVC_INSECURE`. Mirror your `vsphere.*` values into those.
 
@@ -120,7 +120,7 @@ kubectl get kustomizations -A           # Flux reconciling
 windsor show blueprint                  # the fully composed blueprint
 ```
 
-`kubectl` uses the context's `KUBECONFIG`; prefix with `windsor exec --` or install the [shell hook](../contexts/environment-injection.md) so it's exported automatically.
+`kubectl` uses the context's `KUBECONFIG`; prefix with [`windsor exec --`](https://www.windsorcli.dev/reference/cli/commands/exec) or install the [shell hook](../contexts/environment-injection.md) so it's exported automatically.
 
 ## 5. Day-two changes
 
@@ -142,7 +142,7 @@ windsor destroy --confirm=vsphere-prod
 ## Troubleshooting
 
 - **`vsphere_compute_cluster` lookup fails.** The named cluster has to be an actual `ClusterComputeResource` in vCenter. A bare host added straight to the datacenter, outside any cluster, doesn't satisfy this. Wrap it in a cluster, even a single-host one.
-- **VMs never get an IP in `windsor show`.** IPs come from `vmtoolsd` (VMware Tools) reporting back to vCenter. This needs the Talos OVA's bundled guest agent running, which can lag a boot or two. If it never resolves, confirm the ESXi host reached `factory.talos.dev` to pull the OVA in the first place.
+- **VMs never get an IP in [`windsor show`](https://www.windsorcli.dev/reference/cli/commands/show).** IPs come from `vmtoolsd` (VMware Tools) reporting back to vCenter. This needs the Talos OVA's bundled guest agent running, which can lag a boot or two. If it never resolves, confirm the ESXi host reached `factory.talos.dev` to pull the OVA in the first place.
 - **OVF deploy fails outbound.** The ESXi host itself needs the network path to `factory.talos.dev`, not the machine running `windsor`. This is a common gap in segmented plant networks.
 - **Composition fails demanding `vsphere.host_system`.** Set when the datacenter has more than one ESXi host; Windsor can't guess which one you mean.
 

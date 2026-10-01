@@ -3,7 +3,7 @@ title: Registries
 description: Push to OCI, bundle blueprints, CLI version compatibility.
 ---
 
-Windsor packages a blueprint as an **OCI artifact**, so other projects can pull it from a registry and reuse its components. `windsor push` builds the artifact from `contexts/_template/` and pushes it; consumers add its `oci://` URL to their blueprint sources.
+Windsor packages a blueprint as an **OCI artifact**, so other projects can pull it from a registry and reuse its components. [`windsor push`](https://www.windsorcli.dev/reference/cli/commands/push) builds the artifact from `contexts/_template/` and pushes it; consumers add its `oci://` URL to their blueprint sources.
 
 ## Pushing to OCI
 

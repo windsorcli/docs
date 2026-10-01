@@ -15,7 +15,7 @@ A backend probe failure (bad credentials, no connectivity, the backend storage i
 
 ## A renamed component
 
-Renaming a component in `blueprint.yaml` gives it a new ID. Its old state stays on disk under the old ID, and Windsor can't tell that apart from a component you meant to decommission, since an ID that's gone from the blueprint looks the same either way. Because of that, `windsor up`, `windsor apply`, and `windsor destroy` only warn about it:
+Renaming a component in `blueprint.yaml` gives it a new ID. Its old state stays on disk under the old ID, and Windsor can't tell that apart from a component you meant to decommission, since an ID that's gone from the blueprint looks the same either way. Because of that, [`windsor up`](https://www.windsorcli.dev/reference/cli/commands/up), [`windsor apply`](https://www.windsorcli.dev/reference/cli/commands/apply), and [`windsor destroy`](https://www.windsorcli.dev/reference/cli/commands/destroy) only warn about it:
 
 ```text
 warning: found local terraform state for "<old-id>", which is no longer in the

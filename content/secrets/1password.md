@@ -3,7 +3,7 @@ title: 1Password
 description: Reference 1Password vault items in a context's environment with the 1Password CLI.
 ---
 
-Windsor reads secrets from the [1Password CLI](https://developer.1password.com/cli/). Add vaults in `windsor.yaml`:
+Windsor reads secrets from the [1Password CLI](https://www.1password.dev/cli/). Add vaults in `windsor.yaml`:
 
 ```yaml
 version: v1alpha1
@@ -43,7 +43,7 @@ A secret that fails to resolve shows up in the environment as an error marker in
 
 ## Security
 
-Windsor scrubs any value it reads from 1Password out of command output. Terraform runs, error messages, and `windsor env` all show `********` instead of the real value. Use `windsor env --decrypt` only when you need the plaintext in your shell; the shell hook decrypts for the session automatically, and `windsor env` without it shows cached secrets as `********`. A central vault makes rotation easy: update the item in 1Password and the next session picks it up, with nothing to re-encrypt. Limit environment injection to development secrets where you can, and close a shell once you're done with it.
+Windsor scrubs any value it reads from 1Password out of command output. Terraform runs, error messages, and [`windsor env`](https://www.windsorcli.dev/reference/cli/commands/env) all show `********` instead of the real value. Use `windsor env --decrypt` only when you need the plaintext in your shell; the shell hook decrypts for the session automatically, and `windsor env` without it shows cached secrets as `********`. A central vault makes rotation easy: update the item in 1Password and the next session picks it up, with nothing to re-encrypt. Limit environment injection to development secrets where you can, and close a shell once you're done with it.
 
 A blueprint facet or Terraform input reads the same vaults through `${secret(provider, name, field)}` instead of `${{ }}`. That's how [Identity](https://www.windsorcli.dev/catalog/core/guides/identity/keycloak) and the cloud platform guides set credentials without plaintext. See [Expressions](../blueprints/expressions.md).
 

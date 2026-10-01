@@ -3,7 +3,7 @@ title: Testing
 description: Static testing for blueprint composition.
 ---
 
-Windsor's `windsor test` command validates blueprint composition without provisioning infrastructure. You define input values and expected components in YAML; the CLI checks that [facets](facets.md) and composition behave as expected.
+Windsor's [`windsor test`](https://www.windsorcli.dev/reference/cli/commands/test) command validates blueprint composition without provisioning infrastructure. You define input values and expected components in YAML; the CLI checks that [facets](facets.md) and composition behave as expected.
 
 ## What is validated
 

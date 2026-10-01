@@ -11,7 +11,7 @@ macOS, Windows, and Linux. On Linux with Docker Engine instead of Docker Desktop
 
 ## Install
 
-Install [Docker Desktop](https://docs.docker.com/desktop/) and start it before you run `windsor up`. Docker Desktop provides the Docker daemon. Windsor doesn't manage it.
+Install [Docker Desktop](https://docs.docker.com/desktop/) and start it before you run [`windsor up`](https://www.windsorcli.dev/reference/cli/commands/up). Docker Desktop provides the Docker daemon. Windsor doesn't manage it.
 
 ## Resources
 

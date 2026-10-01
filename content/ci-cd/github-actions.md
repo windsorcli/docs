@@ -17,7 +17,7 @@ The [Windsor GitHub Action](https://github.com/windsorcli/action) installs and c
 
 `ref` defaults to the action's own pinned CLI release. `context` sets the context every later step runs against; `install-only: true` skips context init and environment injection if you only need the binary on `PATH`. Every sub-action below expects `windsor` already installed this way. None of them install the CLI, and each fails fast with an actionable message if it can't find one on `PATH`.
 
-Every sub-action emits a `context` output (`windsor get context` after the command runs), so a later step can label an artifact or log line without an extra call.
+Every sub-action emits a `context` output ([`windsor get context`](https://www.windsorcli.dev/reference/cli/commands/get-context) after the command runs), so a later step can label an artifact or log line without an extra call.
 
 ## Cloud authentication
 
@@ -65,7 +65,7 @@ Each wraps one `windsor` command, taking the same `workdir` input as the root ac
 | [`windsorcli/action/apply`](https://github.com/windsorcli/action/tree/main/apply) | `windsor apply` | `wait`, `prune`, `terraform-component`, `kustomize-name` |
 | [`windsorcli/action/destroy`](https://github.com/windsorcli/action/tree/main/destroy) | `windsor destroy` | `confirm` (**required**), `component`, `layer`, `continue` |
 
-`bootstrap`'s `yes` and `destroy`'s `confirm` are required for the same reason: both commands prompt for confirmation interactively, and CI has no TTY to answer. `confirm` takes the same context or component name the interactive prompt would ask for. `terraform-component` and `kustomize-name` on `apply` are mutually exclusive, matching `windsor apply terraform <component>` and `windsor apply kustomize <name>`; neither accepts `wait` or `prune`, since `apply terraform` alone has no such flags.
+`bootstrap`'s `yes` and `destroy`'s `confirm` are required for the same reason: both commands prompt for confirmation interactively, and CI has no TTY to answer. `confirm` takes the same context or component name the interactive prompt would ask for. `terraform-component` and `kustomize-name` on `apply` are mutually exclusive, matching [`windsor apply terraform <component>`](https://www.windsorcli.dev/reference/cli/commands/apply-terraform) and `windsor apply kustomize <name>`; neither accepts `wait` or `prune`, since `apply terraform` alone has no such flags.
 
 ```yaml
 - uses: windsorcli/action/bootstrap@v1
@@ -82,7 +82,7 @@ Each wraps one `windsor` command, taking the same `workdir` input as the root ac
 
 ## Posting plan output to a pull request
 
-`windsorcli/action/plan-comment` runs `windsor plan --summary --no-color` and posts the result as a sticky PR comment. A later push updates that same comment instead of piling up new ones; a hidden marker keyed on the context name gives each context in a matrix its own. It defaults to the triggering PR, so it's meant for a `pull_request`-triggered workflow; pass `pr-number` to target another one. A failed `windsor plan` still gets posted with its real error, then the step fails so the job goes red too.
+`windsorcli/action/plan-comment` runs [`windsor plan --summary --no-color`](https://www.windsorcli.dev/reference/cli/commands/plan) and posts the result as a sticky PR comment. A later push updates that same comment instead of piling up new ones; a hidden marker keyed on the context name gives each context in a matrix its own. It defaults to the triggering PR, so it's meant for a `pull_request`-triggered workflow; pass `pr-number` to target another one. A failed `windsor plan` still gets posted with its real error, then the step fails so the job goes red too.
 
 ```yaml
 permissions:
@@ -161,7 +161,7 @@ The action repo's own [`examples/bootstrap-and-destroy.yaml`](https://github.com
 
 The root action masks secrets automatically: it scans `windsor.yaml` for `${{ }}`-templated environment variables, registers their values with GitHub's built-in log masking, and logs only variable names, never values. It calls out to [`actions/github-script`](https://github.com/actions/github-script) with a pinned SHA rather than a mutable tag, to keep that surface minimal.
 
-That covers what the action does, not the workflow you write around it. Pin every third-party action by commit SHA, not a mutable tag (`actions/checkout@<sha> # v7`, not `@v7`), and do your own threat modeling for the systems a workflow can reach. See [GitHub's security hardening guide](https://docs.github.com/en/actions/security-for-github-actions/security-guides/security-hardening-for-github-actions).
+That covers what the action does, not the workflow you write around it. Pin every third-party action by commit SHA, not a mutable tag (`actions/checkout@<sha> # v7`, not `@v7`), and do your own threat modeling for the systems a workflow can reach. See [GitHub's security hardening guide](https://docs.github.com/en/actions/reference/security/secure-use).
 
 ## See also
 

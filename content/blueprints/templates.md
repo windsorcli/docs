@@ -5,7 +5,7 @@ description: Shared blueprint template structure and composition order.
 
 The `contexts/_template/` directory is the base every context in the project inherits from. It pairs a [`blueprint.yaml`](#blueprintyaml) with optional [`schema.yaml`](#schemayaml), [`metadata.yaml`](#metadatayaml), and a [`facets/`](facets.md) directory of conditional fragments. When you initialize a context, Windsor loads `_template/`, evaluates facets against the context's values, and merges the result into a context-specific blueprint.
 
-Run `windsor show blueprint` to see the result for the current context.
+Run [`windsor show blueprint`](https://www.windsorcli.dev/reference/cli/commands/show-blueprint) to see the result for the current context.
 
 ## Directory structure
 
