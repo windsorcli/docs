@@ -57,8 +57,8 @@ metadata.
 7. **Code fences declare a language.** markdownlint MD040 enforces.
 
 Run quality checks before pushing — `markdownlint`, `vale`, `cspell`,
-`lychee`. See [CONTRIBUTING.md](CONTRIBUTING.md) for the local
-commands.
+`lychee`, `alex`. See [CONTRIBUTING.md](CONTRIBUTING.md) for the local
+commands. `task lint` runs them all.
 
 ## Skills
 
