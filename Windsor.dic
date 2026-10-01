@@ -32,6 +32,7 @@ Renovate
 sops
 Talos
 Taskfile
+tcsh
 yamllint
 shellcheck
 markdownlint
