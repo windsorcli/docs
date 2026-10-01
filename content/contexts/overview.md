@@ -3,14 +3,14 @@ title: Overview
 description: A context is a named environment (local, staging, production) with its own blueprint, values, and credentials, and Windsor tracks which one is active.
 ---
 
-It is common to reuse infrastructure code across several targets. Testing is often performed in
-a dedicated staging environment. Duplicates of production infrastructure may target
-different regions, or be dedicated to a single-tenant customer.
+Windsor uses **contexts** to make it easier to work across several environments.
+
+It is common to reuse infrastructure code across several environments. For example, tests are often run against dedicated staging infrastructure. Replicas of production infrastructure may run in different regions, or be dedicated to single-tenant customers.
 
 Across each of the above targets, authentication, endpoints, and input parameters vary. Windsor
-keeps this organized by bundling these collections individually as contexts. These contexts are referenced when running commands. Automatic environment injection configures your tool chain
-to also operate against a common target, so your `kubectl` or `aws` commands target the same
-infrastructure.
+keeps this organized by bundling these collections individually as contexts. Contexts are referenced when running commands that target a particular environment. Automatic environment variable injection configures your tool chain (for example, the `kubectl` or `aws` CLIs) to target the current context.
+
+Contexts usually map to an SDLC stage (`development`, `staging`, `production`), a slice of infrastructure (`admin`, `web`, `observability`), or both, like `web-staging`.
 
 Windsor organizes context files under `<project-root>/contexts/<context-name>/`.
 
@@ -32,28 +32,6 @@ contexts/
 └── contexts/local/              generated Terraform module shims, workstation config, and the stack lock
 ```
 
-A context that targets a cloud platform also gets `.aws/`, `.azure/`, or `.gcp/` for that CLI's config, and a `backend.tfvars` once the backend component has run.
-
-To create a new context, run `windsor init <context-name> --platform <platform>`. This command generates a `blueprint.yaml` file and a `values.yaml` specific to the platform you specified.
-
-To switch contexts, run `windsor set context <context-name>`. You may also pass the `--context` flag to most windsor commands.
-
-Contexts usually map to an SDLC stage (`development`, `staging`, `production`), a slice of infrastructure (`admin`, `web`, `observability`), or both, like `web-staging`.
-
-## Workstation and deployed contexts
-
-There are some special considerations to keep in mind for contexts that represent a local workstation.
-
-A **workstation context**, named `local` or starting with `local-`, runs a Kubernetes cluster in a VM on your machine. Windsor starts and stops that VM. Every other context, like `staging` or `production`, is **deployed**. It targets a cloud, a hypervisor, or bare metal, so there's no VM to start and Windsor provisions the infrastructure directly.
-
-| | Workstation | Deployed |
-|---|---|---|
-| Cluster runs on | A VM on your machine | A cloud, hypervisor, or bare metal |
-| First run | [`windsor up`](https://www.windsorcli.dev/reference/cli/commands/up) | [`windsor bootstrap`](https://www.windsorcli.dev/reference/cli/commands/bootstrap) |
-| Tear down | [`windsor destroy`](https://www.windsorcli.dev/reference/cli/commands/destroy), then [`windsor down`](https://www.windsorcli.dev/reference/cli/commands/down) | `windsor destroy` |
-
-See [Workstation overview](../workstation/overview.md) for the runtimes and what gets built, and [Lifecycle](../provisioning/workflow.md) for how each path runs.
-
 ## Create a context
 
 `windsor init` creates the project and a `local` context: a `contexts/local` folder with a starter `blueprint.yaml`, plus a minimal `windsor.yaml` at the project root on the first run:
@@ -62,17 +40,11 @@ See [Workstation overview](../workstation/overview.md) for the runtimes and what
 windsor init
 ```
 
-To add another, name it and choose a platform. This creates `contexts/production/` targeting AWS, with its own `blueprint.yaml`:
+To add another, use a different name (for example, `production`) and choose a platform. This command creates `contexts/production/` targeting AWS, with its own `blueprint.yaml`:
 
 ```bash
 windsor init production --platform aws
 ```
-
-[`windsor get contexts`](https://www.windsorcli.dev/reference/cli/commands/get-contexts) lists contexts by scanning `contexts/`, and `.windsor/context` records the active one. The root `windsor.yaml` is a version stamp. It gains a `contexts:` map only if you add one for legacy per-context overrides, and a new context never needs it.
-
-`--platform` sets the backend default: `s3` for AWS, `azurerm` for Azure, `gcs` for GCP, and `kubernetes` (state stored as Secrets in the cluster) for `metal`, `docker`, `incus`, `hetzner`, `hyperv`, and `vsphere`.
-
-Every context inherits from a blueprint template: the base blueprint, the schema, and the conditional facets. If you author your own blueprint, the template lives in `contexts/_template/`. See [Blueprint templates](../blueprints/templates.md).
 
 ## Switch contexts
 
@@ -83,7 +55,21 @@ windsor set context <context-name>
 windsor get context
 ```
 
-`windsor set context` writes the name to `.windsor/context` and sets `WINDSOR_CONTEXT` for the current process. By your next prompt, the shell hook has refreshed the per-context environment, including kubeconfig and the cloud profile. See [Environment injection](environment-injection.md).
+`windsor set context` writes the context name to `.windsor/context` and sets `WINDSOR_CONTEXT` for the current process. By your next prompt, the shell hook has refreshed the per-context environment, including kubeconfig and the cloud profile. See [Environment injection](environment-injection.md).
+
+## Workstation vs. deployed contexts
+
+There are some special considerations to keep in mind for contexts that represent a local workstation.
+
+A **workstation context**, named `local` or starting with `local-`, runs a Kubernetes cluster in a VM on your machine. Windsor starts and stops that VM. Every other context, like `staging` or `production`, is **deployed**. It targets a cloud, a hypervisor, or bare metal, so there's no VM to start and Windsor provisions the infrastructure directly.
+
+|                 | Workstation                                                                                          | Deployed                                                                           |
+| --------------- | ---------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| Cluster runs on | A VM on your machine                                                                                 | A cloud, hypervisor, or bare metal                                                 |
+| First run       | [`windsor up`](https://www.windsorcli.dev/reference/cli/commands/up)                                 | [`windsor bootstrap`](https://www.windsorcli.dev/reference/cli/commands/bootstrap) |
+| Tear down       | [`windsor destroy`](https://www.windsorcli.dev/reference/cli/commands/destroy), then [`windsor down`](https://www.windsorcli.dev/reference/cli/commands/down) | `windsor destroy`                                                                  |
+
+Read more about the [local workstation](../workstation/overview.md) and [provisioning lifecycle](../provisioning/workflow.md)
 
 ## In this section
 
