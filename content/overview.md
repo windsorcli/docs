@@ -22,7 +22,7 @@ correct auth files and backends.
 
 The guide is divided into four parts. Read it front to back, or jump to the part you need.
 
-- **Orientation.** [Getting started](getting-started/first-project.md) installs the CLI and runs a local stack. [Contexts](contexts/overview.md) and [Secrets](secrets/sops.md) cover environments and credentials, which are
+- **Orientation.** [Getting started](getting-started/first-project.md) installs the CLI and runs a local stack. [Contexts](contexts/overview.md) and [Secrets](secrets/overview.md) cover environments and credentials, which are
 prerequisites for all the chapters that follow.
 - **Provisioning.** Stands a stack up on a target of your choice. Targets your [workstation](workstation/overview.md), a [hypervisor](virtual/hyperv.md), or a [cloud](cloud/aws.md). The [lifecycle](provisioning/workflow.md) covers the commands those targets share.
 - **Composition.** Add your own components written in [Terraform](components/terraform.md) and [Kustomize](components/kustomize.md). [Blueprints](blueprints/overview.md) covers authoring reusable stacks with [facets](blueprints/facets.md). Distribute your blueprint as an [OCI artifact](blueprints/sharing.md) to public and private registries.

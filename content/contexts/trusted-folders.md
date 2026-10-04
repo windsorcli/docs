@@ -31,9 +31,9 @@ Commands that don't read a project run anywhere: [`version`](https://www.windsor
 
 Treat a project you didn't write the way you'd treat a script you downloaded, and read it first. These are the files to open:
 
-1. **`windsor.yaml`**, the project config. Look for an unfamiliar `terraform.backend`, a secrets backend you didn't expect, or overrides that point at endpoints you don't recognize.
+1. **`windsor.yaml`**, the project config. It normally holds only `version: v1alpha1`, so read anything more in it as you would a `values.yaml`.
 2. **`contexts/<context>/blueprint.yaml`**, the blueprint. The `sources` entries can pull OCI artifacts from other registries.
-3. **`contexts/<context>/values.yaml`**, the context's values. Check cluster endpoints, registry URLs, and DNS overrides against what you'd expect.
+3. **`contexts/<context>/values.yaml`**, the context's values. Look for an unfamiliar `terraform.backend`, a secrets provider you didn't expect, an `environment:` block, and cluster endpoints, registry URLs, or DNS overrides you don't recognize.
 4. **`contexts/_template/`**, if the project has one. Facets hold expressions that run when the blueprint is composed, so read an unfamiliar facet like a script.
 
 `windsor show blueprint` is gated too, so you can't use it to preview the composition before you run `init`. Read the files themselves.
@@ -57,5 +57,5 @@ cat ~/.config/windsor/.trusted
 ## Reference
 
 - [Environment injection](environment-injection.md): what trust gates day to day
-- [SOPS](../secrets/sops.md), [1Password](../secrets/1password.md): the secrets backends a `windsor.yaml` can name
+- [SOPS](../secrets/sops.md), [1Password](../secrets/1password.md): the secrets providers a `values.yaml` can name
 - [`init`](https://www.windsorcli.dev/reference/cli/commands/init), [`bootstrap`](https://www.windsorcli.dev/reference/cli/commands/bootstrap), [`env`](https://www.windsorcli.dev/reference/cli/commands/env), [`hook`](https://www.windsorcli.dev/reference/cli/commands/hook)

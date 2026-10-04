@@ -1,15 +1,11 @@
 ---
 title: SOPS
-description: Encrypt secrets to a file with SOPS, commit them safely, and reference them in a context's environment.
+description: Keep secrets in an encrypted file in the context, commit it, and reference its keys from the context's environment.
 ---
 
-Windsor reads secrets from a `secrets.yaml` encrypted with [SOPS](https://github.com/getsops/sops), so the encrypted file can live in git. Add a `sops.yaml` to your project, create the file in plaintext, and [encrypt it](#encrypt-and-commit) before Windsor loads it:
+Windsor reads [SOPS](https://github.com/getsops/sops)-encoded secrets from a YAML file at `contexts/<context>/secrets.enc.yaml`.
 
-```bash
-$EDITOR contexts/<context>/secrets.yaml
-```
-
-Enable the provider in `contexts/<context>/windsor.yaml`. Without it, `sops.*` references fail with `no provider found for vault "sops"`:
+Enable the provider in `contexts/<context>/values.yaml`. Without it, `sops` references fail with `no provider found for vault "sops"`:
 
 ```yaml
 secrets:
@@ -17,45 +13,42 @@ secrets:
     enabled: true
 ```
 
-The same key under `contexts.<name>` in the project's root `windsor.yaml` is not read ([windsorcli/cli#3469](https://github.com/windsorcli/cli/issues/3469)).
+## Create the file
 
-Nested keys flatten to dot-path lookups, so a `streaming: {criterion: {password: ...}}` entry resolves as `streaming.criterion.password`. Reference it in a context's `environment` in `windsor.yaml`:
-
-```yaml
-version: v1alpha1
-contexts:
-  local:
-    environment:
-      CRITERION_PASSWORD: ${{ sops.streaming.criterion.password }}
-```
-
-## Encrypt and commit
-
-`secrets.yaml` is auto-git-ignored, the same as `.env`. Encrypt it before committing or loading it:
+Put your SOPS key rules in a `.sops.yaml` at the project root, then let SOPS create the file. It opens your editor and writes the encrypted result on save:
 
 ```bash
-sops -e contexts/<context>/secrets.yaml > contexts/<context>/secrets.enc.yaml
-rm contexts/<context>/secrets.yaml
+sops contexts/<context>/secrets.enc.yaml
 ```
 
-Windsor decides whether a `secrets*.yaml` file is encrypted by its content, not its filename, so an operator's own SOPS output can carry either name. A `secrets.yaml` that still contains plaintext is refused with an explicit error rather than a raw SOPS failure, since the likely cause is a file that was never encrypted. See [Contexts directory reference](https://www.windsorcli.dev/reference/cli/contexts) for the full file layout and error text.
+The decrypted content is ordinary YAML. Nested keys flatten to dot-paths, so this file defines `database.password`:
 
-Rotating a value means decrypting, editing, and re-encrypting; there's no separate rotation command.
+```yaml
+database:
+  password: example-password
+```
 
-## Troubleshooting
+Reference it from `environment` in the same `values.yaml`:
 
-A secret that fails to resolve shows up in the environment as an error marker instead of a value:
+```yaml
+environment:
+  DB_PASSWORD: ${secret("sops", "database.password")}
+```
 
-- Bash: `env | grep '<ERROR'` → for example, `MY_SECRET=<ERROR: secret not found>`
-- PowerShell: `Get-ChildItem Env: | Where-Object { $_.Value -like '*<ERROR*' }`
+To change a value, run the same `sops` command and edit the file. Windsor decrypts the file again each time a Windsor command starts, so `windsor plan` and `windsor apply` use the new value right away. A shell that already exported the old value keeps it until you start a new shell. See [Caching](overview.md#caching).
 
-## Security
+## File names
 
-Windsor scrubs any value it reads from SOPS out of command output. Terraform runs, error messages, and [`windsor env`](https://www.windsorcli.dev/reference/cli/commands/env) all show `********` instead of the real value. Use `windsor env --decrypt` only when you need the plaintext in your shell; the shell hook decrypts for the session automatically, and `windsor env` without it shows cached secrets as `********`. Limit environment injection to development secrets where you can, and close a shell once you're done with it.
+Windsor loads `secrets.yaml`, `secrets.yml`, `secrets.enc.yaml`, and `secrets.enc.yml` from the context directory. It decides whether a file is encrypted by trying to decrypt it with `sops`.
 
-A blueprint facet or Terraform input reads the same store through `${secret(provider, name, field)}` instead of `${{ }}`; see [Expressions](../blueprints/expressions.md).
+- `secrets.enc.yaml` is meant to be committed.
+- `secrets.yaml` is git-ignored, like `.env`. It must also be encrypted. Windsor refuses a plaintext one and reports `refusing to load unencrypted secrets file`.
+
+To encrypt an existing plaintext file, run `sops -e -i contexts/<context>/secrets.yaml`. To commit the file, rename the encrypted file to `secrets.enc.yaml`. Renaming a plaintext file does not encrypt it, and git then tracks the plain text.
+
+The [Contexts directory reference](https://www.windsorcli.dev/reference/cli/contexts) has the full file layout and error text.
 
 ## See also
 
-- [1Password](1password.md): the other supported secrets provider
-- [Contexts directory reference](https://www.windsorcli.dev/reference/cli/contexts): full file layout
+- [Secrets overview](overview.md): reference syntax, caching, masking, troubleshooting
+- [1Password](1password.md): the other supported provider

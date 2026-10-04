@@ -93,7 +93,7 @@ Terraform reads the file through `TF_CLI_ARGS_plan`, and Windsor sets the same `
 
 Windsor also sets `TF_VAR_context`, `TF_VAR_context_id`, `TF_VAR_context_path`, `TF_VAR_project_root`, and `TF_VAR_os_type`, so a module can declare variables with those names and use them. The `TF_CLI_ARGS_init` setting carries the context's backend configuration, which is how a manual `terraform init` ends up using the right backend. The first time you enter a module folder, Windsor also writes a git-ignored `backend_override.tf` there so the module points at that backend. See [Lifecycle](../provisioning/workflow.md#under-the-hood) for how `bootstrap` creates and migrates that backend.
 
-Variables in `contexts/<name>/terraform/.env` are exported only inside these module directories, which makes it the place for credentials Terraform needs and nothing else should see.
+Variables in `contexts/<name>/terraform/.env` are exported only inside these module directories, which makes it the place for credentials Terraform needs and nothing else should see. Values can be [secret references](../secrets/overview.md#provider-credentials-in-terraformenv).
 
 ## Under the hood
 
@@ -105,7 +105,7 @@ On every prompt the hook runs [`windsor env --hook`](https://www.windsorcli.dev/
 | bash | Before each prompt, through `PROMPT_COMMAND`, preserving the last command's exit status |
 | PowerShell | In a wrapper around your existing `prompt` function, which still runs afterward |
 
-`WINDSOR_MANAGED_ENV` lists the variables Windsor set, and the hook unsets that list before applying a new context's. The `--hook` flag makes `env` non-fatal: warnings are suppressed and errors exit 0, so a broken project can't break your prompt. Run `windsor env` without it to see the full output and any errors.
+`WINDSOR_MANAGED_ENV` lists the variables Windsor set, and the hook unsets that list before applying a new context's. The `--hook` flag makes `env` non-fatal: warnings are suppressed and errors exit 0, so a broken project can't break your prompt. Run `windsor env --verbose` without `--hook` to see the full output and any errors. Without `--verbose`, a failing `windsor env` prints nothing.
 
 In a fresh `local` context, `windsor env` prints:
 
