@@ -3,7 +3,7 @@ title: Hyper-V
 description: Deploy a Windsor stack to Hyper-V, with Talos VMs on a Windows host and a choice of host-only or LAN-bridged networking.
 ---
 
-[Hyper-V](https://learn.microsoft.com/en-us/virtualization/hyper-v-on-windows/), the hypervisor built into Windows Pro, Enterprise, and Server, runs Talos Linux VMs with full-VM isolation rather than containers, and Flux reconciles the `core` blueprint's services on top. Hyper-V has no [`windsor up`](https://www.windsorcli.dev/reference/cli/commands/up)/`down` overlay, so the lifecycle is `init` → `bootstrap` → `apply` → `destroy`, the same as a cloud platform. For the concepts behind those verbs, see [Lifecycle](../provisioning/workflow.md).
+[Hyper-V](https://learn.microsoft.com/en-us/virtualization/hyper-v-on-windows/), the hypervisor built into Windows Pro, Enterprise, and Server, runs Talos Linux VMs with full-VM isolation rather than containers, and Flux reconciles the `core` blueprint's services on top. Hyper-V has no [`windsor up`](https://www.windsorcli.dev/reference/cli/commands/up)/`down` overlay, so the lifecycle is `init` → `bootstrap` → `apply` → `destroy`, the same as a cloud platform. For the concepts behind those verbs, see [Lifecycle](../provisioning/overview.md).
 
 Hyper-V only runs on a Windows host. `cluster.driver` is always `talos`: Hyper-V has no managed Kubernetes offering to target instead.
 
@@ -125,8 +125,8 @@ windsor destroy --confirm=hyperv-prod
 
 ## Where to next
 
-- [Lifecycle](../provisioning/workflow.md): the commands from `init` to `destroy`
-- [Destroy](../maintenance/destroy.md): safety behaviors and locking on teardown
+- [Lifecycle](../provisioning/overview.md): the commands from `init` to `destroy`
+- [Destroy](../provisioning/destroy.md): safety behaviors and locking on teardown
 - [Terraform](../components/terraform.md): state backends and cross-component outputs
 - [vSphere](vsphere.md): the other on-premises VM platform
 - [AWS](../cloud/aws.md), [Azure](../cloud/azure.md), [GCP](../cloud/gcp.md), and [Hetzner](../cloud/hetzner.md): the other deployment targets

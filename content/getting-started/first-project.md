@@ -115,11 +115,11 @@ windsor destroy --confirm=local
 windsor down
 ```
 
-`destroy` removes the live infrastructure (Terraform state and Flux Kustomizations). `down` stops the VM and clears local context artifacts. `--confirm=local` is the non-interactive equivalent of typing `local` at the destroy prompt.
+`destroy` removes the live infrastructure (Terraform state and Flux Kustomizations). `down` removes the local environment and clears local context artifacts. `--confirm=local` is the non-interactive equivalent of typing `local` at the destroy prompt.
 
 ## Next steps
 
-- [Lifecycle](../provisioning/workflow.md): the commands behind what you just ran, and how it differs for a cloud or metal context
+- [Lifecycle](../provisioning/overview.md): the commands behind what you just ran, and how it differs for a cloud or metal context
 - [Contexts](../contexts/overview.md): multiple environments and switching
 - [Workstation](../workstation/overview.md): the local runtimes and what `windsor up` builds
 - [Components](../components/terraform.md): adding your own Terraform and Kustomize to a consumed blueprint

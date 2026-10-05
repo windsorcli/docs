@@ -3,7 +3,7 @@ title: Hetzner
 description: Deploy a Windsor stack to Hetzner Cloud, with Talos nodes on a private network, Hetzner DNS, and Flux-managed workloads.
 ---
 
-Windsor deploys to [Hetzner Cloud](https://www.hetzner.com/cloud/) as Talos Linux servers on a private network, with Hetzner's Cloud Load Balancer and Volumes and the `core` blueprint's services reconciled by Flux. There is no local VM, so the lifecycle is `init` → `bootstrap` → `apply` → `destroy`. For the concepts behind those verbs, see [Lifecycle](../provisioning/workflow.md).
+Windsor deploys to [Hetzner Cloud](https://www.hetzner.com/cloud/) as Talos Linux servers on a private network, with Hetzner's Cloud Load Balancer and Volumes and the `core` blueprint's services reconciled by Flux. There is no local VM, so the lifecycle is `init` → `bootstrap` → `apply` → `destroy`. For the concepts behind those verbs, see [Lifecycle](../provisioning/overview.md).
 
 Unlike AWS or Azure, Hetzner has no managed Kubernetes offering. `cluster.driver` is always `talos`, and Windsor builds the cluster itself from bare servers.
 
@@ -149,8 +149,8 @@ There's a separate `dns-zone` component when `dns.public_domain` is set. It's in
 
 ## Where to next
 
-- [Lifecycle](../provisioning/workflow.md): the commands from `init` to `destroy`
-- [Destroy](../maintenance/destroy.md): safety behaviors and locking on teardown
+- [Lifecycle](../provisioning/overview.md): the commands from `init` to `destroy`
+- [Destroy](../provisioning/destroy.md): safety behaviors and locking on teardown
 - [Terraform](../components/terraform.md): state backends and cross-component outputs
 - [SOPS](../secrets/sops.md), [1Password](../secrets/1password.md): for `hetzner.token`
 - [AWS](aws.md), [Azure](azure.md), and [GCP](gcp.md): the other deployment targets

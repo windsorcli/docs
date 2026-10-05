@@ -46,6 +46,7 @@ hostports
 Kubeconfig
 kubectl
 kubelet
+Mayastor
 namespace
 namespaces
 schedulable
