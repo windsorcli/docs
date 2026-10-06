@@ -61,7 +61,7 @@ The hook decrypts secret references in `environment` and `.env`, so many referen
 
 Windsor injects only in trusted directories, and in an untrusted one it does nothing, even to clear what the last prompt set. If you `cd` from a trusted project into an untrusted directory, the old `KUBECONFIG` stays set until you `cd` somewhere trusted. See [Trusted folders](trusted-folders.md).
 
-Windsor treats a directory as part of a project when a `windsor.yaml` sits in it or in a parent. Outside a project, Windsor runs in global mode. The shell hook prints nothing there. `windsor env` and `windsor exec` still work, with `~/.config/windsor` as the project root, but they leave out the cloud variables that point at project files, such as `AWS_CONFIG_FILE` and `AWS_SHARED_CREDENTIALS_FILE`. Your own cloud setup stays in effect.
+Windsor treats a directory as part of a project when a `windsor.yaml` sits in it or in a parent. Outside a project, Windsor runs in global mode. The shell hook prints nothing there. `windsor env` and `windsor exec` still work, with `~/.config/windsor` as the project root, but they leave out the cloud variables that point at project files, such as `AWS_CONFIG_FILE` and `AWS_SHARED_CREDENTIALS_FILE`.
 
 ## Terraform folders and tfvars
 
@@ -89,9 +89,9 @@ cd terraform/cluster
 terraform plan        # picks up contexts/staging/terraform/cluster.tfvars
 ```
 
-Terraform reads the file through `TF_CLI_ARGS_plan`, and Windsor sets the same `-var-file` for `destroy`, `import`, and `refresh`. It passes two files: the `terraform.tfvars` that Windsor generates under `.windsor/`, then yours, so your values win. A `.tfvars.json` file works too. Staging and production each keep their own `cluster.tfvars`, so the module stays the same and only the values change.
+Terraform reads the file through `TF_CLI_ARGS_plan`, and Windsor sets the same `-var-file` for `destroy`, `import`, and `refresh`. It passes two files: the `terraform.tfvars` that Windsor generates under `.windsor/`, then yours. Terraform applies later files last, so a value in yours overrides the same variable in the generated file. A `.tfvars.json` file works too. Staging and production each have their own `cluster.tfvars` for the same module.
 
-Windsor also sets `TF_VAR_context`, `TF_VAR_context_id`, `TF_VAR_context_path`, `TF_VAR_project_root`, and `TF_VAR_os_type`. A module can declare variables with those names and read them.
+Windsor also sets `TF_VAR_context`, `TF_VAR_context_id`, `TF_VAR_context_path`, `TF_VAR_project_root`, and `TF_VAR_os_type`. Declare variables with those names in a module to read them.
 
 `TF_CLI_ARGS_init` carries the context's backend settings, so a manual `terraform init` uses the right backend. In a folder that a blueprint [component](../components/terraform.md) points at with `path:`, Windsor also writes a `backend_override.tf` and adds it to `terraform/.gitignore`. See [Lifecycle](../provisioning/state-backend.md#bootstrap) for how `bootstrap` creates and migrates that backend.
 

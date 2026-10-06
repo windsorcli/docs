@@ -3,7 +3,7 @@ title: Trusted folders
 description: Windsor loads a project's configuration only from folders you've trusted. How to trust one, what to read first, and how to undo it.
 ---
 
-A Windsor project runs Terraform, resolves secrets, and sets shell variables based on files in its repository. Whoever controls those files controls what Windsor runs. Windsor therefore reads a project only after you trust it, and environment injection stays off until then.
+A Windsor project runs Terraform, resolves secrets, and sets shell variables based on files in its repository. The files decide what Windsor runs, so Windsor reads a project only after you trust it. Until then, environment injection stays off.
 
 ## Trust a project
 

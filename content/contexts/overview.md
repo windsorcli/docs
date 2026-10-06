@@ -3,9 +3,9 @@ title: Overview
 description: A context is a named environment (local, staging, production) with its own blueprint, values, and credentials, and Windsor tracks which one is active.
 ---
 
-A context is a named environment, such as `local`, `staging`, or `production`. It has its own blueprint, values, credentials, and kubeconfig, and Windsor tracks which context is active. Commands act on the active context, and [environment injection](environment-injection.md) points `kubectl`, `terraform`, and the cloud CLIs at it.
+A context is a named environment, such as `local`, `staging`, or `production`. Each context has a blueprint, a `values.yaml`, and its own credentials and kubeconfig. Windsor tracks which one is active. Commands act on the active context, and [environment injection](environment-injection.md) points `kubectl`, `terraform`, and the cloud CLIs at it.
 
-Contexts usually map to a stage (`development`, `staging`, `production`), a slice of infrastructure (`admin`, `web`, `observability`), or both, like `web-staging`. Several contexts can share the same infrastructure code while their credentials, endpoints, and input values stay separate.
+Contexts usually map to a stage (`development`, `staging`, `production`), a slice of infrastructure (`admin`, `web`, `observability`), or both, like `web-staging`. Contexts can share infrastructure code and still keep separate credentials, endpoints, and input values.
 
 Windsor keeps a context's files under `contexts/<context-name>/` in the project root.
 
@@ -41,7 +41,7 @@ To add another context, give it a name and a platform. AWS needs a region, so pa
 windsor init production --platform aws --set aws.region=us-east-1
 ```
 
-This creates `contexts/production/` with its own `blueprint.yaml` and `values.yaml`, and makes it the active context. Without a region, `init` stops and names the missing value.
+This creates `contexts/production/` with its own `blueprint.yaml` and `values.yaml`, and makes it the active context. If you leave out the region, `init` exits with an error.
 
 ## Switch contexts
 
@@ -52,7 +52,7 @@ windsor set context <context-name>
 windsor get context
 ```
 
-`windsor set context` writes the context name to `.windsor/context` and sets `WINDSOR_CONTEXT` for the current process. The context must exist already. Otherwise the command fails and tells you to run `windsor init <name>`. By your next prompt, the shell hook has refreshed the per-context environment, including kubeconfig and the cloud profile. See [Environment injection](environment-injection.md).
+`windsor set context` writes the context name to `.windsor/context` and sets `WINDSOR_CONTEXT` for the current process. The command fails for a context that doesn't exist, so create it with `windsor init <name>` first. By your next prompt, the shell hook has refreshed the per-context environment, including kubeconfig and the cloud profile. See [Environment injection](environment-injection.md).
 
 ## Workstation vs. deployed contexts
 
