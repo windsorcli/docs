@@ -18,31 +18,31 @@ windsor exec --context staging -- kubectl get pods
 
 To run plain `kubectl` and `terraform` without `windsor exec`, install the shell hook. It sets the environment for the active context at every prompt. Add the line for your shell to its startup file, then open a new shell.
 
+Windsor supports zsh, bash, and PowerShell. Pick the tab for the shell you run, whatever the operating system.
+
 <!-- tabs -->
 
-<!-- tab:macos -->
+<!-- tab:zsh -->
 
-On macOS, zsh is the default shell. Add this line to `~/.zshrc`:
+For zsh, add this line to `~/.zshrc`:
 
 ```bash
 eval "$(windsor hook zsh)"
 ```
 
-If you use bash instead, add `eval "$(windsor hook bash)"` to `~/.bash_profile`, because Terminal starts bash as a login shell.
+<!-- tab:bash -->
 
-<!-- tab:linux -->
-
-On Linux, add this line to `~/.bashrc` for bash:
+For bash, add this line to `~/.bashrc`:
 
 ```bash
 eval "$(windsor hook bash)"
 ```
 
-For zsh, add `eval "$(windsor hook zsh)"` to `~/.zshrc`.
+On macOS, Terminal starts bash as a login shell, which reads `~/.bash_profile` instead. Put the line there.
 
-<!-- tab:windows -->
+<!-- tab:powershell -->
 
-On Windows, add the hook to your PowerShell profile. The first command creates the profile if you don't have one:
+For PowerShell, add the hook to your profile. The first command creates the profile if you don't have one:
 
 ```powershell
 if (!(Test-Path $PROFILE)) { New-Item -ItemType File -Path $PROFILE -Force }
