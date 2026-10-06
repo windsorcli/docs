@@ -33,4 +33,4 @@ Windsor never force-copies orphaned state into the shared backend unattended: pu
 
 - [Lifecycle](../provisioning/overview.md): where `up` and `apply` fit among the other commands
 - [State backend](../provisioning/state-backend.md): configuring the backend this migrates state into
-- [Destroy](destroy.md): retiring a component's infrastructure instead of moving its state
+- [Destroy](../provisioning/destroy.md): retiring a component's infrastructure instead of moving its state
