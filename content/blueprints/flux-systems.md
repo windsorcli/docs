@@ -60,7 +60,7 @@ A system with `globalDependency: true` inverts the usual dependency direction: i
 
 ## Kubernetes Secrets
 
-A `flux:` system can also declare a `secrets:` block to land a `sensitive: true` schema value as a Kubernetes Secret in its namespace. See [Facets — Kubernetes Secrets](facets.md#kubernetes-secrets).
+A `flux:` system can also declare a `secrets:` block to land a resolved value, such as a `sensitive: true` schema property, as a Kubernetes Secret in its namespace. See [Facets — Kubernetes Secrets](facets.md#kubernetes-secrets).
 
 ## See also
 

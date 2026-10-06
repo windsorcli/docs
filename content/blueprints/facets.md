@@ -91,7 +91,7 @@ flux:
           url: ${telemetry.alerts.slack.webhook_url}
 ```
 
-`data` maps Secret keys to resolved expressions, never plaintext literals; the referenced `telemetry.alerts.slack.webhook_url` property must itself be `sensitive: true`. Windsor materializes an Opaque Secret by default, ordered after the owning system's install Kustomization. A `.dockerconfigjson` key (or `docker-username` plus `docker-password`) materializes as `kubernetes.io/dockerconfigjson` instead, for use as an `imagePullSecret`.
+`data` maps Secret keys to `${...}` expressions, such as a config property like `telemetry.alerts.slack.webhook_url`. Windsor rejects a plaintext literal. Marking the property `sensitive: true` in the schema is still worthwhile: it redacts the value in `windsor show values` and keeps it out of `substitutions:`. Windsor materializes an Opaque Secret by default, ordered after the owning system's install Kustomization. A `.dockerconfigjson` key (or `docker-username` plus `docker-password`) materializes as `kubernetes.io/dockerconfigjson` instead, for use as an `imagePullSecret`.
 
 An optional `namespaces:` list targets more than one namespace; empty means auto-resolve the single namespace the owning kustomization creates. Removing an entry prunes the corresponding cluster Secret on the next apply; changing an entry's resolved data rolls workloads that reference it. See the [Blueprint reference](https://www.windsorcli.dev/reference/cli/blueprint) for the full `flux[].secrets{}` schema.
 
@@ -100,4 +100,5 @@ An optional `namespaces:` list targets more than one namespace; empty means auto
 - [Expressions](expressions.md): the `when:` / `${...}` language and Windsor's added functions
 - [Blueprint templates](templates.md) — How the _template folder and composition order work.
 - [Testing](testing.md): Testing facet conditions and expected components.
-- [Schema — Marking a property sensitive](schema.md#marking-a-property-sensitive): the `sensitive: true` flag this section's `data:` values must carry
+- [Schema — Marking a property sensitive](schema.md#marking-a-property-sensitive): the `sensitive: true` flag that redacts a value and keeps it out of `substitutions:`
+- [Secrets](../secrets/overview.md): how Windsor resolves secret references

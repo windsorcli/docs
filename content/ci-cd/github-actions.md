@@ -159,7 +159,7 @@ The action repo's own [`examples/bootstrap-and-destroy.yaml`](https://github.com
 
 ## Security
 
-The root action masks secrets automatically: it scans `windsor.yaml` for `${{ }}`-templated environment variables, registers their values with GitHub's built-in log masking, and logs only variable names, never values. It calls out to [`actions/github-script`](https://github.com/actions/github-script) with a pinned SHA rather than a mutable tag, to keep that surface minimal.
+The root action masks secrets automatically: it scans the project's root `windsor.yaml` for `${{ }}`-templated environment variables, registers their values with GitHub's built-in log masking, and logs only variable names, never values. It matches only the `${{ }}` form, so a variable written as `${secret(...)}`, or declared in a context's `values.yaml`, is not masked this way. It calls out to [`actions/github-script`](https://github.com/actions/github-script) with a pinned SHA rather than a mutable tag, to keep that surface minimal.
 
 That covers what the action does, not the workflow you write around it. Pin every third-party action by commit SHA, not a mutable tag (`actions/checkout@<sha> # v7`, not `@v7`), and do your own threat modeling for the systems a workflow can reach. See [GitHub's security hardening guide](https://docs.github.com/en/actions/reference/security/secure-use).
 

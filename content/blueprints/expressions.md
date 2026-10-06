@@ -20,7 +20,7 @@ value: "${cluster.controlplanes.count ?? 1}"
 | Function | Does |
 |---|---|
 | `env(name)` | Reads an environment variable. Returns nothing when unset. |
-| `secret(provider, name, field)` | Resolves a value from a configured secret store at apply time. |
+| `secret(vault, item, field)` | Resolves a value from a configured secret store when Windsor runs Terraform or applies the blueprint. See [Secrets](../secrets/overview.md). |
 | `terraform_output(component, output)` | Reads an output from an already-applied Terraform component. Returns nothing until that component has run. See [Deferred evaluation](#deferred-evaluation). |
 | `yaml(pathOrContent, [input])` | Parses YAML from a file path or an inline string. |
 | `yamlString(value)` / `yamlString(path, input)` | The inverse: marshals a value to a YAML string. |
@@ -66,6 +66,8 @@ If a value genuinely must be present, don't rely on an expression to catch it. D
 ## Deferred evaluation
 
 `terraform_output()` can't resolve before its component has actually applied. During [`windsor plan`](https://www.windsorcli.dev/reference/cli/commands/plan), or on a facet's first evaluation pass, the referenced component may not have run yet. Windsor handles this by deferring: it leaves an expression that depends on a not-yet-available output unevaluated, and retries it once its dependency resolves, rather than failing the whole composition. This is why facets that read `terraform_output()` almost always pair it with a fallback (`?? cluster.controlplanes.nodes`), so the blueprint still composes something sensible before that Terraform component exists.
+
+`secret()` defers the same way. Composition leaves the call as written, and Windsor resolves it when it runs Terraform for the component or applies the blueprint. That keeps decrypted values out of the composed blueprint and the generated tfvars.
 
 ## Reference
 
