@@ -3,16 +3,11 @@ title: Overview
 description: A context is a named environment (local, staging, production) with its own blueprint, values, and credentials, and Windsor tracks which one is active.
 ---
 
-Windsor uses **contexts** to make it easier to work across several environments.
+A context is a named environment, such as `local`, `staging`, or `production`. It has its own blueprint, values, credentials, and kubeconfig, and Windsor tracks which context is active. Commands act on the active context, and [environment injection](environment-injection.md) points `kubectl`, `terraform`, and the cloud CLIs at it.
 
-It is common to reuse infrastructure code across several environments. For example, tests are often run against dedicated staging infrastructure. Replicas of production infrastructure may run in different regions, or be dedicated to single-tenant customers.
+Contexts usually map to a stage (`development`, `staging`, `production`), a slice of infrastructure (`admin`, `web`, `observability`), or both, like `web-staging`. Several contexts can share the same infrastructure code while their credentials, endpoints, and input values stay separate.
 
-Across each of the above targets, authentication, endpoints, and input parameters vary. Windsor
-keeps this organized by bundling these collections individually as contexts. Contexts are referenced when running commands that target a particular environment. Automatic environment variable injection configures your tool chain (for example, the `kubectl` or `aws` CLIs) to target the current context.
-
-Contexts usually map to an SDLC stage (`development`, `staging`, `production`), a slice of infrastructure (`admin`, `web`, `observability`), or both, like `web-staging`.
-
-Windsor organizes context files under `<project-root>/contexts/<context-name>/`.
+Windsor keeps a context's files under `contexts/<context-name>/` in the project root.
 
 ```text
 windsor.yaml                     project root; a version stamp
@@ -28,23 +23,25 @@ contexts/
     ├── .kube/config             kubeconfig, written by windsor up
     └── .talos/config            talosconfig, written by windsor up
 .windsor/
-├── context                      the active context name
+├── context                      the active context name; Windsor assumes `local` when it is absent
 └── contexts/local/              generated Terraform module shims, workstation config, and the stack lock
 ```
 
 ## Create a context
 
-`windsor init` creates the project and a `local` context: a `contexts/local` folder with a starter `blueprint.yaml`, plus a minimal `windsor.yaml` at the project root on the first run:
+In a git repository, `windsor init` creates the project: a `windsor.yaml` at the root on the first run, and a `local` context with a starter `blueprint.yaml` and `values.yaml`:
 
 ```bash
 windsor init
 ```
 
-To add another, use a different name (for example, `production`) and choose a platform. This command creates `contexts/production/` targeting AWS, with its own `blueprint.yaml`:
+To add another context, give it a name and a platform. AWS needs a region, so pass one with `--set`:
 
 ```bash
-windsor init production --platform aws
+windsor init production --platform aws --set aws.region=us-east-1
 ```
+
+This creates `contexts/production/` with its own `blueprint.yaml` and `values.yaml`, and makes it the active context. Without a region, `init` stops and names the missing value.
 
 ## Switch contexts
 
@@ -55,21 +52,19 @@ windsor set context <context-name>
 windsor get context
 ```
 
-`windsor set context` writes the context name to `.windsor/context` and sets `WINDSOR_CONTEXT` for the current process. By your next prompt, the shell hook has refreshed the per-context environment, including kubeconfig and the cloud profile. See [Environment injection](environment-injection.md).
+`windsor set context` writes the context name to `.windsor/context` and sets `WINDSOR_CONTEXT` for the current process. The context must exist already. Otherwise the command fails and tells you to run `windsor init <name>`. By your next prompt, the shell hook has refreshed the per-context environment, including kubeconfig and the cloud profile. See [Environment injection](environment-injection.md).
 
 ## Workstation vs. deployed contexts
 
-Contexts that represent a local workstation work a little differently, so keep a few things in mind.
-
-A **workstation context**, named `local` or starting with `local-`, runs a Kubernetes cluster in a VM on your machine. Windsor starts and stops that VM. Every other context, like `staging` or `production`, is **deployed**. It targets a cloud, a hypervisor, or bare metal, so there's no VM to start and Windsor provisions the infrastructure directly.
+A workstation context, named `local` or starting with `local-`, runs a Kubernetes cluster on your machine. Windsor starts and stops the VM or container runtime it runs in. Every other context, like `staging` or `production`, is deployed. It targets a cloud, a hypervisor, or bare metal, and Windsor provisions the infrastructure directly.
 
 |                 | Workstation                                                                                          | Deployed                                                                           |
 | --------------- | ---------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
-| Cluster runs on | A VM on your machine                                                                                 | A cloud, hypervisor, or bare metal                                                 |
+| Cluster runs on | Your machine                                                                                         | A cloud, hypervisor, or bare metal                                                 |
 | First run       | [`windsor up`](https://www.windsorcli.dev/reference/cli/commands/up)                                 | [`windsor bootstrap`](https://www.windsorcli.dev/reference/cli/commands/bootstrap) |
-| Tear down       | [`windsor destroy`](https://www.windsorcli.dev/reference/cli/commands/destroy), then [`windsor down`](https://www.windsorcli.dev/reference/cli/commands/down) | `windsor destroy`                                                                  |
+| Tear down       | [`windsor down`](https://www.windsorcli.dev/reference/cli/commands/down)                             | [`windsor destroy`](https://www.windsorcli.dev/reference/cli/commands/destroy)     |
 
-Read more about the [local workstation](../workstation/overview.md) and [provisioning lifecycle](../provisioning/overview.md)
+See the [workstation overview](../workstation/overview.md) and the [provisioning lifecycle](../provisioning/overview.md).
 
 ## In this section
 
