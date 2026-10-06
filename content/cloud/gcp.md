@@ -3,7 +3,7 @@ title: GCP
 description: Deploy a Windsor stack to GCP, with a GKE cluster on a dedicated VPC, GCS state, Cloud DNS, and Flux-managed workloads.
 ---
 
-A Windsor context on GCP is a dedicated VPC, a [GKE](https://cloud.google.com/kubernetes-engine) cluster, Terraform state in a GCS bucket, and the `core` blueprint's services reconciled by Flux. With no local VM to bring up, the lifecycle is `init` → `bootstrap` → `apply` → `destroy`. For the concepts behind those verbs, see [Lifecycle](../provisioning/workflow.md).
+A Windsor context on GCP is a dedicated VPC, a [GKE](https://cloud.google.com/kubernetes-engine) cluster, Terraform state in a GCS bucket, and the `core` blueprint's services reconciled by Flux. With no local VM to bring up, the lifecycle is `init` → `bootstrap` → `apply` → `destroy`. For the concepts behind those verbs, see [Lifecycle](../provisioning/overview.md).
 
 ## Prerequisites
 
@@ -116,7 +116,7 @@ Node spread alone isn't sufficient either: workloads still need pod anti-affinit
 windsor bootstrap gcp-prod
 ```
 
-`bootstrap` blocks until every Kustomization reports ready. Windsor applies the components in order (GCS backend, VPC, Cloud DNS zone if public, GKE, then Flux), migrating state from local to the GCS bucket once it exists. The on-disk `windsor.yaml` is never mutated during the migration. See [Terraform — Bootstrap](../components/terraform.md#bootstrap) for the mechanics.
+`bootstrap` blocks until every Kustomization reports ready. Windsor applies the components in order (GCS backend, VPC, Cloud DNS zone if public, GKE, then Flux), migrating state from local to the GCS bucket once it exists. The on-disk `values.yaml` is never mutated during the migration. See [State backend](../provisioning/state-backend.md#bootstrap) for the mechanics.
 
 If you delegated `dns.public_domain` to the new Cloud DNS zone, update your registrar's NS records to the zone's nameservers so ACME validation and external-dns can resolve.
 
@@ -153,7 +153,7 @@ windsor apply kustomize observability   # one Flux kustomization
 windsor destroy --confirm=gcp-prod
 ```
 
-`destroy` removes the Flux kustomizations, then the Terraform components in reverse order, with the GCS backend removed last so dependent state is written out first. The public Cloud DNS zone lives in its own stack, so a full `destroy` removes it too. To keep the delegated zone, destroy individual components instead. See [destroy safety](../maintenance/destroy.md#tear-down).
+`destroy` removes the Flux kustomizations, then the Terraform components in reverse order, with the GCS backend removed last so dependent state is written out first. The public Cloud DNS zone lives in its own stack, so a full `destroy` removes it too. To keep the delegated zone, destroy individual components instead. See [destroy safety](../provisioning/destroy.md#tear-down).
 
 ## Troubleshooting
 
@@ -164,8 +164,8 @@ windsor destroy --confirm=gcp-prod
 
 ## Where to next
 
-- [Lifecycle](../provisioning/workflow.md): the commands from `init` to `destroy`
-- [Destroy](../maintenance/destroy.md): safety behaviors and locking on teardown
+- [Lifecycle](../provisioning/overview.md): the commands from `init` to `destroy`
+- [Destroy](../provisioning/destroy.md): safety behaviors and locking on teardown
 - [Terraform](../components/terraform.md): state backends, the bootstrap two-phase apply, cross-component outputs
 - [SOPS](../secrets/sops.md), [1Password](../secrets/1password.md): for sensitive values
 - [AWS](aws.md), [Azure](azure.md), [Hetzner](hetzner.md), [Hyper-V](../virtual/hyperv.md), and [vSphere](../virtual/vsphere.md): the other deployment targets

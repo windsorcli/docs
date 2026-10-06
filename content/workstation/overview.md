@@ -105,5 +105,5 @@ Reference `${BUILD_ID}` in your manifests or Kustomize files instead of a fixed 
 
 ## See also
 
-- [Lifecycle](../provisioning/workflow.md): `up` and `down`, and how a deployed context differs
+- [Lifecycle](../provisioning/overview.md): `up` and `down`, and how a deployed context differs
 - [Contexts](../contexts/overview.md): switching between a workstation and other contexts

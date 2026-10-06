@@ -3,7 +3,7 @@ title: AWS
 description: Deploy a Windsor stack to AWS, with an EKS cluster on a dedicated VPC, S3 state, Route53 DNS, and Flux-managed workloads.
 ---
 
-This guide stands up a production-style Windsor stack on AWS: a dedicated VPC, an [EKS](https://aws.amazon.com/eks/) cluster, Terraform state in S3, and the `core` blueprint's services reconciled by Flux. It targets a **deployed context**: there is no local VM, so the lifecycle is `init` → `bootstrap` → `apply` → `destroy`. For the concepts behind those verbs, see [Lifecycle](../provisioning/workflow.md).
+This guide stands up a production-style Windsor stack on AWS: a dedicated VPC, an [EKS](https://aws.amazon.com/eks/) cluster, Terraform state in S3, and the `core` blueprint's services reconciled by Flux. It targets a **deployed context**: there is no local VM, so the lifecycle is `init` → `bootstrap` → `apply` → `destroy`. For the concepts behind those verbs, see [Lifecycle](../provisioning/overview.md).
 
 ## Prerequisites
 
@@ -119,7 +119,7 @@ Node spread alone isn't sufficient either: workloads still need pod anti-affinit
 windsor bootstrap aws-prod
 ```
 
-`bootstrap` blocks until every Kustomization reports ready. Windsor applies the components in order (S3 backend, VPC, Route53 zone if public, EKS, then Flux), migrating state from local to S3 once the bucket exists. The on-disk `windsor.yaml` is never mutated during the migration. See [Terraform — Bootstrap](../components/terraform.md#bootstrap) for the mechanics.
+`bootstrap` blocks until every Kustomization reports ready. Windsor applies the components in order (S3 backend, VPC, Route53 zone if public, EKS, then Flux), migrating state from local to S3 once the bucket exists. The on-disk `values.yaml` is never mutated during the migration. See [State backend](../provisioning/state-backend.md#bootstrap) for the mechanics.
 
 If you delegated `dns.public_domain` to the new Route53 zone, update your registrar's NS records to the zone's nameservers so ACME validation and external-dns can resolve.
 
@@ -156,7 +156,7 @@ windsor apply kustomize observability   # one Flux kustomization
 windsor destroy --confirm=aws-prod
 ```
 
-`destroy` removes the Flux kustomizations, then the Terraform components in reverse order, with the S3 backend removed last so dependent state is written out first. The state bucket is emptied and deleted as part of teardown. `--confirm=aws-prod` is the non-interactive equivalent of typing the context name at the prompt. The public Route53 zone lives in its own stack, so a full `destroy` removes it too. To keep the delegated zone, destroy individual components instead. See [destroy safety](../maintenance/destroy.md#tear-down).
+`destroy` removes the Flux kustomizations, then the Terraform components in reverse order, with the S3 backend removed last so dependent state is written out first. The state bucket is emptied and deleted as part of teardown. `--confirm=aws-prod` is the non-interactive equivalent of typing the context name at the prompt. The public Route53 zone lives in its own stack, so a full `destroy` removes it too. To keep the delegated zone, destroy individual components instead. See [destroy safety](../provisioning/destroy.md#tear-down).
 
 ## Troubleshooting
 
@@ -167,8 +167,8 @@ windsor destroy --confirm=aws-prod
 
 ## Where to next
 
-- [Lifecycle](../provisioning/workflow.md) — the commands from `init` to `destroy`
-- [Destroy](../maintenance/destroy.md) — safety behaviors and locking on teardown
+- [Lifecycle](../provisioning/overview.md) — the commands from `init` to `destroy`
+- [Destroy](../provisioning/destroy.md) — safety behaviors and locking on teardown
 - [Terraform](../components/terraform.md) — state backends, the bootstrap two-phase apply, cross-component outputs
 - [SOPS](../secrets/sops.md), [1Password](../secrets/1password.md) — for sensitive values
 - [Azure](azure.md), [GCP](gcp.md), [Hetzner](hetzner.md), [Hyper-V](../virtual/hyperv.md), and [vSphere](../virtual/vsphere.md) — the other deployment targets

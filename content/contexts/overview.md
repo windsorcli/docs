@@ -69,7 +69,7 @@ A **workstation context**, named `local` or starting with `local-`, runs a Kuber
 | First run       | [`windsor up`](https://www.windsorcli.dev/reference/cli/commands/up)                                 | [`windsor bootstrap`](https://www.windsorcli.dev/reference/cli/commands/bootstrap) |
 | Tear down       | [`windsor destroy`](https://www.windsorcli.dev/reference/cli/commands/destroy), then [`windsor down`](https://www.windsorcli.dev/reference/cli/commands/down) | `windsor destroy`                                                                  |
 
-Read more about the [local workstation](../workstation/overview.md) and [provisioning lifecycle](../provisioning/workflow.md)
+Read more about the [local workstation](../workstation/overview.md) and [provisioning lifecycle](../provisioning/overview.md)
 
 ## In this section
 
