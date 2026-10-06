@@ -3,7 +3,7 @@ title: Schema
 description: JSON Schema for blueprint configuration validation.
 ---
 
-The `contexts/_template/schema.yaml` file defines the expected structure and default values for configuration. Windsor uses it to validate and fill in values from `windsor.yaml` and `values.yaml`.
+The `contexts/_template/schema.yaml` file defines the expected structure and default values for configuration. Windsor uses it to validate and fill in values from `values.yaml`.
 
 ## Overview
 
