@@ -54,7 +54,7 @@ flowchart TB
 
 - **Nodes are containers.** `controlplane-1` runs Talos as a privileged container on the `windsor-local` bridge, next to the support containers described in the [overview](overview.md#what-gets-built).
 - **Localhost access.** The container publishes the Kubernetes API on `6443`, the Talos API on `50000`, and the gateway's NodePorts on `8080`, `8081`, `8443`, and `8444`. That's why Grafana is at `https://grafana.test:8443`.
-- **DNS answers `127.0.0.1`.** Every `*.test` name resolves to localhost, and the published ports do the routing. There's no route to the cluster network, so the host can't reach service IPs or a layer 2 load balancer.
+- **DNS answers `127.0.0.1`.** Every `*.test` name resolves to localhost, and the published ports do the routing. There's no route to the cluster network, so the host can't reach load balancer IPs.
 - **Flannel, not Cilium.** Cilium has no working transport over Docker Desktop's loopback, so Windsor sets the CNI to Flannel for this runtime.
 
 Filesystem volumes work as usual: `${project_root}/.volumes` is bind-mounted into the node so persistent volumes show up as folders in your project. Block devices aren't available. For them, use [Colima + Incus](colima-incus.md).

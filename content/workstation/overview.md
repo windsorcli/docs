@@ -14,7 +14,7 @@ The cluster can be hosted three ways. They differ in what the cluster nodes are 
 | Runs on               | macOS, Linux, Windows               | macOS, Linux                        | macOS, Linux                        |
 | Cluster nodes         | Containers                          | Containers                          | VMs                                 |
 | Reaching the cluster  | Ports published on localhost        | A host route to the cluster network | A host route to the cluster network |
-| `*.test` resolves to  | `127.0.0.1`                         | The service IPs                     | The service IPs                     |
+| `*.test` resolves to  | `127.0.0.1`                         | The gateway load balancer IP        | The gateway load balancer IP        |
 | Load balancer         | NodePort only                       | Layer 2                             | Layer 2                             |
 | Block devices         | Filesystem only                     | Filesystem only                     | Yes                                 |
 | Closest to production | Least                               | Middle                              | Most                                |
