@@ -22,7 +22,7 @@ properties:
   platform:
     type: string
     default: "none"
-    enum: ["none", "aws", "azure", "hetzner", "incus", "metal", "docker", "hyperv", "vsphere"]
+    enum: ["none", "aws", "azure", "gcp", "hetzner", "incus", "metal", "docker", "hyperv", "vsphere", "proxmox"]
   observability:
     type: object
     properties:

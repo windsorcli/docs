@@ -14,7 +14,7 @@ When you do not set a backend, `--platform` picks a default:
 | `aws`                                                      | `s3`                                                                       |
 | `azure`                                                    | `azurerm`                                                                  |
 | `gcp`                                                      | `gcs`                                                                      |
-| `metal`, `docker`, `incus`, `hetzner`, `hyperv`, `vsphere` | `kubernetes` (each component's state is stored as a Secret in the cluster) |
+| `metal`, `docker`, `incus`, `hetzner`, `hyperv`, `vsphere`, `proxmox` | `kubernetes` (each component's state is stored as a Secret in the cluster) |
 | `none`, unset                                              | not defaulted (effectively `local`)                                        |
 
 To change it, set `terraform.backend.type` in `values.yaml` to `local`, `s3`, `azurerm`, `gcs`, or `kubernetes`. You can also pass `--backend` to `init` or `--set terraform.backend.type=...` to `bootstrap`.

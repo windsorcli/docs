@@ -168,4 +168,4 @@ windsor destroy --confirm=gcp-prod
 - [Destroy](../provisioning/destroy.md): safety behaviors and locking on teardown
 - [Terraform](../components/terraform.md): state backends, the bootstrap two-phase apply, cross-component outputs
 - [SOPS](../secrets/sops.md), [1Password](../secrets/1password.md): for sensitive values
-- [AWS](aws.md), [Azure](azure.md), [Hetzner](hetzner.md), [Hyper-V](../virtual/hyperv.md), and [vSphere](../virtual/vsphere.md): the other deployment targets
+- [AWS](aws.md), [Azure](azure.md), [Hetzner](hetzner.md), [Hyper-V](../virtual/hyperv.md), [vSphere](../virtual/vsphere.md), and [Proxmox VE](../virtual/proxmox.md): the other deployment targets

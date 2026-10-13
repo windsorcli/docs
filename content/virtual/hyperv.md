@@ -128,5 +128,5 @@ windsor destroy --confirm=hyperv-prod
 - [Lifecycle](../provisioning/overview.md): the commands from `init` to `destroy`
 - [Destroy](../provisioning/destroy.md): safety behaviors and locking on teardown
 - [Terraform](../components/terraform.md): state backends and cross-component outputs
-- [vSphere](vsphere.md): the other on-premises VM platform
+- [vSphere](vsphere.md) and [Proxmox VE](proxmox.md): the other on-premises VM platforms
 - [AWS](../cloud/aws.md), [Azure](../cloud/azure.md), [GCP](../cloud/gcp.md), and [Hetzner](../cloud/hetzner.md): the other deployment targets
