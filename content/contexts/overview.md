@@ -12,16 +12,18 @@ Windsor keeps a context's files under `contexts/<context-name>/` in the project 
 ```text
 windsor.yaml                     project root; a version stamp
 contexts/
-└── local/
-    ├── blueprint.yaml           this context's blueprint
-    ├── values.yaml              values that feed the schema
-    ├── .gitignore               keeps sensitive context files out of commits
-    ├── secrets.enc.yaml         SOPS-encrypted secrets, safe to commit
-    ├── .env                     git-ignored environment variables
-    ├── terraform/               <component>.tfvars overrides for terraform components
-    ├── patches/                 <component>/patch.yaml patches for kustomize components
-    ├── .kube/config             kubeconfig, written by windsor up
-    └── .talos/config            talosconfig, written by windsor up
+├── local/
+│   ├── blueprint.yaml           this context's blueprint
+│   ├── values.yaml              values that feed the schema
+│   ├── .gitignore               keeps sensitive context files out of commits
+│   ├── secrets.enc.yaml         SOPS-encrypted secrets, safe to commit
+│   ├── .env                     git-ignored environment variables
+│   ├── terraform/               <component>.tfvars overrides for terraform components
+│   ├── patches/                 <component>/patch.yaml patches for kustomize components
+│   ├── .kube/config             kubeconfig, written by windsor up
+│   └── .talos/config            talosconfig, written by windsor up
+├── staging/                     another context, with its own copy of these files
+└── production/
 .windsor/
 ├── context                      the active context name; Windsor assumes `local` when it is absent
 └── contexts/local/              generated Terraform module shims, workstation config, and the stack lock
