@@ -1,58 +1,47 @@
 ---
 title: vSphere
-description: Deploy a Windsor stack to VMware vSphere, with Talos VMs on existing inventory and an in-cluster load balancer.
+description: Run Windsor on VMware vSphere. Terraform creates Talos Linux VMs in existing vCenter inventory, and Cilium assigns LoadBalancer IPs on the LAN.
 ---
 
-Windsor can place Talos Linux VMs on [VMware vSphere](https://www.vmware.com/products/cloud-infrastructure/vsphere) infrastructure you already run, then have Flux reconcile the `core` blueprint's services on top. The lifecycle is `init` → `bootstrap` → `apply` → `destroy`, the same as a cloud platform. For the concepts behind those verbs, see [Lifecycle](../provisioning/overview.md).
-
-vSphere is common for industrial and on-premises deployments with no public cloud reachable: plant networks, air-gapped-adjacent sites, and existing VMware estates. `cluster.driver` is always `talos`. vSphere has no managed Kubernetes offering to target instead.
+Windsor runs the [`core` blueprint](../blueprints/overview.md) on [VMware vSphere](https://www.vmware.com/products/cloud-infrastructure/vsphere). Terraform creates Talos Linux VMs through vCenter, and Flux installs the blueprint's services once Kubernetes is up. The blueprint replaces Talos's built-in flannel with Cilium, which networks the pods and assigns LoadBalancer IPs.
 
 ## Prerequisites
 
-vSphere is the one platform where Windsor reads existing inventory rather than creating it. Before you run anything, vCenter needs:
+Windsor doesn't create vCenter inventory. Set these up first:
 
-- A **datacenter**.
-- A **compute cluster** (a `ClusterComputeResource`) with at least one ESXi host joined to it. A host added directly to the datacenter, not inside a cluster, doesn't satisfy this. Put it in a cluster even if that cluster has just the one host.
-- A **datastore** and a **port group** reachable from that host.
-- The ESXi host needs outbound access to `factory.talos.dev` to pull the Talos OVA on first apply.
+- A datacenter.
+- A compute cluster with at least one ESXi host. Windsor can't use a standalone host.
+- A datastore and a port group that host can reach.
 
-Beyond the inventory:
+The ESXi host and the VMs must reach the internet. The host downloads the Talos OVA from `factory.talos.dev`, and the VMs pull container images from public registries. Air-gapped sites aren't yet supported.
 
-- vCenter credentials with permission to deploy and manage VMs.
-- Terraform (or OpenTofu) and `kubectl` on your `PATH`. Run [`windsor check`](https://www.windsorcli.dev/reference/cli/commands/check) to validate the toolchain.
-- A git repository for the project ([`windsor init`](https://www.windsorcli.dev/reference/cli/commands/init) refuses to scaffold outside one).
+On the machine that runs Windsor:
 
-To inspect or prepare inventory out of band, [`govc`](https://github.com/vmware/govmomi/tree/main/govc) reads the same credentials via `GOVC_URL`/`GOVC_USERNAME`/`GOVC_PASSWORD`/`GOVC_INSECURE`. Mirror your `vsphere.*` values into those.
+- vCenter credentials that can create VMs and folders.
+- Terraform (or OpenTofu) and `kubectl`. [`windsor check`](https://www.windsorcli.dev/reference/cli/commands/check) verifies these tools are available and meet the minimum version requirement.
+- A git repository for the project. [`windsor init`](https://www.windsorcli.dev/reference/cli/commands/init) refuses to scaffold outside one.
+
+To check inventory names before you write `values.yaml`, [`govc`](https://github.com/vmware/govmomi/tree/main/govc) works with the same vCenter credentials set as `GOVC_URL`, `GOVC_USERNAME`, `GOVC_PASSWORD`, and `GOVC_INSECURE`.
 
 ## What gets created
 
-Setting `platform: vsphere` selects the vSphere path in the `core` blueprint. Nothing here provisions inventory. It deploys VMs onto what you already have:
-
 ```mermaid
 flowchart TB
-  subgraph vC["vCenter · datacenter / cluster"]
-    subgraph VMs["VMs on existing datastore + port group"]
-      CP["Controlplane VM(s)"]
-      W["Worker VM(s)"]
+  subgraph vC["vCenter inventory (existing)"]
+    subgraph Folder["VM folder windsor-(context ID)"]
+      CP["control plane VM<br/>10.20.0.10"]
+      W["worker VMs<br/>10.20.0.20 and up"]
     end
   end
-
-  VMs --> Flux["Flux (GitOps)<br/>reconciles core add-ons"]
-  Flux --> Addons["cert-manager · gateway<br/>kube-vip or MetalLB (ARP)"]
+  Folder --> Cilium["Cilium<br/>pod network and LoadBalancer IPs"]
+  Cilium --> Flux["Flux<br/>core blueprint services"]
 ```
 
-VMs deploy from the Talos OVA using vSphere's guestinfo mechanism, the vSphere equivalent of cloud-init on AWS or Azure. The deploy generates machine secrets and machine config inline, so there's no separate config-generation step like Hyper-V needs.
+Terraform deploys each VM from a Talos OVA and writes its machine config into vSphere guestinfo, which Talos reads on first boot. The OVA includes the VMware Tools agent, so vCenter shows each VM's IP address. Terraform also installs Cilium, because Flux's pods can't start without a pod network. After that, Flux manages Cilium along with the rest of the blueprint.
 
 ## 1. Create the context
 
-```bash
-windsor init vsphere-prod --platform vsphere
-windsor set context vsphere-prod
-```
-
-## 2. Configure values
-
-Windsor exports `VSPHERE_SERVER`, `VSPHERE_USER`, and `VSPHERE_ALLOW_UNVERIFIED_SSL` from the `server`, `user`, and `insecure` keys of the `vsphere.*` block below. The password is not a config key. Provide it as `VSPHERE_PASSWORD` in your shell, or in the context's `environment` from a secrets provider such as [SOPS](../secrets/sops.md) or [1Password](../secrets/1password.md), so it never lands in `values.yaml`:
+`windsor init` reads the vSphere inventory keys when it sets up the blueprint, so write them first. Create `contexts/vsphere-prod/values.yaml`:
 
 ```yaml
 platform: vsphere
@@ -64,7 +53,10 @@ vsphere:
   datastore: datastore-01
   network: "VM Network"
 network:
-  cidr_block: 10.5.0.0/16
+  cidr_block: 10.20.0.0/24
+  loadbalancer_ips:
+    start: 10.20.0.200
+    end: 10.20.0.220
 cluster:
   controlplanes:
     count: 1
@@ -72,37 +64,81 @@ cluster:
     count: 2
 ```
 
-`datacenter`, `cluster`, `datastore`, and `network` are all required. Windsor refuses to compose the blueprint without them: there's no sensible default for infrastructure it doesn't own. Names must match vCenter's inventory exactly.
+Then create the context:
 
-As on Hetzner and Hyper-V, there's no `cluster.pools`. `cluster.controlplanes.count` and `cluster.workers.count` set node counts directly, sized by `cluster.{controlplanes,workers}.cpu`/`memory`. `topology` is inferred from those counts.
+```bash
+windsor init vsphere-prod --platform vsphere
+```
 
-Other common knobs:
+`init` adds the `core` blueprint, generates a context ID in `values.yaml`, and makes `vsphere-prod` the active context.
 
-| Key | Effect |
-|-----|--------|
-| `vsphere.folder` | VM folder path, relative to the datacenter root. Unset places VMs at the datacenter root. |
-| `vsphere.resource_pool` | Resource pool path, relative to the compute cluster. Unset uses the cluster's root pool. |
-| `vsphere.host_system` | Specific ESXi host to place VMs on. Required only when the datacenter has more than one host; a single-host datacenter auto-selects it. |
-| `observability.enabled: true` | Grafana, Prometheus, and the logging stack. |
+## 2. Configure values
+
+`datacenter`, `cluster`, `datastore`, and `network` are required and must match the names in vCenter exactly. If vCenter uses a self-signed certificate, add `vsphere.insecure: true`.
+
+The password doesn't go in `values.yaml`. Put it in `contexts/vsphere-prod/terraform/.env`, which Windsor keeps out of git and loads for Terraform runs:
+
+```text
+VSPHERE_PASSWORD=${secret("MyVault", "vsphere", "password")}
+```
+
+Use plain text or a [secret reference](../secrets/overview.md#provider-credentials-in-terraformenv). Windsor exports the other connection keys as `VSPHERE_SERVER`, `VSPHERE_USER`, and `VSPHERE_ALLOW_UNVERIFIED_SSL`.
+
+### Node addresses
+
+Nodes get static addresses from `network.cidr_block`. Control planes start at the 10th host (`10.20.0.10`) and workers at the 20th. The default route is the first host, and DNS goes to `1.1.1.1` and `8.8.8.8`. Set `network.gateway` or `network.nameservers` if your LAN differs.
+
+Every context uses the same offsets. A second context on the same subnet must list its own node addresses and its own load balancer range:
+
+```yaml
+network:
+  loadbalancer_ips:
+    start: 10.20.0.230
+    end: 10.20.0.240
+cluster:
+  controlplanes:
+    count: 1
+    nodes:
+      controlplane-1:
+        node: 10.20.0.110
+  workers:
+    count: 2
+    nodes:
+      worker-1:
+        node: 10.20.0.120
+      worker-2:
+        node: 10.20.0.121
+```
+
+Key each entry by its position in the pool (`controlplane-1`, `worker-2`), even when the pool has one node. Windsor doesn't check for addresses that overlap with another context.
+
+Each node defaults to 4 vCPUs and 8 GiB of memory, with a 30 GB root disk on control planes and 50 GB on workers. To change them, set `cpu`, `memory`, and `root_disk_size` under `cluster.controlplanes` or `cluster.workers`.
 
 ### Load balancing
 
-vSphere VMs get real routed IPs on your network, so an in-cluster load balancer works the way it would on bare metal. `kube-vip` in ARP mode is the usual choice for a plant network. It needs no switch configuration, just a reserved IP range on the same subnet as the nodes:
+Cilium hands out LoadBalancer addresses from `network.loadbalancer_ips`. For each address, one node answers ARP with its own MAC address. vSphere's default port group security policy allows that, so anything that can reach the node subnet reaches the address without switch changes. The internal gateway gets the first address.
 
-```yaml
-cluster:
-  cni:
-    driver: flannel
-network:
-  loadbalancer_driver: kube-vip
-  loadbalancer_ips:
-    start: 10.5.0.100
-    end: 10.5.0.120
-```
+Choose free addresses on the nodes' subnet, outside your DHCP scope and above the node addresses. Windsor's default range doesn't fit in a `/24` or smaller subnet, so set the range explicitly.
 
-The load balancer isn't installed under the default `cilium` CNI, so the example also sets `cluster.cni.driver` to `flannel`.
+The answering node receives all of that address's inbound traffic, and another node takes the address over if it fails. NSX SpoofGuard and dynamic ARP inspection on physical switches can drop these ARP replies. If your network uses either, allow the pool addresses on the node ports.
 
-MetalLB (also ARP mode) is supported as an alternative.
+### Storage
+
+Each VM gets one thin-provisioned disk. It holds Talos, container images, etcd on control planes, and persistent volumes, which OpenEBS creates as local volumes under `/var/mnt/local`. A volume stays on the node that created it, and destroying or removing that VM deletes the volume.
+
+Size the disks before the first `bootstrap`. Windsor sets `root_disk_size` only when it creates a VM. Put control planes on a low-latency datastore, such as SSD or vSAN flash, because etcd stalls when disk writes are slow.
+
+Longhorn and Mayastor require a second disk on each node, which these VMs don't have, so `cluster.storage.driver` stays at `openebs` on vSphere.
+
+### Other settings
+
+| Key | Effect |
+|-----|--------|
+| `vsphere.folder` | Existing VM folder, relative to the datacenter. If unset, Windsor creates `windsor-<id>`, named for the context ID. |
+| `vsphere.resource_pool` | Resource pool path, relative to the compute cluster. Defaults to the cluster's root pool. |
+| `vsphere.host_system` | ESXi host for the VMs. Required when the datacenter has more than one host. |
+| `network.dhcp: true` | Nodes take DHCP addresses, which VMware Tools reports back. For Cilium, also set `cluster.endpoint` to a fixed control-plane address. |
+| `observability.enabled: true` | Installs Grafana, Prometheus, and the logging stack. |
 
 ## 3. Bootstrap
 
@@ -110,26 +146,26 @@ MetalLB (also ARP mode) is supported as an alternative.
 windsor bootstrap vsphere-prod
 ```
 
-`bootstrap` deploys the VMs from the OVA, waits for vCenter Tools to report each guest's IP, then installs the Flux blueprint and waits for every kustomization to report ready.
+`bootstrap` deploys the VMs, bootstraps Kubernetes, and installs Cilium and Flux. Then it moves Terraform state into the cluster (see [State backend](../provisioning/state-backend.md)) and waits for every kustomization to report ready.
 
 ## 4. Verify
 
 ```bash
 kubectl get nodes                       # VMs Ready
 kubectl get kustomizations -A           # Flux reconciling
-windsor show blueprint                  # the fully composed blueprint
+kubectl get svc -A | grep LoadBalancer  # addresses from the pool
 ```
 
-`kubectl` uses the context's `KUBECONFIG`; prefix with [`windsor exec --`](https://www.windsorcli.dev/reference/cli/commands/exec) or install the [shell hook](../contexts/environment-injection.md) so it's exported automatically.
+`kubectl` uses the context's `KUBECONFIG`. Prefix commands with [`windsor exec --`](https://www.windsorcli.dev/reference/cli/commands/exec), or install the [shell hook](../contexts/environment-injection.md) to export it automatically.
 
 ## 5. Day-two changes
 
 ```bash
-windsor plan                            # summary across all components
+windsor plan
 windsor apply --wait
 ```
 
-Raising `cluster.workers.count` adds VMs on the next `apply`. There's no autoscaling group: each VM is a fixed Terraform resource sized by `cluster.workers.cpu`/`memory`.
+To add workers, raise `cluster.workers.count`. Each new VM takes the next address after the last worker.
 
 ## 6. Tear down
 
@@ -137,14 +173,16 @@ Raising `cluster.workers.count` adds VMs on the next `apply`. There's no autosca
 windsor destroy --confirm=vsphere-prod
 ```
 
-`destroy` removes the Flux kustomizations, then the VMs, in reverse order. Windsor never touches vCenter's own inventory (the datacenter, cluster, datastore, port group). It only ever reads it.
+`destroy` removes the Flux kustomizations, then the VMs and the folder Windsor created. It doesn't touch the datacenter, cluster, datastore, or port group.
 
 ## Troubleshooting
 
-- **`vsphere_compute_cluster` lookup fails.** The named cluster has to be an actual `ClusterComputeResource` in vCenter. A bare host added straight to the datacenter, outside any cluster, doesn't satisfy this. Wrap it in a cluster, even a single-host one.
-- **VMs never get an IP in [`windsor show`](https://www.windsorcli.dev/reference/cli/commands/show).** IPs come from `vmtoolsd` (VMware Tools) reporting back to vCenter. This needs the Talos OVA's bundled guest agent running, which can lag a boot or two. If it never resolves, confirm the ESXi host reached `factory.talos.dev` to pull the OVA in the first place.
-- **OVF deploy fails outbound.** The ESXi host itself needs the network path to `factory.talos.dev`, not the machine running `windsor`. This is a common gap in segmented plant networks.
-- **Composition fails demanding `vsphere.host_system`.** Set when the datacenter has more than one ESXi host; Windsor can't guess which one you mean.
+- **`windsor show blueprint` lists no Terraform components.** `init` ran before the required `vsphere.*` keys were set, so the context has no `core` blueprint. Run `windsor init vsphere-prod --platform vsphere --reset`. Your `values.yaml` is kept.
+- **The `vsphere_compute_cluster` lookup fails.** `vsphere.cluster` must name a compute cluster, not a standalone host. Add the host to a cluster. A one-host cluster works.
+- **The `vsphere_host` lookup fails.** The datacenter has more than one ESXi host. Set `vsphere.host_system` to pick one.
+- **The OVA deploy fails or times out.** The ESXi host can't reach `factory.talos.dev`. Segmented plant networks often block it.
+- **Pods stay in `ImagePullBackOff`.** The VMs can't reach public container registries. Check the port group's outbound route, and set `network.nameservers` if the LAN blocks `1.1.1.1` and `8.8.8.8`.
+- **A LoadBalancer Service stays `<pending>`, or its address doesn't answer.** Check that `network.loadbalancer_ips` sits inside `network.cidr_block`. If it does, look for NSX SpoofGuard or ARP inspection dropping the node's ARP replies.
 
 ## Where to next
 
