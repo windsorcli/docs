@@ -43,7 +43,8 @@ metadata.
 
 4. **Plain markdown only.** No MDX components, no JSX, no Astro
    shortcodes. The website's renderer supports them; an agent
-   fetching the raw `.md` does not.
+   fetching the raw `.md` does not. GitHub alerts (`> [!NOTE]`) are
+   allowed: they read as a blockquote in raw markdown.
 
 5. **Stable headings.** Renaming `## Anatomy` to `## How it works`
    breaks every deep-link to `#anatomy`. Treat heading text as part
@@ -55,6 +56,11 @@ metadata.
    instead.
 
 7. **Code fences declare a language.** markdownlint MD040 enforces.
+
+8. **Textbook register.** Pages read like a technical book: problem,
+   example, mechanism, then the general rule. Terms are defined before
+   use, and section overviews work as chapter introductions. See
+   [ADR 0002](adrs/0002-textbook-voice.md).
 
 Run quality checks before pushing — `markdownlint`, `vale`, `cspell`,
 `lychee`, `alex`. See [CONTRIBUTING.md](CONTRIBUTING.md) for the local

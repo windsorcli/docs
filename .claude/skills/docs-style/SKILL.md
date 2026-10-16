@@ -41,6 +41,43 @@ Both fields are required, and `description:` is capped at 160
 characters. CI rejects pages missing either, or with overlong
 descriptions.
 
+## The textbook register
+
+Write like a good technical book, not a reference manual.
+[ADR 0002](../../../adrs/0002-textbook-voice.md) is the source; these
+are the rules to draft against.
+
+- **Problem → example → mechanism → rule.** Open a concept section with
+  what the reader can't do without the concept, in one or two sentences
+  tied to a real scenario. Show the smallest real listing or command.
+  Walk through what Windsor does with the parts that matter. Then state
+  the general rule and link to where the rest lives.
+- **Paragraphs carry the explanation.** Topic sentence first. Each
+  paragraph builds on the last instead of redefining the same thing
+  (the circular re-definition tell). A table or list is for lookup
+  material only: four or more parallel items the reader scans, like
+  modules per platform.
+- **Define each term once, at first use, in *italics*.** Plain words,
+  one sentence. If the section overview already defines it, link the
+  first use to that definition instead.
+- **Never use a concept before introducing it.** Read the draft top to
+  bottom and check that every term, key, or file is introduced before
+  a sentence depends on it.
+- **Sections read like chapters.** The section `overview.md` introduces
+  the core terms in the order the child pages build on them. A child
+  page may assume those terms. Pages still stand alone through links,
+  never through "as we saw."
+- **One running example per section** where it fits: the same context
+  name, platform, and values on every page that refers to it. Take it
+  from `core` or a validated run.
+- **Introduce every listing with a full sentence** that names what it
+  shows, not a bare colon or "the following." Afterward, explain the
+  lines that matter by naming the key. Never "the code above."
+- **"You" for the reader; no authorial "we."**
+- **Callouts for asides.** An aside that would interrupt the main line
+  goes in a GitHub alert (see [Callouts](#callouts)), not a
+  parenthetical or a trailing clause.
+
 ## Pages stand alone
 
 Agents and search results fetch single pages, not whole sections.
@@ -60,8 +97,8 @@ Three rules that follow from that:
 This repo's pages are vendored into Astro, which supports MDX
 components. But raw `.md` fetches don't get the renderer. Stick
 to portable syntax: CommonMark, GFM tables, fenced code blocks,
-mermaid, frontmatter, and the small HTML set markdownlint allows
-(`<details>`, `<kbd>`, `<sup>`, `<br>`, `<img>`).
+mermaid, frontmatter, GitHub alerts, and the small HTML set
+markdownlint allows (`<details>`, `<kbd>`, `<sup>`, `<br>`, `<img>`).
 
 If a section *only* renders on the website, the agent reading it
 sees broken markup.
@@ -116,9 +153,10 @@ The register shifts by page type (the types in
   mechanism first: "Windsor walks up the tree looking for
   `windsor.yaml`." Precise and unhurried, no second-person
   hand-holding.
-- **Section overviews — explanation.** Lead with the idea, not a
-  command: one strong definition sentence, then the structure of the
-  thing.
+- **Section overviews — explanation.** These are chapter
+  introductions. Lead with the problem the section solves, then
+  introduce the section's terms in the order its pages build on them,
+  each with a short example. End with links to the child pages.
 
 ### The anti-voice — don't write like an LLM
 
@@ -213,6 +251,12 @@ not the content. The overview lead below is the docs owner's own
 writing — when a generated draft and these samples disagree, the
 owner's prose wins.
 
+These samples calibrate the sentence. None of them shows a whole
+section in the [textbook register](#the-textbook-register) yet; the
+first section the docs owner approves after ADR 0002 goes here as the
+fourth sample. Until then, check section structure against the
+register's rules, not against these excerpts.
+
 ### Guide tier (how-to) — [`contexts/lifecycle.md`](../../../content/contexts/lifecycle.md)
 
 > Host networking and DNS need elevation, which `up` does not request
@@ -302,7 +346,10 @@ for the full list.
 - [Reference](https://www.windsorcli.dev/reference/cli/...)
 ````
 
-Drop a section if a page genuinely doesn't need it. Don't pad.
+Drop a section if a page genuinely doesn't need it. Don't pad. The
+skeleton is a menu of headings, not a form: a concept page can be a
+lead plus a few concept sections written in the
+[textbook register](#the-textbook-register).
 
 ## Link conventions
 
@@ -330,6 +377,29 @@ Drop a section if a page genuinely doesn't need it. Don't pad.
   `windsor init <context>`.
 - Show output when output is the point. Hide it otherwise.
 - Long output goes in `<details>` with a one-line `<summary>`.
+- Introduce each listing with a sentence that names what it shows. A
+  trimmed listing says so and links to the full file.
+
+## Callouts
+
+GitHub alerts hold asides. Raw markdown shows them as a blockquote,
+GitHub renders them natively, and the website renders them through
+`src/lib/remark-github-alerts.mjs`.
+
+```markdown
+> [!NOTE]
+> `backend/s3` only appears when Windsor manages the state bucket.
+```
+
+- `NOTE`: context the reader can skip without going wrong.
+- `TIP`: a faster way to do what the text just described.
+- `IMPORTANT`: a requirement the step depends on.
+- `WARNING`: destroys data or breaks a running cluster.
+- `CAUTION`: cannot be undone.
+
+The `[!TYPE]` marker sits alone on the first line. One point per
+callout, never two back to back, and rarely more than two or three on
+a page.
 
 ## Mermaid
 

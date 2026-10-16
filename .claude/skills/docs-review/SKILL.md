@@ -165,6 +165,20 @@ Skim each changed page against the canonical structure:
 A page may genuinely not need every section. But if a page is missing
 a *lead*, that's always a problem.
 
+Then check the [textbook register](../docs-style/SKILL.md#the-textbook-register)
+from [ADR 0002](../../../adrs/0002-textbook-voice.md):
+
+- Read top to bottom. Flag any term, key, or file a sentence depends on
+  before the page introduces it (`should-fix`).
+- Flag a concept section that opens on mechanism with no problem or
+  example in front of it (`consider`).
+- Flag a table or list that replaces an explanation of how its items
+  relate (`consider`).
+- Flag a listing introduced by a bare colon, "the following," or a
+  positional reference like "the code above" (`should-fix`).
+- Flag a callout whose `[!TYPE]` marker isn't alone on its first line,
+  or two callouts back to back (`should-fix`).
+
 For the how-to + explanation pages,
 [ADR 0001](../../../adrs/0001-guide-first-two-tier-pages.md) sets the
 two-tier structure: guide tier first, then a `## Under the hood` seam

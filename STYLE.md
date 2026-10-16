@@ -32,9 +32,33 @@ punctuation and keeps the tell. See
 [`docs-style`](.claude/skills/docs-style/SKILL.md) (the anti-voice
 section) for the full catalog and worked examples.
 
+### Textbook register
+
+Pages read like a technical book, not a reference manual.
+[ADR 0002](adrs/0002-textbook-voice.md) has the full rules; the short
+version:
+
+- **Problem, example, mechanism, rule.** A concept section says what
+  the reader can't do without the concept, shows the smallest real
+  example, walks through what Windsor does with it, and then states the
+  general rule.
+- **Paragraphs explain; tables look things up.** Use a table or list
+  only for four or more parallel items the reader scans. Never let one
+  stand in for how its rows relate.
+- **Define a term once, at first use, in *italics*.** Later uses on the
+  page don't redefine it. A term the section overview defines is a link
+  on its first use, not a second definition.
+- **"You" for the reader, the system as subject in explanation.** No
+  authorial "we."
+- **Sections read in order.** The section `overview.md` is the chapter
+  introduction; child pages may assume its terms and link back to them.
+
 ## 2. Page structure
 
-A general page (overview, how-to, concept) follows this structure:
+The skeleton below lists the headings a general page can use, in the
+order they appear. It is a menu, not a form to fill: a concept page may
+be a lead and three concept sections, and the prose inside each section
+follows the [textbook register](#textbook-register).
 
 ````markdown
 ---
@@ -118,6 +142,33 @@ truncate at that point.
   values, use angle-bracket placeholders: `windsor init <context>`.
 - Show output when the output is the point. Hide it when it's noise.
 - Long output goes in `<details>` with a one-line `<summary>`.
+- Introduce a listing with a complete sentence that names what it
+  shows: "`platform-aws.yaml` declares two Terraform components and one
+  Flux system." Don't end the sentence on a bare colon, and don't point
+  by position ("the code above"). After the listing, explain the lines
+  that matter by naming the key.
+
+## 5a. Callouts
+
+Put an aside that would interrupt the explanation in a GitHub alert:
+
+```markdown
+> [!WARNING]
+> `windsor destroy` removes the cluster and its volumes.
+```
+
+| Type        | Use for                                                   |
+| ----------- | --------------------------------------------------------- |
+| `NOTE`      | Context the reader can skip without going wrong           |
+| `TIP`       | A faster or easier way to do what the text described      |
+| `IMPORTANT` | A requirement the reader must meet for the step to work   |
+| `WARNING`   | An action that destroys data or breaks a running cluster  |
+| `CAUTION`   | An action that cannot be undone                           |
+
+One point per callout, never two callouts back to back, and rarely more
+than two or three per page. The `[!TYPE]` marker sits alone on the first
+line. GitHub renders alerts natively, the website renders them with
+`src/lib/remark-github-alerts.mjs`, and raw markdown shows a blockquote.
 
 ## 6. Mermaid
 
@@ -140,6 +191,9 @@ Agents, search results, and "Open in Claude"-style links fetch
 read top-to-bottom. Every page should make sense to a reader who
 arrives via a deep link.
 
+- **Sections read in order, pages still stand alone.** A child page may
+  assume the terms its section overview defines, and links to the
+  definition on first use instead of restating it.
 - **No forward references.** Don't write `as we'll see below` or
   `as discussed above` — the section the reader came from may not
   be there. Vale's `Windsor.ForwardReferences` rule flags these.
@@ -162,8 +216,8 @@ MDX components, but agents and tools fetching the raw markdown
 get plain text. Stick to portable syntax:
 
 - **Yes:** CommonMark, GFM tables, fenced code blocks, mermaid
-  blocks, frontmatter, HTML allowed by markdownlint (`<details>`,
-  `<kbd>`, `<sup>`, `<br>`, `<img>`).
+  blocks, frontmatter, GitHub alerts (`> [!NOTE]`), HTML allowed by
+  markdownlint (`<details>`, `<kbd>`, `<sup>`, `<br>`, `<img>`).
 - **No:** MDX components, JSX, custom Astro shortcodes, anything
   that requires the website's renderer to make sense.
 
