@@ -43,9 +43,8 @@ descriptions.
 
 ## The textbook register
 
-Write like a good technical book, not a reference manual.
-[ADR 0002](../../../adrs/0002-textbook-voice.md) is the source; these
-are the rules to draft against.
+Write like a good technical book, not a reference manual. These are
+the rules to draft against.
 
 - **Problem → example → mechanism → rule.** Open a concept section with
   what the reader can't do without the concept, in one or two sentences
@@ -118,6 +117,49 @@ Banned words (Vale enforces — `styles/Windsor/MarketingWords.yml`):
 Hedges to drop: `basically`, `just`, `really`, `simply`,
 `essentially`, `obviously`, `clearly`, `of course`.
 
+## Reader baseline
+
+Write for a power user who can `sudo`. Assume the reader:
+
+- is fluent in a shell: editing `~/.zshrc`, running `sudo`, reading
+  command output. Don't explain a shell hook or an environment variable.
+- can run `kubectl` and read its output. Still explain Flux, Kustomize,
+  and Talos specifics.
+- understands a container but has never built one. Explain image
+  builds, runtimes, and anything Windsor does to a container that the
+  reader wouldn't predict.
+- has probably not written Terraform. Explain state, modules, and the
+  generated module shims when a page depends on them.
+
+This tells you where to stop explaining. It is not an audience label to
+repeat in prose.
+
+## Page types
+
+Name what a page is for before you structure it. This repo carries
+three types; reference, the fourth, lives in `windsorcli/cli` and
+`windsorcli/core`.
+
+- **Tutorial**: learning by guided doing (`getting-started/`).
+- **How-to**: getting a task done when the reader already understands
+  it (`deployment/`, most of `workstation/`).
+- **Explanation**: the why and the bigger picture (`overview.md`
+  pages, concept pages).
+
+Each page serves one primary type. A page that is really an
+input-by-input reference table belongs in `core`; flag it instead of
+restyling it.
+
+### Two-tier pages
+
+A page that is both how-to and explanation has two tiers at one URL.
+The guide tier comes first and carries every command the reader runs.
+Then a `## Under the hood` heading, with that exact text, starts the
+mechanism: flags, environment variables, control flow, file layout. A
+reader who stops at the seam already has what they came for. The
+under-the-hood tier restates which command or context it covers so a
+deep link to it still makes sense. Short pure how-tos skip the seam.
+
 ## Voice persona
 
 Pick the voice before you pick the words. Write as one experienced
@@ -143,8 +185,7 @@ extends the **Microsoft Writing Style Guide** (see `.vale.ini`); the
 government guides like **GOV.UK** are good public references for the
 same register.
 
-The register shifts by page type (the types in
-[ADR 0001](../../../adrs/0001-guide-first-two-tier-pages.md)):
+The register shifts by [page type](#page-types):
 
 - **Guide tier — how-to and tutorial.** Second person, present tense,
   the task in the verb: "You run `windsor up`, and the cluster comes
@@ -237,15 +278,13 @@ the Rails getting-started guide — actually make. They're checkable:
   medium-length sentences is the deepest AI tell — deeper than any
   single word.
 - **One idea per page; link out for the rest.** Don't fold reference
-  detail into a how-to. The two-tier seam from
-  [ADR 0001](../../../adrs/0001-guide-first-two-tier-pages.md) is
-  where the extra detail goes.
+  detail into a how-to. The [two-tier seam](#two-tier-pages) is where
+  the extra detail goes.
 
 ## Calibration samples
 
 Rules tell you what to avoid; samples tell you what to hit. These
-three excerpts are one per register from
-[ADR 0001](../../../adrs/0001-guide-first-two-tier-pages.md). Read the
+three excerpts are one per register in [page types](#page-types). Read the
 matching one before you write that page type, and match the *rhythm*,
 not the content. The overview lead below is the docs owner's own
 writing — when a generated draft and these samples disagree, the
@@ -253,8 +292,8 @@ owner's prose wins.
 
 These samples calibrate the sentence. None of them shows a whole
 section in the [textbook register](#the-textbook-register) yet; the
-first section the docs owner approves after ADR 0002 goes here as the
-fourth sample. Until then, check section structure against the
+first section the docs owner approves in that register goes here as
+the fourth sample. Until then, check section structure against the
 register's rules, not against these excerpts.
 
 ### Guide tier (how-to) — [`contexts/lifecycle.md`](../../../content/contexts/lifecycle.md)

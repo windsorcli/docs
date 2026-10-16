@@ -34,9 +34,7 @@ section) for the full catalog and worked examples.
 
 ### Textbook register
 
-Pages read like a technical book, not a reference manual.
-[ADR 0002](adrs/0002-textbook-voice.md) has the full rules; the short
-version:
+Pages read like a technical book, not a reference manual:
 
 - **Problem, example, mechanism, rule.** A concept section says what
   the reader can't do without the concept, shows the smallest real
@@ -52,6 +50,8 @@ version:
   authorial "we."
 - **Sections read in order.** The section `overview.md` is the chapter
   introduction; child pages may assume its terms and link back to them.
+- **One running example per section** where it fits: the same context
+  name, platform, and values on every page that refers to it.
 
 ## 2. Page structure
 

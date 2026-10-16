@@ -60,7 +60,7 @@ metadata.
 8. **Textbook register.** Pages read like a technical book: problem,
    example, mechanism, then the general rule. Terms are defined before
    use, and section overviews work as chapter introductions. See
-   [ADR 0002](adrs/0002-textbook-voice.md).
+   [STYLE.md](STYLE.md#textbook-register).
 
 Run quality checks before pushing — `markdownlint`, `vale`, `cspell`,
 `lychee`, `alex`. See [CONTRIBUTING.md](CONTRIBUTING.md) for the local
