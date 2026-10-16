@@ -136,7 +136,7 @@ Then read the rest of the changed prose and flag:
   beats chatty.
 - **Docs-specific tells:** bulleting what should be one sentence;
   over-explaining a step the
-  [reader baseline](../../../adrs/0001-guide-first-two-tier-pages.md)
+  [reader baseline](../docs-style/SKILL.md#reader-baseline)
   already knows; rule-of-three lists where the third item is padding;
   "not just X, but Y"; the word "shape" where structure, layout,
   format, schema, or signature is meant; em-dashes in prose (only
@@ -165,9 +165,22 @@ Skim each changed page against the canonical structure:
 A page may genuinely not need every section. But if a page is missing
 a *lead*, that's always a problem.
 
-For the how-to + explanation pages,
-[ADR 0001](../../../adrs/0001-guide-first-two-tier-pages.md) sets the
-two-tier structure: guide tier first, then a `## Under the hood` seam
+Then check the [textbook register](../docs-style/SKILL.md#the-textbook-register):
+
+- Read top to bottom. Flag any term, key, or file a sentence depends on
+  before the page introduces it (`should-fix`).
+- Flag a concept section that opens on mechanism with no problem or
+  example in front of it (`consider`).
+- Flag a table or list that replaces an explanation of how its items
+  relate (`consider`).
+- Flag a listing introduced by a bare colon, "the following," or a
+  positional reference like "the code above" (`should-fix`).
+- Flag a callout whose `[!TYPE]` marker isn't alone on its first line,
+  or two callouts back to back (`should-fix`).
+
+For the how-to + explanation pages, check the
+[two-tier structure](../docs-style/SKILL.md#two-tier-pages): guide tier
+first, then a `## Under the hood` seam
 (that exact text; it's part of the page API) before the mechanism. A
 reader who stops at the seam should already have what they came for.
 Don't require the seam on a short pure how-to.
