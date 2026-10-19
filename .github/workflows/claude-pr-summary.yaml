@@ -65,7 +65,6 @@ jobs:
       - uses: anthropics/claude-code-action@51ea8ea73a139f2a74ff649e3092c25a904aed7e # v1.0.123
         env:
           PR_NUMBER: ${{ steps.pr.outputs.number }}
-          PR_HEAD_SHA: ${{ steps.pr.outputs.head_sha }}
           BASE_REF: ${{ steps.pr.outputs.base_ref }}
           GH_REPO: ${{ github.repository }}
           STICKY_MARKER: "<!-- claude-pr-summary -->"
@@ -83,6 +82,7 @@ jobs:
             already in the body, replacing only an existing block with
             the same marker):
 
+              <!-- claude-pr-summary -->
               > [!NOTE]
               >
               > **{Low|Medium|High} Risk**
@@ -96,15 +96,15 @@ jobs:
               >
               > {Optional second paragraph on notable behavioral or
               > structural detail.}
-              >
-              > Summarized by Claude for commit `<first 7 chars of PR_HEAD_SHA>`.
 
               <!-- /claude-pr-summary -->
 
             Hard rules: prose paragraphs only, no bullet lists, no file
             enumerations, under ~150 words. Calm and specific. No
-            emojis. The summary should let a reviewer scan in ~15
-            seconds and know the shape of the change.
+            emojis. Do not sign or attribute the block: no "Summarized
+            by" line and no mention of Claude or AI. The summary should
+            let a reviewer scan in ~15 seconds and know the shape of the
+            change.
 
             Risk level: Low for isolated, reversible changes; Medium
             for changes to shared infra/CI/conventions or to the
