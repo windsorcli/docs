@@ -36,15 +36,15 @@ Each context picks up the template through the `sources:` list in its own `bluep
 
 ### Values and schema
 
-Each context records its settings, its *values*, in `contexts/<name>/values.yaml`. For these two contexts the settings that matter are the platform keys. `local` runs on Docker through Colima, so its file sets the platform and the workstation runtime.
+A context's settings are its *values*. You write them in `contexts/<name>/values.yaml`, and `windsor init` records a few on its own, such as the platform of a workstation context. For these two contexts the values that matter are the platform keys. `local` runs on Docker through Docker Desktop, so `init` sets its platform and workstation runtime.
 
 ```yaml
 platform: docker
 workstation:
-  runtime: colima
+  runtime: docker-desktop
 ```
 
-`production` runs on AWS, so its file sets the platform and a region.
+`production` runs on AWS, and its `values.yaml` sets the platform and a region.
 
 ```yaml
 platform: aws
@@ -52,7 +52,7 @@ aws:
   region: us-east-1
 ```
 
-The blueprint's `schema.yaml` is a JSON Schema for these files. Windsor validates each context's values against it before performing any work. [Schema](schema.md) covers this file in more detail.
+The blueprint's `schema.yaml` is a JSON Schema for these values. Windsor validates each context's values against it before performing any work. [Schema](schema.md) covers this file in more detail.
 
 ### Facets
 
