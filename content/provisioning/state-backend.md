@@ -14,7 +14,7 @@ When you do not set a backend, `--platform` picks a default:
 | `aws`                                                      | `s3`                                                                       |
 | `azure`                                                    | `azurerm`                                                                  |
 | `gcp`                                                      | `gcs`                                                                      |
-| `metal`, `docker`, `incus`, `hetzner`, `hyperv`, `vsphere` | `kubernetes` (each component's state is stored as a Secret in the cluster) |
+| `metal`, `docker`, `incus`, `hetzner`, `hyperv`, `vsphere`, `proxmox` | `kubernetes` (state is stored as Secrets in the cluster; see [Kubernetes backend](#kubernetes-backend)) |
 | `none`, unset                                              | not defaulted (effectively `local`)                                        |
 
 To change it, set `terraform.backend.type` in `values.yaml` to `local`, `s3`, `azurerm`, `gcs`, or `kubernetes`. You can also pass `--backend` to `init` or `--set terraform.backend.type=...` to `bootstrap`.
@@ -84,7 +84,7 @@ Windsor's bootstrapping flow handles the chicken-or-egg problem with terraform s
 1. Phase 1 sets `terraform.backend.type` to `local` in memory and applies the backend component and any component declared before it. This creates the remote state store, usually an object store.
 2. Phase 2 restores the configured backend type and runs `terraform init -migrate-state -force-copy` for those components. This moves their state to the remote store.
 
-The remaining components then initialize directly against the remote backend.
+The remaining components then initialize directly against the remote backend. The blueprint's `backend:` field decides which component is the backend component; see [The `backend` field](../blueprints/templates.md#the-backend-field).
 
 If you allow the default backend to be created, it will generate `contexts/<name>/backend.tfvars`. This file holds the store's connection settings, such as the bucket and region on AWS. Windsor passes the file to `terraform init` for every other component. This file should be checked in to source control.
 
@@ -104,6 +104,26 @@ windsor bootstrap                    # current context
 windsor bootstrap staging            # switch context, then bootstrap
 windsor bootstrap --platform aws --blueprint ghcr.io/org/blueprint:v1.2.0
 ```
+
+## Kubernetes backend
+
+On the Talos platforms, Windsor stores Terraform state in the cluster itself. Each component gets its own Secret in the `default` namespace, named after the component, such as `tfstate-default-cluster`.
+
+This is the same chicken-or-egg problem that [Bootstrap](#bootstrap) solves. The state needs the cluster, but Terraform builds the cluster. Windsor builds the cluster using local state, then moves the state into the cluster once it's running.
+
+Destroy works in reverse. Windsor copies all of the state back to your machine first, then tears everything down using that local copy. If a destroy fails partway through, run it again from the same machine. You can't destroy the `cluster` component by itself, since everything else's state lives on it.
+
+```mermaid
+flowchart LR
+  Start["destroy"] --> Pull["copy all state<br/>cluster → local"]
+  Pull --> Plan["plan and confirm"]
+  Plan --> Flux["remove<br/>Flux kustomizations"]
+  Flux --> TF["destroy Terraform<br/>reverse order"]
+  TF --> Cluster["destroy cluster<br/>and machines last"]
+  TF -.->|failure| Rerun["rerun destroy<br/>from the local copy"]
+```
+
+Storing state inside the infrastructure it manages is usually considered an anti-pattern. Windsor does it here because the cluster is the one state store available without a cloud provider, and for many deployments, production included, it's a sound choice. The trade-off is that if you lose the cluster, you lose its state too. Where that risk matters, use a cloud backend such as S3, Azure Storage, or GCS. See [Use an existing backend](#use-an-existing-backend).
 
 ## State locks
 

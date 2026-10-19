@@ -27,10 +27,11 @@ windsor destroy --confirm=staging     # cloud or metal: slow but orderly
 
 ## Safety and concurrency
 
-`destroy` has two safety behaviors:
+`destroy` has three safety behaviors:
 
 - If a Terraform resource carries `lifecycle { prevent_destroy = true }`, `destroy` warns the run may halt partway through. It does not override the protection; remove the lifecycle block in HCL to actually destroy.
 - By default `destroy` aborts on the first component failure. `--continue` keeps going, collects failures, and prints a one-line summary. It is layer-wide only; Windsor refuses it when given a component argument. When a non-tier component stays un-destroyed or a Flux kustomization fails to delete, `destroy` defers the backend tier so it doesn't remove the [state store](state-backend.md) out from under components that still depend on it. Rerun to converge.
+- With a [Kubernetes backend](state-backend.md#kubernetes-backend), `destroy` copies all Terraform state back to your machine before it starts. If it fails partway through, run it again from the same machine.
 
 To read more about safety from concurrent runs, see [Locking](overview.md#locking).
 
