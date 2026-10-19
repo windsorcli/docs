@@ -50,6 +50,25 @@ kustomize:
 
 Context-specific `blueprint.yaml` files (for example, `contexts/local/blueprint.yaml`) can extend or override this base.
 
+### The `backend` field
+
+The top-level `backend:` field names the Terraform component that creates the state backend. On `up`, Windsor applies that component, and every Terraform component declared before it, using local state, then moves their state into the backend. On `destroy`, those components are removed last. [State backend](../provisioning/state-backend.md#bootstrap) covers the full flow.
+
+A blueprint that builds a Talos cluster on Docker and keeps its state in that cluster names the cluster component:
+
+```yaml
+backend: cluster
+terraform:
+  - name: compute
+    path: compute/docker
+  - name: cluster
+    path: cluster/talos
+```
+
+Declaration order decides what goes with the backend component, not `dependsOn`. Anything listed before it is applied on local state too, so keep those components at the top of the list. A facet can set `backend:` as well, and when two facets set it, the one with the higher [ordinal](facets.md#ordinals) wins. Windsor rejects a `backend:` that names a component that doesn't exist.
+
+You only need `backend:` when the blueprint creates its own state store: a cloud bucket, or the cluster itself for the `kubernetes` backend. With the `kubernetes` backend and no `backend:` set, `windsor up` stops before the cluster exists and asks you to add one.
+
 ## schema.yaml
 
 JSON Schema that validates the user's `values.yaml` and supplies defaults for missing keys.
