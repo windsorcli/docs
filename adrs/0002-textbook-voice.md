@@ -1,6 +1,6 @@
 # ADR 0002 — Textbook voice and chapter-order sections
 
-- **Status:** Proposed
+- **Status:** Accepted
 - **Date:** 2026-10-16
 - **Deciders:** Ryan
 - **Amends:** [ADR 0001](0001-guide-first-two-tier-pages.md), sections 3 and 5
