@@ -1,38 +1,46 @@
 ---
 title: Facets
-description: Conditional blueprint composition from configuration.
+description: How a facet adds components to a blueprint when a context's values match, and how config blocks share computed values between facets.
 ---
 
-**Facets** are YAML files under `contexts/_template/facets/` that add or modify blueprint content based on configuration (for example, platform, feature flags). They let one template support multiple environments and options without duplicating the base blueprint.
+The `core` template has one facet per platform, from AWS to vSphere, but each context runs on only one of them. `production` on AWS needs a VPC and an EKS cluster, and `local` on Docker needs neither. A [*facet*](overview.md#facets) is a file in the template that adds components only when its `when:` condition is true for the current context. This page covers how Windsor loads, orders, and merges facets.
 
 ## Overview
 
-- Loaded from `_template/facets/*.yaml` and `_template/facets/**/*.yaml`.
-- Ordered by ordinal (ascending), then by name.
-- Each facet has a `when` expression; when it evaluates to true, that facet's Terraform components, Kustomizations, Flux systems, and [config blocks](#config-blocks) are merged.
+Windsor loads every file that matches `_template/facets/*.yaml` or `_template/facets/**/*.yaml` and sorts the facets by [ordinal](#ordinals), lowest first, then by name. It evaluates each facet's `when:` expression against the context's values. For each facet whose condition is true, Windsor merges its Terraform components, Kustomizations, Flux systems, and [config blocks](#config-blocks) into the blueprint.
 
 ## Example
+
+[`platform-aws.yaml`](https://github.com/windsorcli/core/blob/main/contexts/_template/facets/platform-aws.yaml) in `core` adds the AWS network and cluster. This listing trims it to the `network` and `cluster` entries, with two inputs each.
 
 ```yaml
 kind: Facet
 apiVersion: blueprints.windsorcli.dev/v1alpha1
 metadata:
-  name: aws-facet
-  description: AWS-specific infrastructure
+  name: aws
 when: platform == 'aws'
 terraform:
-  - path: network/vpc
-    source: core
+  - name: network
+    path: network/aws-vpc
     inputs:
-      cidr: ${network.cidr_block ?? "10.0.0.0/16"}
-    strategy: merge
+      cidr_block: ${network.cidr_block}
+      domain_name: ${dns.private_domain ?? ""}
+  - name: cluster
+    path: cluster/aws-eks
+    dependsOn:
+      - network
+    inputs:
+      vpc_id: ${terraform_output('network', 'vpc_id')}
+      private_subnet_ids: ${terraform_output('network', 'private_subnet_ids')}
 ```
 
-When `platform` is `aws`, the VPC Terraform component from `core` is included. Expressions can reference [schema](schema.md) properties and `terraform_output()` for cross-component values.
+For `production`, `platform` is `aws`, so the top-level `when:` is true and both entries join its blueprint. `${network.cidr_block}` reads the CIDR from `production`'s values. When a context sets no `dns.private_domain`, the `??` operator supplies an empty string instead. The `cluster` entry reads two outputs of `network` through `terraform_output()`, and its `dependsOn` makes Windsor apply `network` first.
+
+An expression in a facet can read any value that the [schema](schema.md) declares, any config block from a facet that composes before it, and another Terraform component's outputs through `terraform_output()`. [Expressions](expressions.md) lists the operators and functions.
 
 ## Config blocks
 
-A `config:` entry computes a named value from expressions and exposes it at scope root, alongside `values.yaml` properties like `cluster.driver`, so `terraform:` inputs, `kustomize:` substitutions, and other facets' own expressions can reference it the same way. This is different from a `values.yaml` default: a schema default is only visible where the property itself is read, but a config block's value is visible to *every* facet that composes after it, including facets from a different blueprint source. That cross-facet visibility is the reason this mechanism exists. See [Schema](schema.md) for `values.yaml` properties and their defaults.
+Some settings depend on other settings. On AWS, the public ClusterIssuer depends on DNS: with a public zone, cert-manager can use ACME through Route 53, and without one it uses a self-signed issuer. A *config block* computes a value like this once, under a name, from expressions. These two blocks from `platform-aws.yaml` compute `pki_effective`.
 
 ```yaml
 config:
@@ -40,28 +48,27 @@ config:
     value:
       issuer_component: public-issuer/selfsigned
   - name: pki_effective
-    when: (dns.public_domain ?? '') != ''
+    when: >-
+      dns_zone_effective.enabled == true && (pki.public_issuer ?? 'acme') != 'selfsigned'
     value:
       issuer_component: public-issuer/acme/route53
-  - name: pki_effective
-    when: gateway.access == 'private' && (dns.private_domain ?? '') != ''
-    value:
-      issuer_component: ""
 ```
 
-Three blocks share the name `pki_effective` here, each contributing under its own `when:`. A scalar or list value is read as `${pki_effective}`; a map value like this one is read key by key (`${pki_effective.issuer_component}`) from a `terraform:` input, a `kustomize:` substitution, or another config block's own `value:`.
+The first block has no `when:`, so it always applies and sets the self-signed issuer. The second applies when the context has a public DNS zone and `pki.public_issuer` is not `selfsigned`. It comes later, so its `issuer_component` wins. A scalar or list value is read as `${pki_effective}`. A map value like this one is read key by key, as `${pki_effective.issuer_component}`, from a `terraform:` input, a `kustomize:` substitution, or another config block's `value:`.
+
+Windsor exposes a config block's value at the scope root, alongside `values.yaml` properties such as `cluster.driver`, so every expression reads both the same way. A schema default works differently: it is visible only where the property itself is read. A config block's value is visible to every facet that composes after it, including facets from a different blueprint source, and that visibility across facets is the reason config blocks exist. [Schema](schema.md) covers `values.yaml` properties and their defaults.
 
 ### Merge precedence
 
-Within one facet, matching blocks with the same name apply in order. Map values deep-merge; for a scalar or list, the last block whose `when:` matches wins, as in the `pki_effective` example above. Across facets, the higher ordinal takes precedence, the same rule `terraform:` and `kustomize:` entries follow (see [Ordinals](#ordinals)), and the default `merge` strategy deep-merges maps the same way. `strategy: replace` or `strategy: remove` change that for one block; `merge` is right for almost every case.
+Within one facet, matching blocks with the same name apply in order. Map values deep-merge, and for a scalar or list the last block whose `when:` matches wins. Across facets, the higher [ordinal](#ordinals) takes precedence, which is the same rule that `terraform:` and `kustomize:` entries follow, and the default `merge` strategy deep-merges maps the same way. `strategy: replace` or `strategy: remove` changes that for one block. `merge` suits almost every case.
 
 ### Evaluation order
 
-A block's `value:` can reference another block. Windsor works out the right order automatically, so you don't need to declare blocks in dependency order yourself.
+A block's `value:` can reference another block. Windsor orders the blocks by those references, so a file can declare a block before the block it reads.
 
 ## Ordinals
 
-If a facet does not set `ordinal`, it is derived from the filename:
+A facet can set `ordinal` itself. When it doesn't, Windsor derives the ordinal from the filename, as this table shows.
 
 | Pattern | Ordinal |
 | --- | --- |
@@ -72,33 +79,33 @@ If a facet does not set `ordinal`, it is derived from the filename:
 | `addon-*` / `addons-*` | 400 |
 | anything else | 0 |
 
-Higher ordinal means higher precedence when merging (addons override platform-base for same-name entries). A filename matching none of these patterns gets ordinal 0, lower than even `config-*`. Name facets to match one of these prefixes rather than relying on the fallback.
+Higher ordinal means higher precedence when merging, so an addon overrides a platform base for entries with the same name. A filename matching none of these patterns gets ordinal 0, lower than even `config-*`. Name facets to match one of these prefixes rather than relying on the fallback.
 
 ## File resolution
 
-Paths in facets (for example, `jsonnet()`, `file()`) are relative to the facet file under `_template/`. A facet at `_template/facets/aws.yaml` can reference `_template/facets/config.jsonnet` or `../configs/config.jsonnet`.
+Paths in facets, for example in `jsonnet()` and `file()`, are relative to the facet file under `_template/`. A facet at `_template/facets/aws.yaml` can reference `_template/facets/config.jsonnet` or `../configs/config.jsonnet`.
 
 ## Kubernetes Secrets
 
-A facet can wire a `sensitive: true` [schema](schema.md#marking-a-property-sensitive) value into a `flux:` system's `secrets:` block to land it as a Kubernetes Secret in a Flux-managed namespace. See [Flux systems](flux-systems.md) for the install/resources tiers, merge strategy, and `globalDependency`.
+A facet can wire a `sensitive: true` [schema](schema.md#marking-a-property-sensitive) value into the `secrets:` block of a `flux:` system, and Windsor lands it as a Kubernetes Secret in a Flux-managed namespace. This entry from `addon-observability.yaml` in `core`, trimmed of its `when:`, turns Grafana's OIDC client secret into a Secret.
 
 ```yaml
 flux:
-  - name: telemetry
+  - name: observability
     secrets:
-      alertmanager-notification-slack:
+      grafana-oidc-client:
         data:
-          url: ${telemetry.alerts.slack.webhook_url}
+          clientSecret: ${observability.grafana.client_secret}
 ```
 
-`data` maps Secret keys to `${...}` expressions, such as a config property like `telemetry.alerts.slack.webhook_url`. Windsor rejects a plaintext literal. Marking the property `sensitive: true` in the schema is still worthwhile: it redacts the value in `windsor show values` and keeps it out of `substitutions:`. Windsor materializes an Opaque Secret by default, ordered after the owning system's install Kustomization. A `.dockerconfigjson` key (or `docker-username` plus `docker-password`) materializes as `kubernetes.io/dockerconfigjson` instead, for use as an `imagePullSecret`.
+`data` maps Secret keys to `${...}` expressions, here the `observability.grafana.client_secret` property, and Windsor rejects a plaintext literal. Mark the property `sensitive: true` in the schema anyway, so that `windsor show values` redacts it and `substitutions:` never carries it. By default Windsor materializes an Opaque Secret, ordered after the owning system's install Kustomization. A `.dockerconfigjson` key, or `docker-username` plus `docker-password`, materializes as `kubernetes.io/dockerconfigjson` instead, for use as an `imagePullSecret`.
 
-An optional `namespaces:` list targets more than one namespace; empty means auto-resolve the single namespace the owning kustomization creates. Removing an entry prunes the corresponding cluster Secret on the next apply; changing an entry's resolved data rolls workloads that reference it. See the [Blueprint reference](https://www.windsorcli.dev/reference/cli/blueprint) for the full `flux[].secrets{}` schema.
+An optional `namespaces:` list targets more than one namespace. Without it, Windsor uses the single namespace that the owning kustomization creates. Removing an entry prunes its Secret from the cluster on the next apply, and changing an entry's resolved data rolls the workloads that reference it. [Flux systems](flux-systems.md) covers the install and resources tiers, the merge strategy, and `globalDependency`, and the [blueprint reference](https://www.windsorcli.dev/reference/cli/blueprint) has the full `flux[].secrets{}` schema.
 
 ## See also
 
-- [Expressions](expressions.md): the `when:` / `${...}` language and Windsor's added functions
-- [Blueprint templates](templates.md) — How the _template folder and composition order work.
-- [Testing](testing.md): Testing facet conditions and expected components.
+- [Expressions](expressions.md): the `when:` and `${...}` language, and the functions Windsor adds
+- [The _template folder](templates.md): the template's files and the composition order
+- [Testing](testing.md): testing facet conditions and the components they add
 - [Schema — Marking a property sensitive](schema.md#marking-a-property-sensitive): the `sensitive: true` flag that redacts a value and keeps it out of `substitutions:`
 - [Secrets](../secrets/overview.md): how Windsor resolves secret references
