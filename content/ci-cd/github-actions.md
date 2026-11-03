@@ -38,7 +38,7 @@ Only the inputs for your platform are required; leave the rest unset. Each platf
 | `azure` | [`azure/login`](https://github.com/Azure/login) + [`azure/use-kubelogin`](https://github.com/Azure/use-kubelogin) | `azure-client-id`, `azure-tenant-id`, `azure-subscription-id` |
 | `gcp` | [`google-github-actions/auth`](https://github.com/google-github-actions/auth) + `gke-gcloud-auth-plugin` | `gcp-workload-identity-provider`, `gcp-service-account` |
 
-A platform that needs no cloud credentials (`none`, `docker`, `incus`, `metal`, `hyperv`, `vsphere`) is a no-op. An unrecognized platform, `hetzner` (which has no OIDC and needs `HCLOUD_TOKEN` set directly), or a missing required input for the detected one fails immediately rather than surfacing as an opaque auth error later.
+A platform that needs no cloud credentials (`none`, `docker`, `incus`, `metal`, `hyperv`, `vsphere`, `proxmox`) is a no-op. An unrecognized platform, `hetzner` (which has no OIDC and needs `HCLOUD_TOKEN` set directly), or a missing required input for the detected one fails immediately rather than surfacing as an opaque auth error later.
 
 ### Setting up the trust relationship
 
