@@ -168,7 +168,7 @@ The values pick cluster software too. `gateway` installs Envoy or Cilium dependi
 
 ## Sharing a blueprint
 
-A template that works for every context in one project often fits other projects too. You can push a blueprint to an OCI registry, and a context in another project lists the artifact's URL in its `sources:` list the same way it lists `template`. `core` is published this way at `oci://ghcr.io/windsorcli/core:v0.8.0`, which is how a project builds on `core` without copying its `_template/` directory.
+A template that works for every context in one project often fits other projects too. You can push a blueprint to an OCI registry, and a context in another project lists the artifact's URL in its `sources:` list the same way it lists `template`. `core` is published this way at `oci://ghcr.io/windsorcli/core:v0.9.0`, which is how a project builds on `core` without copying its `_template/` directory.
 
 A context can list both a published blueprint and its own `template`. Sources merge in the order the context lists them, so `template` after `core` adds the project's own components on top of `core`'s. [Registries](sharing.md) covers publishing and consuming artifacts.
 

@@ -3,7 +3,7 @@ title: Registries
 description: Push a blueprint to an OCI registry, consume it from another project, and set the CLI versions it supports.
 ---
 
-A template that serves every context in one project often fits a second project too. Copying `contexts/_template/` into the second project works once, but the two copies drift apart with every change. Windsor publishes a blueprint as an *OCI artifact*, a package in the format that container registries store, so any registry that holds images can hold a blueprint. [`windsor push`](https://www.windsorcli.dev/reference/cli/commands/push) builds the artifact from `contexts/_template/` and pushes it, and other projects add its `oci://` URL to their blueprint sources. `core` itself is published this way, at `oci://ghcr.io/windsorcli/core:v0.8.0`.
+A template that serves every context in one project often fits a second project too. Copying `contexts/_template/` into the second project works once, but the two copies drift apart with every change. Windsor publishes a blueprint as an *OCI artifact*, a package in the format that container registries store, so any registry that holds images can hold a blueprint. [`windsor push`](https://www.windsorcli.dev/reference/cli/commands/push) builds the artifact from `contexts/_template/` and pushes it, and other projects add its `oci://` URL to their blueprint sources. `core` itself is published this way, at `oci://ghcr.io/windsorcli/core:v0.9.0`.
 
 ## Pushing to OCI
 
@@ -23,7 +23,7 @@ windsor push <account>.dkr.ecr.us-east-1.amazonaws.com/<blueprint>:v1.0.0
 windsor push registry.example.com/blueprints   # uses metadata.yaml name/version
 ```
 
-In blueprint sources, an OCI URL takes the full form `oci://<registry>/<repository>:<tag>`, for example `oci://ghcr.io/windsorcli/core:v0.8.0`.
+In blueprint sources, an OCI URL takes the full form `oci://<registry>/<repository>:<tag>`, for example `oci://ghcr.io/windsorcli/core:v0.9.0`.
 
 ## Using shared blueprints
 

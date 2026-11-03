@@ -22,7 +22,7 @@ flux:
 
 Windsor compiles this entry into two Flux Kustomizations. `policy-install` deploys the Kyverno controller, and `policy-resources` applies the policies after `policy-install` is ready. `globalDependency: true` makes every other workload wait for the policies, as [globalDependency](#globaldependency) describes.
 
-A `kustomize:` entry works differently: each entry maps to exactly one Kustomization, as [Kustomize](../components/kustomize.md) describes. Facets usually contribute `flux:` entries rather than `kustomize:` ones, because a system's controller and the custom resources it admits must reconcile in separate tiers.
+A `kustomize:` entry works differently: each entry maps to exactly one Kustomization, as [Kustomize](../components/kustomize.md) describes. Facets usually contribute `flux:` entries rather than `kustomize:` ones, because a system's controller and the custom resources it admits must reconcile in separate tiers. Every facet in `core` uses `flux:` entries only.
 
 ## Install and resources tiers
 

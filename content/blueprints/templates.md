@@ -31,7 +31,7 @@ Windsor loads files at any depth under `facets/`. [Testing](testing.md) covers t
 
 ## blueprint.yaml
 
-`blueprint.yaml` is the base blueprint. It declares the sources and any unconditional Terraform components and Kustomizations that all contexts share, and Windsor always loads and merges it in full. This base blueprint pulls `core` from its registry and deploys the Talos cluster and the NGINX ingress from it.
+`blueprint.yaml` is the base blueprint. It declares the sources and any unconditional Terraform components and Kustomizations that all contexts share, and Windsor always loads and merges it in full. This base blueprint pulls `core` from its registry and deploys the Talos cluster and the OpenEBS storage driver from it.
 
 ```yaml
 kind: Blueprint
@@ -41,16 +41,16 @@ metadata:
   description: Base blueprint for all contexts
 sources:
   - name: core
-    url: oci://ghcr.io/windsorcli/core:v0.8.0
+    url: oci://ghcr.io/windsorcli/core:v0.9.0
 terraform:
   - source: core
     path: cluster/talos
 kustomize:
-  - name: ingress
-    path: ingress
+  - name: csi
+    path: csi/install
     source: core
     components:
-      - nginx
+      - openebs
 ```
 
 A context's own `blueprint.yaml`, such as `contexts/local/blueprint.yaml`, can extend or override this base.
