@@ -25,7 +25,7 @@ To pull a kustomization from a remote source, name the source and let Windsor re
 kustomize:
 - name: csi
   source: core
-  path: csi
+  path: csi/install
   components:
     - longhorn
 ```

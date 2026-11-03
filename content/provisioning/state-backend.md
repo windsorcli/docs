@@ -107,9 +107,11 @@ windsor bootstrap --platform aws --blueprint ghcr.io/org/blueprint:v1.2.0
 
 ## Kubernetes backend
 
-On the Talos platforms, Windsor stores Terraform state in the cluster itself. Each component gets its own Secret in the `default` namespace, named after the component, such as `tfstate-default-cluster`.
+On the Talos platforms, Windsor stores Terraform state in the cluster itself. Each component gets its own Secret in the `system-terraform` namespace, named after the component, such as `tfstate-default-cluster`. To use a different namespace, set `terraform.backend.kubernetes.namespace`.
 
-This is the same chicken-or-egg problem that [Bootstrap](#bootstrap) solves. The state needs the cluster, but Terraform builds the cluster. Windsor builds the cluster using local state, then moves the state into the cluster once it's running.
+Terraform's Kubernetes backend does not create the namespace. The `core` blueprint adds a `backend` component, `backend/kubernetes`, that creates it. The component runs right after `cluster` when `values.yaml` sets `terraform.backend.type: kubernetes`. `windsor init --platform` sets this value for the Talos platforms.
+
+This is the same chicken-or-egg problem that [Bootstrap](#bootstrap) solves. The state needs the cluster, but Terraform builds the cluster. Windsor builds the cluster and the namespace using local state, then moves the state into the cluster once it's running.
 
 Destroy works in reverse. Windsor copies all of the state back to your machine first, then tears everything down using that local copy. If a destroy fails partway through, run it again from the same machine. You can't destroy the `cluster` component by itself, since everything else's state lives on it.
 
@@ -124,6 +126,14 @@ flowchart LR
 ```
 
 Storing state inside the infrastructure it manages is usually considered an anti-pattern. Windsor does it here because the cluster is the one state store available without a cloud provider, and for many deployments, production included, it's a sound choice. The trade-off is that if you lose the cluster, you lose its state too. Where that risk matters, use a cloud backend such as S3, Azure Storage, or GCS. See [Use an existing backend](#use-an-existing-backend).
+
+When the configured namespace changes, Windsor moves the state on the next `apply`, `up`, or `upgrade`. For each component, it runs `terraform init -migrate-state -force-copy` against the new namespace. It prints one line for each component that it moves, such as this line for the cluster:
+
+```text
+Moved terraform state of cluster/talos from namespace default to system-terraform
+```
+
+`windsor plan` reads the state from the old namespace and writes nothing to the cluster. Terraform copies the state and leaves the old Secrets in place.
 
 ## State locks
 

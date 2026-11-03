@@ -21,7 +21,7 @@ windsor push <account>.dkr.ecr.us-east-1.amazonaws.com/myblueprint:v1.0.0
 windsor push registry.example.com/blueprints   # uses metadata.yaml name/version
 ```
 
-OCI URLs: `oci://registry/repository:tag`. In blueprint sources use the full form, for example, `oci://ghcr.io/windsorcli/core:v0.8.0`.
+OCI URLs: `oci://registry/repository:tag`. In blueprint sources use the full form, for example, `oci://ghcr.io/windsorcli/core:v0.9.0`.
 
 ## Using shared blueprints
 
