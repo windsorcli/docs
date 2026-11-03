@@ -38,13 +38,13 @@ metadata:
   description: Base blueprint for all contexts
 sources:
   - name: core
-    url: oci://ghcr.io/windsorcli/core:v0.8.0
+    url: oci://ghcr.io/windsorcli/core:v0.9.0
 terraform:
   - source: core
     path: cluster/talos
 kustomize:
-  - name: ingress
-    path: ingress/base
+  - name: csi
+    path: csi/install
     source: core
 ```
 

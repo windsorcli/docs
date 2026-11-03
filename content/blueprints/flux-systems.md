@@ -3,7 +3,7 @@ title: Flux systems
 description: How flux entries compose into multi-tier Flux Kustomizations, distinct from the kustomize 1:1 passthrough.
 ---
 
-A `flux:` entry in `blueprint.yaml` is a **system**: a named functional layer that compiles to an install Kustomization plus one or more resources Kustomizations. This is different from `kustomize:`, which is a 1:1 passthrough where each entry maps to exactly one Kustomization; see [Kustomize](../components/kustomize.md). Facets typically contribute `flux:` entries rather than `kustomize:` ones, since a system's controller and the custom resources it admits usually need separate reconciliation tiers.
+A `flux:` entry in `blueprint.yaml` is a **system**: a named functional layer that compiles to an install Kustomization plus one or more resources Kustomizations. This is different from `kustomize:`, which is a 1:1 passthrough where each entry maps to exactly one Kustomization; see [Kustomize](../components/kustomize.md). Facets typically contribute `flux:` entries rather than `kustomize:` ones, since a system's controller and the custom resources it admits usually need separate reconciliation tiers. Every facet in `core` uses `flux:` entries only.
 
 ```yaml
 flux:

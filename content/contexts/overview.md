@@ -56,6 +56,19 @@ windsor get context
 
 `windsor set context` writes the context name to `.windsor/context` and sets `WINDSOR_CONTEXT` for the current process. The command fails for a context that doesn't exist, so create it with `windsor init <name>` first. By your next prompt, the shell hook has refreshed the per-context environment, including kubeconfig and the cloud profile. See [Environment injection](environment-injection.md).
 
+## Context ID
+
+A context's name can change. Each context also has an `id` in its `values.yaml` that stays the same. `windsor init` generates one, such as `wrk3va8i`: a `w` and 7 random lowercase letters and digits. To use your own `id`, set it before the first deploy:
+
+```yaml
+# contexts/staging/values.yaml
+id: web-staging
+```
+
+An `id` is a DNS label. It has 1 to 63 characters, starts with a lowercase letter, and contains only lowercase letters, digits, and single hyphens. It does not end with a hyphen. Windsor rejects any other value when it loads the context.
+
+The `core` Terraform modules use the `id` in the names of the resources they create, such as the S3 state bucket `terraform-state-<id>`. Many cloud names have a limit shorter than 63 characters. When the `id` is too long for a name, the module truncates the `id` and adds the first 6 hex characters of its SHA-256 hash, so the name stays unique. The README of each [`core` Terraform module](https://github.com/windsorcli/core/tree/main/terraform) lists its limits in a "Context id" section.
+
 ## Workstation vs. deployed contexts
 
 A workstation context, named `local` or starting with `local-`, runs a Kubernetes cluster on your machine. Windsor starts and stops the VM or container runtime it runs in. Every other context, like `staging` or `production`, is deployed. It targets a cloud, a hypervisor, or bare metal, and Windsor provisions the infrastructure directly.
