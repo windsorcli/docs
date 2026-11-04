@@ -102,7 +102,6 @@ do not reshuffle the tree up front.
 | `workstation/{colima-docker,colima-incus,docker-desktop}` | How-to | Task-first |
 | `ci-cd/github-actions` | How-to | Task-first |
 | `maintenance/migrate` | How-to (problem-solving) | Symptom → cause → fix |
-| `troubleshooting/overview` | How-to (problem-solving) | Symptom → cause → fix |
 
 Classifying also surfaces **misfiled pages**: any blueprint page that is
 really an input-by-input reference table belongs in `windsorcli/core`, not
@@ -240,8 +239,7 @@ settle before it is stamped across two dozen pages:
    Use them as the worked reference for the shape.
 2. **Narrative-heavy sections.** `getting-started/`, `blueprints/`, and
    the top-level [overview](../content/overview.md).
-3. **Remaining sections.** `deployment/`, `workstation/`,
-   `troubleshooting/`.
+3. **Remaining sections.** `deployment/` and `workstation/`.
 
 Each phase is its own PR, validated with the `docs-review` and
 `docs-validation` skills before it merges.
