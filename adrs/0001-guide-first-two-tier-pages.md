@@ -1,6 +1,6 @@
 # ADR 0001 — Guide-first, two-tier pages
 
-- **Status:** Proposed
+- **Status:** Accepted
 - **Date:** 2026-06-12
 - **Deciders:** Ryan
 - **Applies to:** every page under `content/`
@@ -66,8 +66,8 @@ each serves:
 - **Tutorial** — learning by guided doing. The reader follows along and
   builds footing. (`getting-started/`)
 - **How-to** — accomplishing a task whose shape the reader already
-  understands. Focused on the outcome, not on teaching. (`deployment/`,
-  most of `workstation/`)
+  understands. Focused on the outcome, not on teaching. (`cloud/`,
+  `virtual/`, most of `workstation/`)
 - **Reference** — dry facts to look up, no interpretation. **Out of scope
   for this repo** by charter — it lives in `windsorcli/cli` and
   `windsorcli/core`.
@@ -88,13 +88,20 @@ do not reshuffle the tree up front.
 
 | Section / pages | Primary type | Shape |
 |---|---|---|
+| `overview.md` | Explanation | Concept-first |
 | `getting-started/first-project` | Tutorial | Task-first; seam optional |
-| `*/overview` (contexts, blueprints, workstation) | Explanation | Concept-first |
-| `contexts/{lifecycle,environment-injection,trusted-folders}` | How-to + Explanation | Two-tier |
-| `blueprints/{templates,facets,schema,terraform,kustomize,sharing,testing,explain}` | How-to + Explanation; some near-reference | Two-tier; move pure reference to `core` |
-| `deployment/{aws,azure,metal,secrets-management,securing-secrets}` | How-to | Task-first; seam optional |
-| `workstation/{colima-docker,colima-incus,docker-desktop,build-id}` | How-to | Task-first |
-| `troubleshooting/overview` | How-to (problem-solving) | Symptom → cause → fix |
+| `*/overview` (contexts, blueprints, provisioning, secrets, workstation) | Explanation | Concept-first |
+| `contexts/{environment-injection,trusted-folders}` | How-to + Explanation | Two-tier |
+| `blueprints/{templates,facets,flux-systems,sharing,testing,inspecting,explain}` | How-to + Explanation | Two-tier |
+| `blueprints/{schema,expressions}` | How-to + Explanation; near-reference | Two-tier; move pure reference to `core` |
+| `components/{terraform,kustomize}` | How-to + Explanation | Two-tier |
+| `composition/workflow` | Explanation | Concept-first |
+| `provisioning/{state-backend,destroy,upgrade}` | How-to + Explanation | Two-tier |
+| `secrets/{sops,1password}` | How-to | Task-first |
+| `cloud/{aws,azure,gcp,hetzner}`, `virtual/{hyperv,vsphere}` | How-to | Task-first; seam optional |
+| `workstation/{colima-docker,colima-incus,docker-desktop}` | How-to | Task-first |
+| `ci-cd/github-actions` | How-to | Task-first |
+| `maintenance/migrate` | How-to (problem-solving) | Symptom → cause → fix |
 
 Classifying also surfaces **misfiled pages**: any blueprint page that is
 really an input-by-input reference table belongs in `windsorcli/core`, not
@@ -232,8 +239,7 @@ settle before it is stamped across two dozen pages:
    Use them as the worked reference for the shape.
 2. **Narrative-heavy sections.** `getting-started/`, `blueprints/`, and
    the top-level [overview](../content/overview.md).
-3. **Remaining sections.** `deployment/`, `workstation/`,
-   `troubleshooting/`.
+3. **Remaining sections.** `deployment/` and `workstation/`.
 
 Each phase is its own PR, validated with the `docs-review` and
 `docs-validation` skills before it merges.
@@ -262,11 +268,10 @@ Each phase is its own PR, validated with the `docs-review` and
 
 ## Open questions
 
-- **Does the website vendor step carry `content/assets/`?** The relative
-  link resolves on GitHub and for the link checker today. Whether
-  `windsorcli.github.io`'s `vendor-docs.mjs` copies non-markdown assets
-  into its content collection needs confirming before the first page with
-  a placeholder is tagged for release. Track against the website repo.
+- **Does the website vendor step carry `content/assets/`?** Yes.
+  `vendor-docs.mjs` in `windsorcli.github.io` copies
+  `media-placeholder.svg` to `src/content/docs/assets/`, so the relative
+  link resolves on the site as well as on GitHub.
 - **One generic placeholder or typed variants?** Starting with one. If
   review shows readers cannot tell an intended screenshot from an
   intended screencast, add typed cards (`media-placeholder-video.svg`,
