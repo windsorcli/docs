@@ -3,7 +3,7 @@ title: Destroy
 description: Removing a context's live infrastructure, and the checks that guard a destroy run.
 ---
 
-[`windsor destroy`](https://www.windsorcli.dev/reference/cli/commands/destroy) removes a context's live infrastructure. It begins by tearing down Flux kustomizations first, followed by every Terraform component in reverse-dependency order. It will display a plan before asking you for confirmation.
+[`windsor destroy`](https://www.windsorcli.dev/reference/cli/commands/destroy) removes a context's live infrastructure. It removes the Flux kustomizations first, then every Terraform component in reverse-dependency order, and the backend last. Before it removes anything, it shows a plan and asks you to type the context name, or to pass `--confirm=<name>`.
 
 ```mermaid
 flowchart LR
@@ -16,9 +16,9 @@ flowchart LR
 
 ## Tear down
 
-On a local workstation, [`windsor down`](https://www.windsorcli.dev/reference/cli/commands/down) is usually all you need. It removes the local environment directly: the containers, volumes, and network on Docker, or the whole VM and its data. That skips the slower, orderly Kubernetes teardown that `destroy` performs. Run `destroy` first, then `down`, when you want that orderly teardown, as you would on a production cluster.
+On a local workstation, [`windsor down`](https://www.windsorcli.dev/reference/cli/commands/down) removes the local environment itself: the containers, volumes, and network on Docker, or the VM and its data on Colima. That is faster than the orderly Kubernetes teardown that `destroy` performs. When you want the orderly teardown, as you would on a production cluster, run `destroy` first and then `down`.
 
-A cloud or metal context has no local environment, so `destroy` is sufficient.
+A cloud or metal context has no local environment, so `destroy` is the only command it takes. These commands show both cases.
 
 ```bash
 windsor down                          # local workstation: fast
@@ -27,13 +27,13 @@ windsor destroy --confirm=staging     # cloud or metal: slow but orderly
 
 ## Safety and concurrency
 
-`destroy` has three safety behaviors:
+Three behaviors guard a `destroy` run.
 
-- If a Terraform resource carries `lifecycle { prevent_destroy = true }`, `destroy` warns the run may halt partway through. It does not override the protection; remove the lifecycle block in HCL to actually destroy.
-- By default `destroy` aborts on the first component failure. `--continue` keeps going, collects failures, and prints a one-line summary. It is layer-wide only; Windsor refuses it when given a component argument. When a non-tier component stays un-destroyed or a Flux kustomization fails to delete, `destroy` defers the backend tier so it doesn't remove the [state store](state-backend.md) out from under components that still depend on it. Rerun to converge.
+- If a Terraform resource carries `lifecycle { prevent_destroy = true }`, `destroy` warns up front that the run may halt partway through. It doesn't override the protection. To destroy the resource, remove the lifecycle block from its HCL.
+- By default, `destroy` stops at the first component that fails. `--continue` keeps going, collects the failures, and prints a one-line summary at the end. It applies to a layer-wide destroy only, and Windsor refuses it with a component argument. If a Flux kustomization fails to delete, `destroy` skips Terraform. If a Terraform component outside the backend fails, it skips the backend, so the [state store](state-backend.md) stays in place for the components that still depend on it. Resolve the failures, then run `windsor destroy --continue` again, and the next pass picks up where the last one stopped.
 - With a [Kubernetes backend](state-backend.md#kubernetes-backend), `destroy` copies all Terraform state back to your machine before it starts. If it fails partway through, run it again from the same machine.
 
-To read more about safety from concurrent runs, see [Locking](overview.md#locking).
+[Locking](overview.md#locking) covers how Windsor keeps two commands from running against one context at the same time.
 
 ## See also
 
