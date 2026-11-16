@@ -117,3 +117,4 @@ Terraform's own state lock is separate. See [State locks](state-backend.md#state
 - [State backend](state-backend.md): where state lives and how bootstrap creates it
 - [Destroy](destroy.md): safety behaviors on teardown
 - [Upgrade](upgrade.md): moving a context to a newer blueprint version
+- [Private DNS](private-dns.md): the private zone drivers and when to use `pdns`
