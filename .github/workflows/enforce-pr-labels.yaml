@@ -15,7 +15,7 @@ jobs:
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9
         with:
           script: |
-            const requiredLabels = ['bug', 'chore', 'enhancement', 'feature', 'documentation'];
+            const requiredLabels = ['bug', 'chore', 'dependencies', 'enhancement', 'feature', 'documentation'];
             const allowedLabels = [...requiredLabels, 'breaking'];
             const prLabels = context.payload.pull_request.labels.map(label => label.name);
             const hasRequiredLabel = prLabels.some(label => requiredLabels.includes(label));
