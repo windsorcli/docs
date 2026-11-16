@@ -1,19 +1,17 @@
 ---
 title: Schema
-description: JSON Schema for blueprint configuration validation.
+description: How a blueprint's schema.yaml validates each context's values, fills in defaults, and marks a value as sensitive.
 ---
 
-The `contexts/_template/schema.yaml` file defines the expected structure and default values for configuration. Windsor uses it to validate and fill in values from `values.yaml`.
+A context's [values](overview.md#values-and-schema) decide which facets apply. A misspelled key such as `platfrom: aws` reads as nil in every [expression](expressions.md#member-access-is-always-optional), so without a check it would change the blueprint without a warning. The template's `contexts/_template/schema.yaml` is that check. Windsor validates each context's `values.yaml` against it and fills in a default for each key the context leaves out.
 
 ## Overview
 
-- **Validation**: ensures configuration matches the schema.
-- **Defaults**: missing keys get default values.
-- **Consistency**: same structure across contexts.
-
-The schema file must be valid JSON Schema. Windsor implements a subset of **JSON Schema Draft 2020-12**.
+The schema file must be valid JSON Schema, and Windsor implements a subset of JSON Schema Draft 2020-12. Every context that uses the template validates against the same schema, so all of them accept the same keys with the same meaning.
 
 ## Example
+
+This listing trims the `core` [`schema.yaml`](https://github.com/windsorcli/core/blob/main/contexts/_template/schema.yaml) to two of its properties, `platform` and `topology`.
 
 ```yaml
 $schema: https://json-schema.org/draft/2020-12/schema
@@ -21,29 +19,23 @@ type: object
 properties:
   platform:
     type: string
-    default: "none"
-    enum: ["none", "aws", "azure", "gcp", "hetzner", "incus", "metal", "docker", "hyperv", "vsphere", "proxmox"]
-  observability:
-    type: object
-    properties:
-      enabled:
-        type: boolean
-        default: false
-      backend:
-        type: string
-        default: "quickwit"
-        enum: ["quickwit", "loki", "elasticsearch"]
-    additionalProperties: false
+    enum: [none, aws, azure, gcp, hetzner, incus, metal, docker, hyperv, vsphere, proxmox]
+    default: none
+  topology:
+    type: string
+    enum: [single-node, multi-node, ha]
 additionalProperties: false
 ```
 
+`production` sets `platform: aws`, which is in the `enum`, so it passes. A context that sets `platform: openstack` fails validation, and a context that sets no platform gets `none` from `default:`. `topology` has no `default:`, so it stays unset unless the context sets it. The top-level `additionalProperties: false` rejects any key the schema doesn't declare, which catches `platfrom: aws`.
+
 ## Usage
 
-When a blueprint is loaded, the schema from `_template/schema.yaml` (if present) is applied to the context's configuration before [facets](facets.md) are evaluated. See [Blueprint templates](templates.md) for the full composition order.
+When Windsor loads a blueprint, it applies `_template/schema.yaml`, if the template has one, to the context's values before it evaluates any [facet](facets.md). [The _template folder](templates.md#composition-order) gives the full composition order.
 
 ## Marking a property sensitive
 
-Add `sensitive: true` alongside any property to have that value's path redacted wherever config is displayed:
+A property with `sensitive: true` has its value redacted wherever Windsor displays configuration. `core` marks the Hetzner Cloud API token this way.
 
 ```yaml
 properties:
@@ -54,4 +46,6 @@ properties:
         sensitive: true
 ```
 
-Windsor redacts that value's path as `<sensitive>` wherever config is displayed (currently [`windsor show values`](https://www.windsorcli.dev/reference/cli/commands/show-values)). It doesn't change how the value is stored or resolved, only how it's shown back to the operator. A `substitutions`/`substitute` value that is a bare `${path}` reference to a `sensitive: true` property is rejected at composition time, since substitutions render into a plaintext ConfigMap. Use a `flux:` system's `secrets:` block instead to land it as a Kubernetes Secret; see [Kubernetes Secrets on Flux systems](facets.md#kubernetes-secrets).
+Windsor shows the value as `<sensitive>` in [`windsor show values`](https://www.windsorcli.dev/reference/cli/commands/show-values). The flag doesn't change how Windsor stores or resolves the value, only how it shows the value back to the operator.
+
+Windsor rejects, at composition time, a `substitutions` or `substitute` value that is a bare `${path}` reference to a sensitive property, because substitutions render into a plaintext ConfigMap. To land the value as a Kubernetes Secret, use a `flux:` system's `secrets:` block, which [Facets — Kubernetes Secrets](facets.md#kubernetes-secrets) describes.
