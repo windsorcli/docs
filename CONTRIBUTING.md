@@ -81,11 +81,12 @@ for what the `WINDSOR_DOCS_ROOT` (and `WINDSOR_CLI_DOCS_ROOT`,
 
 ## Opening a PR
 
-Apply at least one of these labels — the changelog can't categorize
-the PR without one and CI rejects unlabeled PRs:
+Apply at least one of these labels. The changelog cannot categorize
+the PR without one, and CI rejects unlabeled PRs:
 
-`feature` · `enhancement` · `fix` · `chore` · `dependencies` ·
-`content` · `restructure`
+`bug` · `chore` · `dependencies` · `documentation` · `enhancement` · `feature`
+
+Add `breaking` for a breaking change. CI rejects any other label.
 
 If the change is substantial, link the
 [windsorcli.github.io](https://github.com/windsorcli/windsorcli.github.io)

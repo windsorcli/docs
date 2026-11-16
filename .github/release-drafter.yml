@@ -1,21 +1,21 @@
 name-template: 'v$RESOLVED_VERSION'
 tag-template: 'v$RESOLVED_VERSION'
 categories:
-  - title: 'New content'
+  - title: 'Features'
     labels:
       - 'feature'
-      - 'content'
-  - title: 'Improvements'
+  - title: 'Enhancements'
     labels:
       - 'enhancement'
-      - 'restructure'
-  - title: 'Fixes'
+  - title: 'Bug fixes'
     labels:
-      - 'fix'
-      - 'bugfix'
       - 'bug'
+  - title: 'Documentation'
+    labels:
+      - 'documentation'
   - title: 'Maintenance'
-    label: 'chore'
+    labels:
+      - 'chore'
   - title: 'Dependencies'
     collapse-after: 3
     labels:
@@ -25,21 +25,17 @@ change-title-escapes: '\<*_&'
 version-resolver:
   major:
     labels:
-      - 'major'
       - 'breaking'
   minor:
     labels:
       - 'feature'
-      - 'content'
   patch:
     labels:
-      - 'fix'
-      - 'bugfix'
       - 'bug'
       - 'chore'
+      - 'documentation'
       - 'dependencies'
       - 'enhancement'
-      - 'restructure'
   default: patch
 template: |
   ## Changes
