@@ -3,7 +3,7 @@ title: Private DNS
 description: The dns.private.driver values (cloud, coredns, pdns, pdns-remote, none), when to choose pdns over coredns, how to switch, and what pdns does not protect.
 ---
 
-A cluster needs a private zone, such as `example.local`, so that `grafana.example.local` resolves to the internal gateway. Something must serve that zone, and something must write a record into it each time a `Gateway` or `HTTPRoute` appears. The `dns.private.driver` key in `values.yaml` selects the server. The `dns.private_domain` key names the zone.
+For `grafana.example.local` to resolve to the internal gateway, a DNS server must hold the `example.local` zone, and each new `Gateway` or `HTTPRoute` hostname must become a record in it. In `values.yaml`, `dns.private_domain` names the zone and `dns.private.driver` selects the server.
 
 ```yaml
 dns:
@@ -12,46 +12,44 @@ dns:
     driver: pdns
 ```
 
-In every driver except `none`, [external-dns](https://kubernetes-sigs.github.io/external-dns/) in the `system-dns` namespace watches `Gateway` and `HTTPRoute` hostnames and writes them as records. The drivers differ in the server that holds those records and in the path external-dns uses to write them.
+With every driver except `none`, external-dns in the `system-dns` namespace reads the hostnames from `Gateway` and `HTTPRoute` resources and writes the records. The drivers differ in the server that stores the records and in how external-dns reaches it.
 
 ## Choose a driver
 
 | Driver | Server | How external-dns writes records | Default on |
 | --- | --- | --- | --- |
-| `cloud` | The private zone of the cloud provider, attached to the VPC or virtual network | The provider API | aws, azure, gcp |
+| `cloud` | The private zone of the cloud provider | The provider API | aws, azure, gcp |
 | `coredns` | CoreDNS in the cluster, with an etcd backend | Directly into etcd | Other platforms, when `dns.private_domain` is set |
-| `pdns` | PowerDNS Authoritative in the cluster, with a CloudNativePG database | The PowerDNS REST API | None (opt-in) |
-| `pdns-remote` | A PowerDNS server that you already run | The REST API of that server | None (opt-in) |
+| `pdns` | PowerDNS Authoritative in the cluster, with a CloudNativePG database | The PowerDNS REST API | Nowhere (opt-in) |
+| `pdns-remote` | A PowerDNS server that you already run | The REST API of that server | Nowhere (opt-in) |
 | `none` | No private zone server | Not applicable | hetzner |
 
 `dns.private.enabled: true` is a deprecated alias for `coredns`.
 
-Choose `cloud` on aws, azure, and gcp. The provider runs the zone, and the cluster has nothing extra to operate. `pdns` is an opt-in alternative on those platforms; `cloud` stays the default there.
+On aws, azure, and gcp, `cloud` is the default, and `pdns` is an opt-in alternative. On [vSphere](../virtual/vsphere.md), [Hyper-V](../virtual/hyperv.md), [Proxmox](../virtual/proxmox.md), bare metal, and [workstation](../workstation/overview.md) contexts, no provider zone exists, so the choice is between `coredns` and `pdns`. Both answer on the address of the internal gateway. A resolver that works with one works with the other.
 
-Choose `coredns` or `pdns` where no provider zone exists: [vSphere](../virtual/vsphere.md), [Hyper-V](../virtual/hyperv.md), [Proxmox](../virtual/proxmox.md), bare metal, and [workstation](../workstation/overview.md) contexts. Both serve the private zone on the address of the internal gateway, so resolvers query the same address under either driver.
+Use `pdns` when a tool other than external-dns must write records. CoreDNS has no write API, so external-dns writes straight into etcd, and any second writer needs etcd client certificates and a route to the etcd client port. PowerDNS takes writes through a REST API with one key. `pdns` also removes the etcd StatefulSet, its certificates, and its network policy.
 
-Choose `pdns` instead of `coredns` when something other than external-dns must write records. CoreDNS has no write API, so external-dns writes straight into etcd. Any other tool would need etcd client certificates and a route to the etcd client port. PowerDNS accepts writes through one REST API and one key. The `pdns` driver also drops the etcd StatefulSet, its certificates, and its network policy.
-
-Keep `coredns` when the context must not run a database. The `pdns` driver adds a PostgreSQL cluster to the context.
+Use `coredns` when the context must not run a database. `pdns` adds a PostgreSQL cluster, even on cloud platforms, where it does not use the managed database option.
 
 ## What the pdns driver runs
 
-The `pdns` driver installs these parts in `system-dns`:
+In `system-dns`, the driver installs:
 
-- PowerDNS Authoritative, which answers queries on port 53.
-- A CloudNativePG `Cluster` named `pdns-db`, which holds the zones and records. The driver turns on `database.postgres.enabled`, and Windsor rejects a context that sets it to `false`.
-- A `pdns-zone-init` Job, which creates the private zone through the API. It also creates the public zone, where PowerDNS serves one. external-dns does not create zones, so the first record write fails without this Job.
-- An external-dns instance for each zone, which writes records through the PowerDNS REST API.
+- PowerDNS Authoritative, which answers on port 53.
+- A CloudNativePG `Cluster` named `pdns-db`, which stores the zones and records. The driver sets `database.postgres.enabled` to `true`, and Windsor rejects a context that sets it to `false`.
+- A `pdns-zone-init` Job, which creates the private zone through the API, and the public zone where PowerDNS serves one. external-dns does not create zones, so without this Job the first record write fails.
+- One external-dns instance for each zone, which writes through the PowerDNS REST API.
 
-Flux holds the PowerDNS tier until the `Cluster` reports `Ready`. A `Cluster` counts as applied before its database accepts connections, so the blueprint checks the `Ready` condition itself.
+A CloudNativePG `Cluster` counts as applied before its database accepts connections. The blueprint therefore holds the PowerDNS tier until the `Cluster` reports `Ready`.
 
-Under `topology: ha`, PowerDNS runs two replicas and the database runs three instances with required anti-affinity. external-dns stays at one replica. While its pod is down, PowerDNS keeps answering and no record changes.
+With `topology: ha`, PowerDNS runs two replicas and the database runs three instances with required anti-affinity. external-dns stays at one replica. While its pod is down, PowerDNS keeps answering, and records stop changing.
 
-Port 53 is exposed as it is under `coredns`: a `LoadBalancer` Service at `gateway.internal.ip` when the gateway driver is Cilium, or a route on the internal gateway when it is Envoy.
+Port 53 is exposed as it is with `coredns`: a `LoadBalancer` Service at `gateway.internal.ip` under Cilium, or a route on the internal gateway under Envoy.
 
 ## The API key
 
-external-dns and the zone-init Job authenticate to the PowerDNS API with one key. Windsor writes it into the `pdns-api` `Secret` in `system-dns`. Set the key in `values.yaml` as a [secret reference](../secrets/overview.md), for a SOPS or 1Password secret:
+external-dns and the zone-init Job authenticate to the PowerDNS API with one key, which Windsor writes into the `pdns-api` `Secret` in `system-dns`. To supply the key, set `dns.private.pdns.api_key` to a [secret reference](../secrets/overview.md) for a SOPS or 1Password secret:
 
 ```yaml
 dns:
@@ -61,19 +59,15 @@ dns:
       api_key: ${secret("sops", "pdns.api_key")}
 ```
 
-When `dns.private.pdns.api_key` is unset, the `pdns` driver generates a random key with a Terraform stack and writes that key into the same `Secret`. Terraform state then holds the key. Set `dns.private.pdns.api_key` when you need to know the key or keep it in your own secret store.
+If the field is unset, a Terraform stack generates a random key and writes it into the same `Secret`, and Terraform state holds it. Set the field when you must know the key or keep it in your own secret store. The PowerDNS pods read the key and the database credentials from `Secret` objects, never from a ConfigMap.
 
-The PowerDNS pods read the key and the database credentials from `Secret` objects, never from a ConfigMap.
+## Records added by hand
 
-## Records that a person adds by hand
-
-The records that external-dns writes come from `Gateway` and `HTTPRoute` sources. When the database is empty, external-dns writes them again from those sources.
-
-A record that a person adds by hand, through the PowerDNS API, has no source. It lives only in the database. If the database volume is lost, that record is lost. The `pdns` driver adds no database backup yet. Keep the definition of each hand-made record outside the cluster, so that you can add it again.
+external-dns can write its records again from the `Gateway` and `HTTPRoute` resources, so an empty database refills itself. A record that someone adds through the PowerDNS API has no such source. It exists only in the database, and it is lost if the database volume is lost. The driver has no database backup, so keep a copy of each hand-made record outside the cluster.
 
 ## Switch from coredns to pdns
 
-To switch a running context, change the driver and apply:
+Change the driver in `values.yaml`:
 
 ```yaml
 dns:
@@ -81,45 +75,36 @@ dns:
     driver: pdns
 ```
 
+Then apply it:
+
 ```bash
 windsor apply
 ```
 
-Flux prunes CoreDNS and etcd, and then creates PowerDNS and the database. Three things follow:
+Flux prunes CoreDNS and etcd, then creates PowerDNS and its database. external-dns writes again every record that it wrote before, because the `Gateway` and `HTTPRoute` resources still hold them and the new instance starts with an empty TXT ownership registry. Records that someone added to etcd by hand are lost, because Windsor does not read the etcd volume. Add them again through the PowerDNS API. The port 53 address does not change, so no resolver needs an edit.
 
-- external-dns writes again each record that it wrote before. The `Gateway` and `HTTPRoute` sources hold those records, and the new instance starts with an empty TXT ownership registry.
-- Records that a person added to etcd by hand are lost. Windsor does not read the etcd volume. Add them again through the PowerDNS API.
-- The port 53 address does not change. No resolver needs an edit.
+Names in the private zone stop resolving from the moment Flux prunes CoreDNS until external-dns finishes its first sync into PowerDNS. The length of that gap is not measured. The CI test for `pdns` checks that a record from a `Gateway` route resolves in the cluster, and it records no switch timing.
 
-Private zone answers stop between the moment Flux prunes CoreDNS and the first external-dns sync into PowerDNS. The length of this gap is not measured. The CI test for the `pdns` driver proves that a record from a `Gateway` route resolves in the cluster, and it reports no switch timing. Plan the switch for a time when a short loss of private names is acceptable.
-
-Switching from `pdns` back to `coredns` works the same way and loses records in the same way.
+A switch from `pdns` back to `coredns` loses records the same way.
 
 ## Network access
 
-The PowerDNS API and its metrics endpoint listen on the `pdns-api` `ClusterIP` Service, on port 8081. No gateway route, load balancer, or node port exposes them.
+The PowerDNS API and its metrics endpoint listen on the `pdns-api` `ClusterIP` Service, port 8081. No gateway route, load balancer, or node port exposes them.
 
-`NetworkPolicy` objects limit who can connect:
+`NetworkPolicy` objects restrict who connects:
 
-- The API accepts connections from the external-dns pods and the zone-init Job only.
-- The database accepts connections from PowerDNS, the migration Job, its own instances, and the database operator.
-- Port 53 accepts connections from any source, because resolvers need it.
+- The API accepts the external-dns pods and the zone-init Job only.
+- The database accepts PowerDNS, the migration Job, its own instances, and the database operator.
+- Port 53 accepts any source, because resolvers must reach it.
 
-A `NetworkPolicy` has an effect only when the CNI enforces it. Cilium enforces it. On a CNI that does not, the objects have no effect, and any pod in the cluster can reach the API with the key.
+A `NetworkPolicy` has an effect only when the CNI enforces it, and Cilium does. On a CNI that does not, the objects do nothing, and any pod in the cluster that has the key can call the API.
 
 ## Use an existing PowerDNS server
 
-The `pdns-remote` driver points external-dns at a PowerDNS server that you already run. It installs no server, no database, and no zone-init Job. The zones MUST already exist on the server. Set `dns.private.pdns.url` and `dns.private.pdns.api_key`. Set `dns.private.pdns.server_id` when the server ID is not `localhost`.
+With `pdns-remote`, external-dns writes to a PowerDNS server that you already run. Windsor installs no server, database, or zone-init Job, so the zones MUST already exist on that server. Set `dns.private.pdns.url` and `dns.private.pdns.api_key`. Set `dns.private.pdns.server_id` if the server ID is not `localhost`.
 
-## Limits
+## What the driver does not cover
 
-- The driver has no database backup.
-- The cert-manager DNS-01 solver for the private zone is not part of the driver. Core tracks it in [core#3318](https://github.com/windsorcli/core/issues/3318).
-- Cloud contexts use the in-cluster database. The driver does not use the managed database option.
+The cert-manager DNS-01 solver for the private zone is not part of the driver. [core#3318](https://github.com/windsorcli/core/issues/3318) tracks it.
 
-## Where to next
-
-- [Secrets](../secrets/overview.md): write the `secret()` reference for the API key
-- [Workstation](../workstation/overview.md): the DNS server that local contexts use
-- [Upgrade](upgrade.md): move a context to a newer blueprint version
-- [The dns add-on in core](https://github.com/windsorcli/core/tree/main/kustomize/dns): components and substitutions
+For the components and substitutions behind the driver, see the [dns add-on](https://github.com/windsorcli/core/tree/main/kustomize/dns) in core.
