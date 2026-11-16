@@ -1,45 +1,32 @@
 name-template: 'v$RESOLVED_VERSION'
 tag-template: 'v$RESOLVED_VERSION'
 categories:
-  - title: 'New content'
+  - title: 'Features'
     labels:
       - 'feature'
-      - 'content'
-  - title: 'Improvements'
+  - title: 'Bug fixes'
     labels:
-      - 'enhancement'
-      - 'restructure'
-  - title: 'Fixes'
-    labels:
-      - 'fix'
-      - 'bugfix'
       - 'bug'
-  - title: 'Maintenance'
-    label: 'chore'
-  - title: 'Dependencies'
-    collapse-after: 3
+  - title: 'Documentation'
     labels:
-      - 'dependencies'
+      - 'documentation'
+  - title: 'Maintenance and dependencies'
+    labels:
+      - 'chore'
 change-template: '- $TITLE @$AUTHOR (#$NUMBER)'
 change-title-escapes: '\<*_&'
 version-resolver:
   major:
     labels:
-      - 'major'
       - 'breaking'
   minor:
     labels:
       - 'feature'
-      - 'content'
   patch:
     labels:
-      - 'fix'
-      - 'bugfix'
       - 'bug'
       - 'chore'
-      - 'dependencies'
-      - 'enhancement'
-      - 'restructure'
+      - 'documentation'
   default: patch
 template: |
   ## Changes

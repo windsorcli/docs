@@ -20,9 +20,9 @@
       "automerge": true,
       "automergeType": "pr",
       "automergeStrategy": "squash",
-      "labels": ["dependencies"]
+      "labels": ["chore"]
     }
   ],
   "platformAutomerge": true,
-  "labels": ["dependencies"]
+  "labels": ["chore"]
 }
