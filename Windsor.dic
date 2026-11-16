@@ -28,6 +28,7 @@ Kustomization
 kustomizations
 Kyverno
 mDNS
+pdns
 OpenTofu
 Renovate
 sops
