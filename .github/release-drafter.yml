@@ -4,6 +4,9 @@ categories:
   - title: 'Features'
     labels:
       - 'feature'
+  - title: 'Enhancements'
+    labels:
+      - 'enhancement'
   - title: 'Bug fixes'
     labels:
       - 'bug'
@@ -27,6 +30,7 @@ version-resolver:
       - 'bug'
       - 'chore'
       - 'documentation'
+      - 'enhancement'
   default: patch
 template: |
   ## Changes

@@ -84,7 +84,7 @@ for what the `WINDSOR_DOCS_ROOT` (and `WINDSOR_CLI_DOCS_ROOT`,
 Apply at least one of these labels. The changelog cannot categorize
 the PR without one, and CI rejects unlabeled PRs:
 
-`bug` · `chore` · `feature` · `documentation`
+`bug` · `chore` · `documentation` · `enhancement` · `feature`
 
 Add `breaking` for a breaking change. CI rejects any other label.
 
