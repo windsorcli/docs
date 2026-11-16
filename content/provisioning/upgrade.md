@@ -3,15 +3,15 @@ title: Upgrade
 description: Moving a running context to newer blueprint versions, and upgrading Talos nodes.
 ---
 
-[`windsor upgrade`](https://www.windsorcli.dev/reference/cli/commands/upgrade) moves a running context to newer versions of its blueprint sources and applies the result.
+A context stays on the blueprint versions that its `blueprint.yaml` pins until you move it. [`windsor upgrade`](https://www.windsorcli.dev/reference/cli/commands/upgrade) moves a running context to newer versions and applies the result. With no arguments, it upgrades every OCI source.
 
 ```bash
 windsor upgrade
 ```
 
-A source is an entry under `sources:` in `blueprint.yaml`. It may be an OCI blueprint artifact or a Git repository that supplies Terraform modules and kustomize bases. A given context may inherit from several sources. Running `windsor init` creates a `blueprint.yaml` file that references a single source, `core`. Passing a `--blueprint` value sets an explicit source. See the [blueprint reference](https://www.windsorcli.dev/reference/cli/blueprint).
+A *source* is an entry under `sources:` in `blueprint.yaml`. It may be an OCI blueprint artifact or a Git repository that supplies Terraform modules and kustomize bases. A given context may inherit from several sources. Running `windsor init` creates a `blueprint.yaml` file that references a single source, `core`, and `init --blueprint` sets a different one. See the [blueprint reference](https://www.windsorcli.dev/reference/cli/blueprint).
 
-By default, `upgrade` moves every declared OCI source to its latest stable tag. It prints what will change, meaning each source's current and target version and the kustomizations it would prune, and asks you to confirm. It then applies Terraform, installs the updated Flux blueprint, waits until it is ready, and prunes kustomizations that the new blueprint no longer declares.
+By default, `upgrade` moves every declared OCI source to its latest stable tag. It first prints each source's current and target version and the kustomizations it would prune, then asks you to confirm. It then applies Terraform, installs the updated Flux blueprint, waits until it is ready, and prunes kustomizations that the new blueprint no longer declares.
 
 Pass `--yes` to skip the prompt, for scripts and CI. With no terminal and no `--yes`, `upgrade` exits with an error.
 
@@ -19,7 +19,7 @@ To see what an upgrade would do without running it, answer no at the prompt. `up
 
 `upgrade` prunes only the kustomizations in the plan you confirmed. To prune any others, or to prune without moving versions, use `apply --prune`.
 
-To upgrade only one source, pass `--source name=url`. Windsor saves the new URL to `blueprint.yaml`:
+To upgrade only one source, pass `--source name=url`, and repeat the flag to move several. Windsor saves each new URL to `blueprint.yaml`. This command moves `core` to v0.9.0 and leaves any other sources on their current versions.
 
 ```bash
 windsor upgrade --source core=oci://ghcr.io/windsorcli/core:v0.9.0
@@ -41,7 +41,7 @@ You don't normally run these commands yourself. To upgrade nodes by hand, [`talo
 
 ## Upgrade core to v0.9.0
 
-`core` v0.9.0 sets `cliVersion: ">=0.10.0"`, so `windsor upgrade` stops on an older CLI. Install Windsor CLI v0.10.0 or later first. Then move the source:
+`core` v0.9.0 sets `cliVersion: ">=0.10.0"`, so `windsor upgrade` stops on an older CLI. Install Windsor CLI v0.10.0 or later first. Then move the source with this command.
 
 ```bash
 windsor upgrade --source core=oci://ghcr.io/windsorcli/core:v0.9.0
@@ -69,7 +69,7 @@ The platform facets no longer set `backend: cluster`. If a context's `blueprint.
 
 ### DHCP control planes require `cluster.endpoint`
 
-On Hyper-V, Proxmox, and vSphere, a context with `network.dhcp: true` and more than one control plane must set `cluster.endpoint`. Without it, composition fails with this message:
+On Hyper-V, Proxmox, and vSphere, a context with `network.dhcp: true` and more than one control plane must set `cluster.endpoint`. Without it, composition fails with this message.
 
 ```text
 Several DHCP control planes share the API address in cluster.endpoint; pick one outside the DHCP scope.
