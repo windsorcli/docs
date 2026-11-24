@@ -440,6 +440,22 @@ The `[!TYPE]` marker sits alone on the first line. One point per
 callout, never two back to back, and rarely more than two or three on
 a page.
 
+## Media placeholders
+
+Where a page calls for a recording or screenshot that doesn't exist
+yet, use the shared placeholder image so the gap shows in review.
+This image line marks a missing recording of `windsor up --wait`, and
+its alt text tells whoever records it what to capture.
+
+```markdown
+![windsor up --wait bringing the local stack to ready](../assets/media-placeholder.svg)
+```
+
+Every section sits one directory under `content/`, so the path is
+always `../assets/media-placeholder.svg`. To fill a gap, change the
+image target; `grep -r media-placeholder.svg content` lists the open
+ones.
+
 ## Mermaid
 
 Use when spatial relationships matter (host / container / cluster
