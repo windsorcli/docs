@@ -103,6 +103,18 @@ docker push ${REGISTRY_URL}/myapp:$BUILD_ID
 
 Reference `${BUILD_ID}` in your manifests or Kustomize files instead of a fixed tag. Each new ID gives the image a unique tag, which keeps iterations traceable and avoids overwriting a shared `:latest`. See [Kustomize](../components/kustomize.md) for the other substitutions that Flux provides.
 
+## Troubleshooting
+
+`up` doesn't change the host's networking. [`windsor configure network`](https://www.windsorcli.dev/reference/cli/commands/configure-network) does, and it requires elevation. It writes the DNS resolver entry on every runtime, and on Colima it also adds the host route to the cluster. Pass `--dry-run` to see what it would change without touching the host, or `--revert` to remove what it installed.
+
+If `*.test` names, or names under your `dns.domain`, don't resolve, the resolver entry is missing. Run `windsor configure network` after the first `up` on a fresh workstation, on Docker Desktop as well as Colima.
+
+If the cluster's nodes are unreachable after `up` on Colima, the host route is missing or was reverted. Run `windsor configure network` again, and check that it reports both the route and the DNS entry.
+
+On Windows, the whole process must be elevated, because there's no per-step prompt the way sudo works on macOS and Linux. Open PowerShell with **Run as Administrator**, change to the project folder, and run `windsor configure network` again.
+
+Windows stores the DNS rule as an NRPT (Name Resolution Policy Table) rule. On a machine that Group Policy manages, a policy rule for the same domain can override the local one, and `configure network` prints a warning when it does. Ask your IT administrator to permit per-machine NRPT rules for the domain.
+
 ## See also
 
 - [Lifecycle](../provisioning/overview.md): `up` and `down`, and how a deployed context differs
