@@ -2,7 +2,7 @@
 # (technical-writing §6).
 extends: existence
 message: "'%s' waves at the rest of a list. Name the items or bound the set."
-level: warning
+level: suggestion
 ignorecase: true
 tokens:
   - ', and (much )?more\b'

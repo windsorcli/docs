@@ -2,7 +2,7 @@
 # Weak alone: keep a contrast that corrects a belief the reader holds.
 extends: existence
 message: "'%s' stages a contrast. State the positive claim alone unless the reader holds the negative."
-level: warning
+level: suggestion
 ignorecase: true
 nonword: true
 tokens:

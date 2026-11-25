@@ -50,9 +50,13 @@ visible sign. A page MUST NOT merge while it contains a marker. Vale's
 docs owner removes each one when the authored text replaces the draft.
 
 The `AITells` Vale style checks `content/` for the AI tells that a
-pattern can find. `RunUps`, `Filler`, `ChatResidue`, and `DraftMarker`
-fail the build. `Words`, `NotXButY`, `VagueListFiller`, and `EmDashes`
-are warnings, because each is weak alone. Vale catches only a part of
+pattern can find. CI fails on any Vale warning or error, so the rules
+that block a merge are errors: `RunUps`, `Filler`, `ChatResidue`,
+`EmDashes`, and `DraftMarker`. `Words`, `NotXButY`, and
+`VagueListFiller` are suggestions, because each is weak alone. Vale
+hides suggestions by default; run
+`vale --minAlertLevel=suggestion content` to see them on a draft.
+Vale catches only a part of
 the catalog. Check every draft by name against sections A to G of the
 `technical-writing` skill, which is the full list.
 

@@ -4,7 +4,7 @@
 # docs use both in their technical sense.
 extends: existence
 message: "'%s' is an overused AI word. Use the plain word, or state the fact it decorates."
-level: warning
+level: suggestion
 ignorecase: true
 tokens:
   - additionally
