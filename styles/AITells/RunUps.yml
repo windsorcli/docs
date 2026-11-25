@@ -1,0 +1,18 @@
+# Staged run-ups that announce a point instead of making it
+# (technical-writing §4).
+extends: existence
+message: "'%s' announces the point. Delete it and start with the point."
+level: error
+ignorecase: true
+tokens:
+  - let's (dive|jump) (in|into)
+  - let's (explore|unpack)
+  - let's break (this|it|that) down
+  - let's be honest
+  - here's what you need to know
+  - here's the thing
+  - without further ado
+  - real talk
+  - '\bheads up\b'
+  - '^the thing is'
+  - '^honestly\?'

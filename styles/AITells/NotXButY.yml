@@ -1,0 +1,11 @@
+# Contrast with a negative half no one claimed (technical-writing §1).
+# Weak alone: keep a contrast that corrects a belief the reader holds.
+extends: existence
+message: "'%s' stages a contrast. State the positive claim alone unless the reader holds the negative."
+level: warning
+ignorecase: true
+nonword: true
+tokens:
+  - '\bnot (just|only|merely|simply)\b[^.;:]{1,60}?\bbut\b'
+  - '\b(it|this|that)(''s| is) not (about )?[^.;:]{1,40}?, (it|this|that)(''s| is)\b'
+  - '\b(isn''t|is not|aren''t|are not) (just|only|merely) (a|an|the)\b'

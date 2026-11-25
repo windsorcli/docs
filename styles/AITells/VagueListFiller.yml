@@ -1,0 +1,10 @@
+# A list that trails off instead of naming its items
+# (technical-writing §6).
+extends: existence
+message: "'%s' waves at the rest of a list. Name the items or bound the set."
+level: warning
+ignorecase: true
+tokens:
+  - ', and (much )?more\b'
+  - ', and the rest\b'
+  - ', and so on\b'
