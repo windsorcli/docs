@@ -17,7 +17,7 @@ flowchart LR
 
 ## A workstation context
 
-A workstation context (typically `local`, or any name starting with `local-`) runs a Kubernetes cluster on your machine. Its lifecycle is `up` and `down`, with `apply` for changes in between. On Docker Desktop or Docker, the flow looks like this:
+A workstation context (typically `local`, or any name starting with `local-`) runs a Kubernetes cluster on your machine. Its lifecycle is `up` and `down`, with `apply` for changes in between. These commands run that lifecycle on Docker Desktop or Docker.
 
 ```bash
 windsor init local
@@ -31,13 +31,13 @@ windsor down                    # remove the local environment
 
 Once the workstation is up, [`windsor apply`](https://www.windsorcli.dev/reference/cli/commands/apply) applies a change to your blueprint or values without touching the runtime. It runs the same Terraform and Flux steps as `up`, so it suits quick iteration. It does not start the runtime or print the network follow-up.
 
-Enabling host DNS requires elevation. When `windsor up` finishes, it requests a [`windsor configure network`](https://www.windsorcli.dev/reference/cli/commands/configure-network) as a follow-up so `*.<domain>` resolves from your browser. Running this command asks for sudo on macOS and Linux, and should be run as an Administrator in PowerShell on Windows.
+Enabling host DNS requires elevation. When `windsor up` finishes, it requests a [`windsor configure network`](https://www.windsorcli.dev/reference/cli/commands/configure-network) as a follow-up so `*.<domain>` resolves from your browser. The command asks for sudo on macOS and Linux. On Windows, run it from PowerShell as an Administrator.
 
-`down` removes the local environment: the containers, volumes, and network on Docker, or the VM and its data on Colima. It also clears local caches and stale cluster credentials. It skips the orderly teardown that [`destroy`](destroy.md) performs, as the VM itself is destroyed, bringing any state with it.
+`down` removes the local environment: the containers, volumes, and network on Docker, or the VM and its data on Colima. It also clears local caches and stale cluster credentials. It skips the orderly teardown that [`destroy`](destroy.md) performs, because removing the VM or containers removes any state they hold.
 
 ### Colima
 
-Colima also needs a host route to reach the cluster, and `up` cannot create the route without elevation. The first `up` provisions what it can, then stops and prints `Run 'windsor configure network' (sudo), then re-run 'windsor up'.` Run the command, then run `up` again to install the blueprint:
+Colima also needs a host route to reach the cluster, and `up` cannot create the route without elevation. The first `up` provisions what it can, then stops and prints `Run 'windsor configure network' (sudo), then re-run 'windsor up'.` Run the command, then run `up` again to install the blueprint, as this sequence shows.
 
 ```bash
 windsor init local --vm-driver colima
@@ -50,7 +50,7 @@ The same flow applies to Colima + Incus. Once the route is in place, later `up` 
 
 ## A cloud or metal context
 
-Deployment contexts that target real platforms follow a slightly different flow. The first run uses `bootstrap`; later reconciles use `apply`:
+A deployed context on a cloud or metal platform follows a slightly different flow. The first run uses `bootstrap`, and later reconciles use `apply`. These commands take a `staging` context from creation to teardown.
 
 ```bash
 windsor init staging
@@ -62,7 +62,7 @@ windsor apply --wait
 windsor destroy --confirm=staging
 ```
 
-`apply` runs the Terraform components and installs the Flux blueprint. It supports targeted runs:
+`apply` runs the Terraform components and installs the Flux blueprint. It can also target one component.
 
 ```bash
 windsor apply terraform cluster        # one terraform component
@@ -73,7 +73,7 @@ Use `bootstrap` on the first run. It handles the case where Terraform must creat
 
 ## Inspect before you apply
 
-[`windsor plan`](https://www.windsorcli.dev/reference/cli/commands/plan) previews pending changes to Terraform components and Flux kustomizations without applying them:
+[`windsor plan`](https://www.windsorcli.dev/reference/cli/commands/plan) previews pending changes to Terraform components and Flux kustomizations without applying them, either for every component or for one.
 
 ```bash
 windsor plan                    # summary of every component
@@ -90,9 +90,9 @@ To inspect the composed blueprint, use `windsor show` or `windsor explain`. See 
 
 ## Locking
 
-Commands that depend on a context's state take a lock on it; `up`, `apply`, `bootstrap`, `upgrade`, `destroy`, and `plan` take out a lock. A second `windsor` command on the same context fails with an error explaining that the state is locked. Pass [`--lock-timeout`](https://www.windsorcli.dev/reference/cli/global-flags) to wait instead. The lock is local to your checkout. It keeps two `windsor` commands on one machine from colliding. It does not coordinate separate machines or CI jobs remotely.
+Each command that depends on a context's state takes a lock on it: `up`, `apply`, `bootstrap`, `upgrade`, `destroy`, and `plan`. A second `windsor` command on the same context fails with an error explaining that the state is locked. Pass [`--lock-timeout`](https://www.windsorcli.dev/reference/cli/global-flags) to wait instead. The lock is local to your checkout. It keeps two `windsor` commands on one machine from colliding. It does not coordinate separate machines or CI jobs remotely.
 
-The lock releases when the command exits. A hung command may leave an orphaned lock. [`windsor unlock`](https://www.windsorcli.dev/reference/cli/commands/unlock) removes the lock files, and `--force` skips that prompt. Use it only when no other `windsor` process is using the context.
+The lock releases when the command exits. A hung command may leave an orphaned lock. [`windsor unlock`](https://www.windsorcli.dev/reference/cli/commands/unlock) asks for confirmation and then removes the lock files. `--force` skips the confirmation. Use it only when no other `windsor` process is using the context.
 
 Terraform's own state lock is separate. See [State locks](state-backend.md#state-locks).
 

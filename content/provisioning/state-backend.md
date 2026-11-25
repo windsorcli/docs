@@ -7,7 +7,7 @@ Every context keeps its Terraform state in a backend. Windsor picks a default fo
 
 ## Choose a backend
 
-When you do not set a backend, `--platform` picks a default:
+When you do not set a backend, `--platform` picks a default, as this table shows.
 
 | Platform                                                   | Default backend                                                            |
 | ---------------------------------------------------------- | -------------------------------------------------------------------------- |
@@ -19,13 +19,13 @@ When you do not set a backend, `--platform` picks a default:
 
 To change it, set `terraform.backend.type` in `values.yaml` to `local`, `s3`, `azurerm`, `gcs`, or `kubernetes`. You can also pass `--backend` to `init` or `--set terraform.backend.type=...` to `bootstrap`.
 
-Windsor will create a backend if one isn't specified, or you can configure one you've already created. To use a store that already exists, see [Use an existing backend](#use-an-existing-backend).
+If you don't specify a backend, Windsor creates one. To use a store that you've already created, see [Use an existing backend](#use-an-existing-backend).
 
 State is keyed per component and isolated within a context. Windsor writes the backend settings into a generated `backend_override.tf` next to each module, so a module never needs a hard-coded `backend` block. The [Terraform page](../components/terraform.md#folder-layout) has more information.
 
 ## Use an existing backend
 
-Describe the store in `values.yaml`, under `terraform.backend`:
+Describe the store in `values.yaml`, under `terraform.backend`. This `staging` context uses an S3 bucket and a DynamoDB lock table that already exist.
 
 ```yaml
 # contexts/staging/values.yaml
@@ -38,7 +38,7 @@ terraform:
       dynamodb_table: my-locks
 ```
 
-Windsor passes these settings to `terraform init` as `-backend-config` arguments:
+Windsor passes these settings to `terraform init` as `-backend-config` arguments. This table lists what you set for each type and what Windsor sets.
 
 | Type         | Set under `terraform.backend.<type>`                                     | Windsor sets    |
 | ------------ | ------------------------------------------------------------------------ | --------------- |
@@ -47,7 +47,7 @@ Windsor passes these settings to `terraform init` as `-backend-config` arguments
 | `gcs`        | `bucket`                                                                 | `prefix`        |
 | `kubernetes` | `namespace`, and `config_path` or `config_context` to choose the cluster | `secret_suffix` |
 
-For Azure, Google Cloud, and Kubernetes, you define similar blocks:
+Azure, Google Cloud, and Kubernetes use similar blocks, one per type in these listings.
 
 ```yaml
 terraform:
@@ -79,14 +79,14 @@ The full argument lists are in Terraform's documentation: [s3](https://developer
 
 ## Bootstrap
 
-Windsor's bootstrapping flow handles the chicken-or-egg problem with terraform state backends. It handles this in two phases, first creating the backend resources in terraform before pivoting to use this backend throughout the stack.
+Windsor's bootstrapping flow handles the chicken-or-egg problem with Terraform state backends. It works in two phases. First it creates the backend resources with Terraform, then it switches every component to that backend.
 
 1. Phase 1 sets `terraform.backend.type` to `local` in memory and applies the backend component and any component declared before it. This creates the remote state store, usually an object store.
 2. Phase 2 restores the configured backend type and runs `terraform init -migrate-state -force-copy` for those components. This moves their state to the remote store.
 
 The remaining components then initialize directly against the remote backend. The blueprint's `backend:` field decides which component is the backend component; see [The `backend` field](../blueprints/templates.md#the-backend-field).
 
-If you allow the default backend to be created, it will generate `contexts/<name>/backend.tfvars`. This file holds the store's connection settings, such as the bucket and region on AWS. Windsor passes the file to `terraform init` for every other component. This file should be checked in to source control.
+When Windsor creates the default backend, it writes `contexts/<name>/backend.tfvars`. This file holds the store's connection settings, such as the bucket and region on AWS. Windsor passes the file to `terraform init` for every other component. Check the file in to source control.
 
 ```mermaid
 flowchart LR
@@ -97,7 +97,7 @@ flowchart LR
   P2 --> Rest["apply the rest on<br/>remote state, install Flux"]
 ```
 
-The following are typical bootstrap commands using various parameters:
+These are typical `bootstrap` runs: for the current context, for another context, and for a new AWS context built from a blueprint.
 
 ```bash
 windsor bootstrap                    # current context
@@ -125,19 +125,34 @@ flowchart LR
   TF -.->|failure| Rerun["rerun destroy<br/>from the local copy"]
 ```
 
-Storing state inside the infrastructure it manages is usually considered an anti-pattern. Windsor does it here because the cluster is the one state store available without a cloud provider, and for many deployments, production included, it's a sound choice. The trade-off is that if you lose the cluster, you lose its state too. Where that risk matters, use a cloud backend such as S3, Azure Storage, or GCS. See [Use an existing backend](#use-an-existing-backend).
+If you lose the cluster, you lose its state too. Windsor keeps state there anyway because the cluster is the only store available without a cloud provider, and that works for many deployments, including production. If you can't afford to lose the state, use a cloud backend such as S3, Azure Storage, or GCS. See [Use an existing backend](#use-an-existing-backend).
 
-When the configured namespace changes, Windsor moves the state on the next `apply`, `up`, or `upgrade`. For each component, it runs `terraform init -migrate-state -force-copy` against the new namespace. It prints one line for each component that it moves, such as this line for the cluster:
+### Change the state namespace
+
+When the configured namespace differs from the one a component last used, `apply`, `up`, and `upgrade` move its state with `terraform init -migrate-state -force-copy` against the new namespace. Windsor prints one line for each component that it moves, such as this line for the cluster.
 
 ```text
 Moved terraform state of cluster/talos from namespace default to system-terraform
 ```
 
-`windsor plan` reads the state from the old namespace and writes nothing to the cluster. Terraform copies the state and leaves the old Secrets in place.
+Terraform copies the state and leaves the old Secrets in place. `plan` reads the state from the old namespace and writes nothing to the cluster. Older `core` releases kept state in `default`, so an upgrade moves it the same way.
+
+> [!WARNING]
+>
+> Windsor reads the last-used namespace from `.windsor/`. A fresh checkout doesn't have it, so `up` can't find the old state and plans to recreate everything.
+
+These commands copy the state Secrets from `default` to `system-terraform`. Run them before the first `up` from a fresh checkout.
+
+```bash
+kubectl create namespace system-terraform
+kubectl get secret -n default -l tfstate=true -o json \
+  | jq '.items |= map(.metadata = {name: .metadata.name, namespace: "system-terraform", labels: .metadata.labels})' \
+  | kubectl apply -f -
+```
 
 ## State locks
 
-Windsor passes `-lock-timeout` to `init` and to every Terraform command that changes state. `terraform.lock.timeout` can be set to change how long to wait for a locked state. It defaults to `5m`:
+Windsor passes `-lock-timeout` to `init` and to every Terraform command that changes state. Set `terraform.lock.timeout` to change how long Terraform waits for a locked state. It defaults to `5m`, and this setting raises it to ten minutes.
 
 ```yaml
 terraform:
