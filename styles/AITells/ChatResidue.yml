@@ -1,0 +1,18 @@
+# Chatbot greetings, praise, offers, and sign-offs left in a page
+# (technical-writing §23).
+extends: existence
+message: "'%s' is chatbot residue. Delete it."
+level: error
+ignorecase: true
+tokens:
+  - I hope this helps
+  - great question
+  - you're absolutely right
+  - '^certainly!'
+  - '^of course!'
+  - would you like me to
+  - want me to
+  - should I continue
+  - let me know
+  - feel free to
+  - happy to help

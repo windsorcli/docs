@@ -1,0 +1,13 @@
+# Throat-clearing and reassurance filler that could open any document
+# (technical-writing §6).
+extends: existence
+message: "'%s' is filler. Delete it and state the fact."
+level: error
+ignorecase: true
+tokens:
+  - (it's|it is) worth (noting|mentioning|pointing out)
+  - (it's|it is) important to (understand|note|remember|recognize)
+  - when it comes to
+  - at the end of the day
+  - in today's [a-z-]+ world
+  - so you don't have to

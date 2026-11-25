@@ -1,0 +1,29 @@
+# Overused AI words (technical-writing §13). Weak alone: one hit is a
+# prompt to look, a cluster in one paragraph is the tell. "realm"
+# (a Keycloak term) and "quietly" (silent failure) are left out: the
+# docs use both in their technical sense.
+extends: existence
+message: "'%s' is an overused AI word. Use the plain word, or state the fact it decorates."
+level: suggestion
+ignorecase: true
+tokens:
+  - additionally
+  - align(s|ed)? with
+  - bolster(s|ed|ing)?
+  - crucial(ly)?
+  - deep dive
+  - delv(e|es|ed|ing)
+  - emphasiz(e|es|ed|ing)
+  - enduring
+  - enhanc(e|es|ed|ing|ement)
+  - foster(s|ed|ing)?
+  - garner(s|ed|ing)?
+  - interplay
+  - intricate
+  - meticulous(ly)?
+  - pivotal
+  - showcas(e|es|ed|ing)
+  - tapestry
+  - testament
+  - underscor(e|es|ed|ing)
+  - vibrant

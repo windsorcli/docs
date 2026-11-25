@@ -1,0 +1,9 @@
+# An `<!-- ai: ... -->` marker flags text that is still an AI draft.
+# A page MUST NOT merge while one remains.
+extends: existence
+message: "AI draft marker found. Replace the marked text with authored prose and remove the marker before merge."
+level: error
+scope: raw
+nonword: true
+tokens:
+  - '<!--\s*ai:'

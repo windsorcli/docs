@@ -28,6 +28,42 @@ overviews. Reference docs (every flag, every field) live in
 `windsorcli/cli` and `windsorcli/core` and get vendored alongside
 these pages at build time.
 
+## Page stages and AI drafts
+
+In a release, each page moves through four stages, and the release
+charter in the `sdlc` repo records the stage of each chapter. The AI
+writes the dossier and a rough draft. The docs owner writes the final
+prose.
+
+| Stage | Who | Exit condition |
+| --- | --- | --- |
+| drafted | AI | A dossier and a rough draft exist. |
+| validated | AI | Each claim in the dossier has evidence, and the draft agrees with the dossier. |
+| authored | Docs owner | The final prose is on the chapter branch. |
+| verified | AI | A second validation run on the final prose passes. Copyedit fixes are in separate commits. |
+
+Mark AI-written text with an `<!-- ai: ... -->` comment on its own
+line above it, for example `<!-- ai: rough draft -->`. The website
+hides HTML comments, so a missed marker would publish AI prose with no
+visible sign. A page MUST NOT merge while it contains a marker. Vale's
+`AITells.DraftMarker` rule fails on any marker in `content/`, and the
+docs owner removes each one when the authored text replaces the draft.
+
+The `AITells` Vale style checks `content/` for the AI tells that a
+pattern can find. CI fails on any Vale warning or error, so the rules
+that block a merge are errors: `RunUps`, `Filler`, `ChatResidue`,
+`EmDashes`, and `DraftMarker`. `Words`, `NotXButY`, and
+`VagueListFiller` are suggestions, because each is weak alone. Vale
+hides suggestions by default; run
+`vale --minAlertLevel=suggestion content` to see them on a draft.
+Vale catches only a part of
+the catalog. Check every draft by name against sections A to G of the
+`technical-writing` skill, which is the full list.
+
+After each authored pass, compare the rough draft with the final text.
+Add each pattern the docs owner removed to this skill. If a pattern can
+find it with few false positives, add a rule to `styles/AITells/` too.
+
 ## Frontmatter (required)
 
 ```yaml
