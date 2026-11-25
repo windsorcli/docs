@@ -3,9 +3,23 @@ title: Overview
 description: How a blueprint turns the settings in a context's values file into Terraform modules and Flux systems.
 ---
 
-[Components](../components/terraform.md) walked you through how to reference Terraform modules and Kustomizations directly in a context's `blueprint.yaml`. That works as long as one context is all you have. A *blueprint* turns the same components into a template, shared by every context instead of hand-copied into each one.
+Running applications on Kubernetes takes more than a cluster. Something has to create the network the cluster runs in and keep the Terraform state for it, and once the cluster is up it still lacks an ingress gateway, storage, and monitoring until someone installs them. Setting all of that up a second time, for another environment or on another cloud, usually means copying the Terraform and manifests from the first and editing them until they fit.
 
-Windsor reads a blueprint, fills in the values for the current context, and deploys the platform to your chosen target. Most projects start with the default [`core`](https://github.com/windsorcli/core) blueprint and build on top of that.
+A *blueprint* describes the whole platform once, as a template. It lists the Terraform modules that build the infrastructure and the Kubernetes software that Flux installs on the cluster, and it declares the settings that change from one environment to the next, such as which platform to deploy on. Windsor reads the blueprint, fills in the settings for the environment you are deploying, and builds the platform from the network up.
+
+Because a blueprint is a template and not a finished configuration, you can publish it to an OCI registry and deploy it with one command. The following [`windsor bootstrap`](https://www.windsorcli.dev/reference/cli/commands/bootstrap) command deploys a blueprint published at `ghcr.io/yourorg/platform:v2` to AWS.
+
+```bash
+windsor bootstrap myapp \
+  --blueprint ghcr.io/yourorg/platform:v2 \
+  --platform=aws
+```
+
+Windsor calls each deployed environment a *context*, and each context keeps its own settings and its own Terraform state. Here `bootstrap` creates a context named `myapp`, applies the blueprint's Terraform to build the infrastructure, and waits while Flux installs the software on the new cluster. Changing `--platform=aws` to `--platform=hetzner` deploys the same blueprint to Hetzner, as long as the blueprint includes modules for it.
+
+Most projects don't write a blueprint from scratch. Windsor's default blueprint, [`core`](https://github.com/windsorcli/core), already covers [ten platforms](#one-blueprint-many-platforms), and a project's own blueprint usually builds on top of it. The rest of this section explains how a blueprint chooses what to build for each environment, and how to write and publish your own.
+
+If you have worked through [Components](../components/terraform.md), you have already listed Terraform modules and Kustomizations directly in a context's `blueprint.yaml`. That works as long as one context is all you have. A blueprint moves those components into a template that every context in the project shares.
 
 The examples on this page follow one project with two contexts. `local` runs on Docker on your workstation, and `production` runs on AWS. Both use `core`, and in this project everything that differs between the two clusters comes from a few lines in each context's `values.yaml`.
 
