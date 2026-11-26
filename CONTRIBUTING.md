@@ -79,6 +79,36 @@ up immediately. See
 for what the `WINDSOR_DOCS_ROOT` (and `WINDSOR_CLI_DOCS_ROOT`,
 `WINDSOR_CORE_DOCS_ROOT`) variables do.
 
+## Authoring with a live preview
+
+`task author` opens one chapter in VS Code, with the site's rendering
+of the active page in a pane beside the editor. Pass the chapter's
+directory under `content/` after `--`. Without one, the task opens
+`contexts`.
+
+```bash
+task author -- workstation
+```
+
+The task looks for a clone of windsorcli.github.io, with its npm
+packages installed, beside this repo's main checkout. Set
+`WINDSOR_SITE_PATH` to use a clone somewhere else. When nothing
+listens on port 4321, the task starts the site's dev server there. When
+a server it started earlier renders a different checkout, such as
+another worktree, it restarts that server for this one. A server you
+started yourself stays running, and the task exits with an error until
+you stop it.
+
+The pane comes from a VS Code extension in `tools/vscode-preview/`,
+which the task installs when the installed copy is missing or older
+than the repo's version. The pane follows the file you edit and
+scrolls to the heading at the top of the editor. A save reaches the
+pane in about three seconds, once the site re-vendors the page. After
+you change the extension, run `task author:extension` to reinstall it.
+
+The editor settings for prose live in `.vscode/settings.json`: word
+wrap at 100 columns, a ruler at 72, and no autocomplete.
+
 ## Opening a PR
 
 Apply at least one of these labels. The changelog cannot categorize

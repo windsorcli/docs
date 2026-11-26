@@ -1,0 +1,36 @@
+{
+  "[markdown]": {
+    "editor.wordWrap": "bounded",
+    "editor.wordWrapColumn": 100,
+    "editor.rulers": [72],
+    "editor.minimap.enabled": false,
+    "editor.quickSuggestions": { "comments": "off", "strings": "off", "other": "off" },
+    "editor.suggest.showWords": false,
+    "editor.wordBasedSuggestions": "off",
+    "editor.inlineSuggest.enabled": false,
+    "editor.glyphMargin": false,
+    "editor.folding": false,
+    "editor.renderWhitespace": "none",
+    "editor.lineHeight": 1.6,
+    "editor.cursorSmoothCaretAnimation": "on",
+    "editor.unicodeHighlight.ambiguousCharacters": true,
+    "files.trimTrailingWhitespace": true,
+    "files.insertFinalNewline": true
+  },
+  "markdown.preview.scrollPreviewWithEditor": true,
+  "markdown.preview.scrollEditorWithPreview": true,
+  "markdown.preview.markEditorSelection": true,
+  "markdown.validate.enabled": true,
+  "workbench.editor.enablePreview": false,
+  "workbench.startupEditor": "none",
+  "files.exclude": {
+    ".claude": true,
+    ".lycheecache": true,
+    "styles/Microsoft": true,
+    "node_modules": true
+  },
+  "search.exclude": {
+    ".claude": true,
+    "styles/Microsoft": true
+  }
+}

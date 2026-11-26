@@ -21,5 +21,9 @@ node_modules/
 # macOS / IDE noise
 .DS_Store
 .idea/
-.vscode/
+
+# Editor settings for authoring are shared (see the author task); the
+# rest of .vscode/ stays local.
+.vscode/*
+!.vscode/settings.json
 *.swp

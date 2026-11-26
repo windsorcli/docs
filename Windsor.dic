@@ -37,6 +37,7 @@ tcsh
 yamllint
 shellcheck
 markdownlint
+worktree
 
 # --- Kubernetes / cloud ---
 apiserver

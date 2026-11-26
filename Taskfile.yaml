@@ -8,6 +8,7 @@ version: "3"
 #   task lint      – run every linter in sequence (fails fast)
 #   task lint:<x>  – run a single linter
 #   task fmt       – auto-fix what can be auto-fixed (markdownlint)
+#   task author    – open a chapter in VS Code with a live site preview
 #
 # Pinned versions match what CI installs. Bumping them is a single-PR
 # change here + the matching pin in .github/workflows/docs-quality.yml.
@@ -98,6 +99,16 @@ tasks:
     desc: "No 'not covered yet' headings or roadmap/TODO phrasing — pages describe the current state"
     cmds:
       - ./scripts/check-no-future-work.sh
+
+  author:
+    desc: "Open a chapter in VS Code with the site preview beside it (task author -- <chapter>)"
+    cmds:
+      - ./scripts/author.sh {{.CLI_ARGS}}
+
+  author:extension:
+    desc: "Build and install the site preview extension from tools/vscode-preview"
+    cmds:
+      - ./scripts/build-vscode-preview.sh
 
   fmt:
     desc: "Auto-fix markdownlint issues in place"

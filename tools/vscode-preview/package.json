@@ -1,0 +1,42 @@
+{
+  "name": "windsor-docs-preview",
+  "displayName": "Windsor Docs Preview",
+  "description": "Shows the docs site's rendering of the page you are editing, beside the editor.",
+  "publisher": "local",
+  "version": "0.1.0",
+  "engines": { "vscode": "^1.90.0" },
+  "main": "./extension.js",
+  "activationEvents": ["workspaceContains:Windsor.dic"],
+  "capabilities": {
+    "untrustedWorkspaces": { "supported": true }
+  },
+  "contributes": {
+    "commands": [
+      { "command": "windsorDocs.preview", "title": "Windsor Docs: Open Site Preview to the Side" },
+      { "command": "windsorDocs.reload", "title": "Windsor Docs: Reload Site Preview" }
+    ],
+    "keybindings": [
+      { "command": "windsorDocs.preview", "key": "cmd+alt+v", "when": "editorLangId == markdown" }
+    ],
+    "configuration": {
+      "title": "Windsor Docs Preview",
+      "properties": {
+        "windsorDocs.siteUrl": {
+          "type": "string",
+          "default": "http://localhost:4321",
+          "description": "Base URL of the docs dev server."
+        },
+        "windsorDocs.openOnStartup": {
+          "type": "boolean",
+          "default": true,
+          "description": "Open the preview when the first page under content/ opens."
+        },
+        "windsorDocs.followSection": {
+          "type": "boolean",
+          "default": true,
+          "description": "Scroll the preview to the section the editor shows."
+        }
+      }
+    }
+  }
+}
