@@ -3,26 +3,24 @@ title: Welcome to the Windsor docs
 description: What Windsor is, and how to find your way through this guide.
 ---
 
+<!-- ai: rough draft -->
+
 ## What Windsor is
 
-Windsor is an infrastructure-as-code authoring and provisioning tool. It drives Terraform and Kustomize to launch complete infrastructure stacks against major cloud platforms, hypervisors, or bare metal.
+Windsor is an infrastructure-as-code authoring and provisioning tool. It drives Terraform and Kustomize to stand up a complete infrastructure stack on a cloud platform, a hypervisor, bare metal, or your own workstation.
 
-As a CLI, Windsor does not depend on a service, and is distributed with an open-source MPL 2.0 license. It's built in Go and runs on Linux, macOS, and Windows. It can be run from your local workstation or in a
-CI/CD environment.
+Windsor is a single CLI written in Go, released under the MPL 2.0 license, with builds for Linux, macOS, and Windows. It needs no Windsor service or account, so it runs the same way on your workstation and in a CI/CD pipeline.
 
-Stacks are built and distributed as [blueprints](blueprints/overview.md), a portable artifact that bundles as an OCI image. Blueprints are similar to Helm charts, but for the entire stack, not just single applications.
+You describe a stack as a [blueprint](blueprints/overview.md): the Terraform modules and Kustomize manifests that make it up, and the order Windsor applies them in. Windsor pushes a blueprint to any OCI registry as an artifact, so other projects can pull it by tag. A blueprint plays the role of a Helm chart for a whole stack instead of one application.
 
-Rather than build your blueprint from scratch, you will tend to build on top of the existing [core](https://www.windsorcli.dev/catalog/core) blueprint, documented in the [blueprint catalog](https://www.windsorcli.dev/catalog). A [manager](https://www.windsorcli.dev/catalog/manager) blueprint is also available, which itself inherits from core.
+Most projects start from the [`core`](https://www.windsorcli.dev/catalog/core) blueprint rather than an empty one. A new context lists `core` as its source and adds its own values and components on top. The [`manager`](https://www.windsorcli.dev/catalog/manager) blueprint is built the same way, layered on `core`. The [blueprint catalog](https://www.windsorcli.dev/catalog) documents both.
 
-You may also use Windsor only as an environment manager. It helps you organize your project and environments as [contexts](contexts/overview.md). It performs [environment injection](contexts/environment-injection.md) similar to tools like [direnv](https://github.com/direnv/direnv) or [mise](https://mise.jdx.dev).
-As you switch contexts, your environment is dynamically reconfigured, pointing your tools at the
-correct auth files and backends.
+You can also use Windsor only to manage environments. A project holds one or more [contexts](contexts/overview.md), such as `local` and `production`, and Windsor [injects](contexts/environment-injection.md) each context's variables into your shell, the way [direnv](https://github.com/direnv/direnv) or [mise](https://mise.jdx.dev) do. When you switch contexts, `KUBECONFIG`, the cloud profile, and the Terraform variables move to the new context.
 
 ## How to use this guide
 
-The guide is divided into three parts. Read it front to back, or jump to the part you need.
+The guide has three parts. Read it front to back, or start with the part you need.
 
-- **Orientation.** [Getting started](getting-started/first-project.md) installs the CLI and runs a local stack. [Contexts](contexts/overview.md) and [Secrets](secrets/overview.md) cover environments and credentials, which are
-prerequisites for all the chapters that follow.
-- **Provisioning.** Stands a stack up on a target of your choice. Targets your [workstation](workstation/overview.md), a [hypervisor](virtual/hyperv.md), or a [cloud](cloud/aws.md). The [lifecycle](provisioning/overview.md) covers the commands those targets share, the [state backend](provisioning/state-backend.md), [upgrading](provisioning/upgrade.md), and [tearing down](provisioning/destroy.md). [CI/CD](ci-cd/github-actions.md) runs the same commands from a pipeline.
-- **Composition.** Add your own components written in [Terraform](components/terraform.md) and [Kustomize](components/kustomize.md). [Blueprints](blueprints/overview.md) covers authoring reusable stacks with [facets](blueprints/facets.md). Distribute your blueprint as an [OCI artifact](blueprints/sharing.md) to public and private registries.
+- **Orientation.** [Getting started](https://www.windsorcli.dev/cli/installation) installs the CLI and runs a [first project](getting-started/first-project.md) on your workstation. [Contexts](contexts/overview.md) and [Secrets](secrets/overview.md) cover environments and credentials, which every later chapter uses.
+- **Provisioning.** The [lifecycle](provisioning/overview.md) covers the commands every target shares, the [state backend](provisioning/state-backend.md), [upgrading](provisioning/upgrade.md), and [tearing down](provisioning/destroy.md). The chapters after it stand a stack up on your [workstation](workstation/overview.md), a [hypervisor](virtual/hyperv.md), or a [cloud](cloud/aws.md). [CI/CD](ci-cd/github-actions.md) runs the same commands from a pipeline.
+- **Composition.** Add your own [Terraform](components/terraform.md) and [Kustomize](components/kustomize.md) components. [Blueprints](blueprints/overview.md) covers authoring a reusable stack with [facets](blueprints/facets.md) and [sharing](blueprints/sharing.md) it through public and private OCI registries.
