@@ -1,0 +1,9 @@
+extends: existence
+message: "'%s' justifies or dramatizes a fact the page already states. State the fact once and cut the rest."
+level: warning
+ignorecase: true
+tokens:
+  - nothing carries over
+  - that makes (it|this|the [a-z]+) the place for
+  - and nothing else should see
+  - not the (directory|file|folder|path) you
