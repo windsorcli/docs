@@ -3,7 +3,7 @@ title: Environment injection
 description: Windsor sets KUBECONFIG, your cloud profile, and Terraform variables for the active context, through a shell hook or windsor exec.
 ---
 
-`kubectl`, `terraform`, and the cloud CLIs each read their configuration from environment variables. `kubectl` reads `KUBECONFIG`, the AWS CLI reads `AWS_CONFIG_FILE` and `AWS_REGION`, and Terraform reads `TF_VAR_*` and `TF_CLI_ARGS_*`. Windsor sets those variables from the active [context](overview.md), so a plain `kubectl get nodes` in the `local` context reaches the `local` cluster. You can apply them to one command with `windsor exec`, or install a shell hook that keeps them current at every prompt.
+`kubectl`, `terraform`, and the cloud CLIs each read their configuration from environment variables. `kubectl` reads `KUBECONFIG`, the AWS CLI reads `AWS_CONFIG_FILE` and `AWS_REGION`, and Terraform reads `TF_VAR_*` and `TF_CLI_ARGS_*`. Windsor sets those variables from the active [context](overview.md), so `kubectl get nodes` in the `local` context reaches the `local` cluster. You can run any command against a context using `windsor exec -- <command>`, or install a shell hook that injects context variables into every prompt.
 
 ## Run a command with `windsor exec`
 
@@ -78,54 +78,54 @@ Add-Content $PROFILE 'windsor hook powershell | Out-String | Invoke-Expression'
 
 The hook decrypts secret references in a context's `environment:` block and `.env` file, so many references slow the first prompt of a new shell. See [When Windsor decrypts](../secrets/overview.md#when-windsor-decrypts).
 
-## What changes when you switch
+## Switch contexts to change environment variables
 
 Take a project with two contexts. `local` runs on Docker and sets `GREETING: hello-local` and `ONLY_LOCAL: "1"` in the `environment:` block of its `values.yaml`. `production` runs on AWS in `us-east-1` and sets only `GREETING: hello-production`.
 
-You switch with [`windsor set context`](https://www.windsorcli.dev/reference/cli/commands/set-context):
+Switch contexts with [`windsor set context`](https://www.windsorcli.dev/reference/cli/commands/set-context):
 
 ```bash
 windsor set context production
 ```
 
-At the next prompt the hook unsets every variable it set for `local`, then exports the ones for `production`. `KUBECONFIG` moves to `contexts/production/.kube/config`. `GREETING` becomes `hello-production`. `ONLY_LOCAL` is gone, because `production` does not define it. `DOCKER_HOST` and `TALOSCONFIG` are gone too, and `AWS_CONFIG_FILE`, `AWS_SHARED_CREDENTIALS_FILE`, and `AWS_REGION` appear. Nothing carries over from one context to the next.
+At the next prompt the hook unsets every variable it set for `local`, then exports the ones for `production`. `KUBECONFIG` moves to `contexts/production/.kube/config`. `GREETING` becomes `hello-production`. `ONLY_LOCAL` is gone. `DOCKER_HOST` and `TALOSCONFIG` are gone too, and `AWS_CONFIG_FILE`, `AWS_SHARED_CREDENTIALS_FILE`, and `AWS_REGION` appear.
 
-The hook acts only inside a [trusted](trusted-folders.md) project. In an untrusted project, and in a directory outside any project, it prints nothing, even to clear what the last prompt set. If you `cd` from the project to `/tmp`, `KUBECONFIG` still points at the `local` cluster until you `cd` back.
+The hook acts only inside a [trusted](trusted-folders.md) project. When you `cd` into an untrusted folder, the hook unsets the Windsor-managed variables once. They stay unset until you return to a trusted folder.
 
-Windsor treats a directory as part of a project when `windsor.yaml` is in it or in one of its parents. Outside a project, Windsor runs in *global mode*, with `~/.config/windsor` as the project root. The hook prints nothing there. `windsor env` and `windsor exec` still work, but leave out the cloud variables that point at project files, such as `AWS_CONFIG_FILE` and `AWS_SHARED_CREDENTIALS_FILE`.
+Windsor treats a directory as part of a project when `windsor.yaml` is in it or in one of its parents. Outside a project, Windsor runs in *global mode*, with `~/.config/windsor` as the project root. The hook does not set any variables in global mode.
 
 ## Terraform folders and tfvars
 
-Your own Terraform modules live in the project's `terraform/` folder, shared by every context. Each context keeps its values for them in `contexts/<name>/terraform/`, in a tree that mirrors the module paths. This listing shows one module and the `local` context's values for it.
+Your Terraform modules live in the project's `terraform/` folder. Each context keeps its values for them in `contexts/<name>/terraform/`, in a tree that mirrors the module paths. This listing shows one module and the `local` context's values for it.
 
 ```text
 terraform/
-└── net/
-    └── vpc/
-        └── main.tf               # declares variable "cidr"
+└── github/
+    └── repo/
+        └── main.tf               # github provider, declares variable "visibility"
 contexts/
 └── local/
     └── terraform/
-        ├── .env                  # VPC_API_TOKEN=...
-        └── net/
-            └── vpc.tfvars        # cidr = "10.20.0.0/16"
+        ├── .env                  # GITHUB_TOKEN=...
+        └── github/
+            └── repo.tfvars       # visibility = "private"
 ```
 
-When you `cd` into `terraform/net/vpc`, the hook adds `vpc.tfvars` to the arguments Terraform reads from the environment. A `terraform plan` you run there uses the same values that [`windsor plan terraform`](https://www.windsorcli.dev/reference/cli/commands/plan-terraform) would:
+When you `cd` into `terraform/github/repo`, the hook adds `repo.tfvars` to the arguments Terraform reads from the environment. A `terraform plan` uses the same values as [`windsor plan terraform`](https://www.windsorcli.dev/reference/cli/commands/plan-terraform) would:
 
 ```bash
-cd terraform/net/vpc
+cd terraform/github/repo
 terraform init
-terraform plan        # cidr = "10.20.0.0/16", from contexts/local/terraform/net/vpc.tfvars
+terraform plan        # visibility = "private", from contexts/local/terraform/github/repo.tfvars
 ```
 
-`terraform plan` saves its plan in Windsor's data directory for the module, and a following `terraform apply` applies that saved plan. In `production`, the same commands read `contexts/production/terraform/net/vpc.tfvars` instead.
+`terraform plan` saves its plan in Windsor's data directory for the module, and a following `terraform apply` applies that saved plan. In `production`, the same commands read `contexts/production/terraform/github/repo.tfvars` instead.
 
-Variables in `contexts/<name>/terraform/.env` are exported only inside module directories and unset when you leave. That makes the file the place for credentials that Terraform needs and nothing else should see. Values can be [secret references](../secrets/overview.md#provider-credentials-in-terraformenv).
+Variables in `contexts/<name>/terraform/.env` are exported only inside Terraform module directories. Git ignores `.env` files by default. Values can include [secret references](../secrets/overview.md#provider-credentials-in-terraformenv).
 
 ## Under the hood
 
-At each prompt the hook runs [`windsor env --decrypt --hook`](https://www.windsorcli.dev/reference/cli/commands/env), and the shell evaluates the `export` and `unset` lines it prints. Each shell attaches differently.
+At each prompt the hook runs [`windsor env --decrypt --hook`](https://www.windsorcli.dev/reference/cli/commands/env), and the shell evaluates the `export` and `unset` lines it prints. Each shell's mechanism varies slightly.
 
 | Shell | Runs the hook |
 |---|---|
@@ -133,11 +133,11 @@ At each prompt the hook runs [`windsor env --decrypt --hook`](https://www.windso
 | bash | Before each prompt, through `PROMPT_COMMAND`, keeping the last command's exit status |
 | fish | On the `fish_prompt` event |
 | tcsh | From the `precmd` alias |
-| PowerShell | In a wrapper around your existing `prompt` function, which still runs afterward |
+| PowerShell | In a wrapper around your existing `prompt` function, which runs afterward |
 
-The `--hook` flag makes `env` non-fatal. It sends warnings to `/dev/null` and exits 0 on any error, so a broken project cannot break your prompt. Run `windsor env --verbose` without `--hook` to see the errors.
+The `--hook` flag makes `env` non-fatal. It sends warnings to `/dev/null` and always exits 0, so a broken project cannot break your prompt. Run `windsor env --verbose` without `--hook` to see the errors.
 
-`WINDSOR_MANAGED_ENV` lists every variable Windsor set. `windsor set context` leaves a reset token in `.windsor/`, and on the next prompt the hook unsets everything in that list before it exports the new context's variables. On every other prompt, Windsor also unsets any name from the previous list that no part of the new environment sets, so a key removed from `environment:` disappears too.
+`WINDSOR_MANAGED_ENV` lists all variables actively managed by Windsor. `windsor set context` leaves a reset token in `.windsor/`, so on the next prompt the hook unsets everything in that list before it exports the new context's variables.
 
 In a fresh `local` context, `windsor env` prints:
 
@@ -157,7 +157,7 @@ WINDSOR_PROJECT_ROOT=/path/to/project
 WINDSOR_SESSION_TOKEN=cwornoJ
 ```
 
-Cloud variables appear when the context configures that cloud. Terraform variables appear only in a directory that holds `*.tf` files under a `terraform/` folder.
+Cloud CLI variables (such as `AWS_CONFIG_FILE`) appear if the context manages cloud resources. Terraform variables appear only in a directory that holds `*.tf` files under a `terraform/` folder.
 
 ### Terraform variables
 
@@ -172,13 +172,18 @@ In a module directory, Windsor sets these variables:
 | `TF_CLI_ARGS_refresh`, `_import`, `_destroy` | the `-var-file` arguments and `-lock-timeout` |
 | `TF_VAR_context`, `TF_VAR_context_id`, `TF_VAR_context_path`, `TF_VAR_project_root`, `TF_VAR_os_type` | the context name, its `id`, `contexts/<context>`, the project root, and `unix` or `windows` |
 
-The `-var-file` arguments come in a fixed order. When the directory is a blueprint [component](../components/terraform.md), the `terraform.tfvars` that Windsor generates under `.windsor/` comes first. Your `<module>.tfvars` or `<module>.tfvars.json` comes after it, so Terraform applies your values last. A module that no component uses gets only your file.
+Windsor passes the `-var-file` arguments in this order. Terraform reads them in order, and a later file overrides an earlier one:
 
-In a component's directory, Windsor also writes a `backend_override.tf` and adds it to `terraform/.gitignore`, so a hand-run `terraform init` uses the context's backend. See [Lifecycle](../provisioning/state-backend.md#bootstrap) for how `bootstrap` creates that backend.
+1. `.windsor/contexts/<context>/terraform/<module>/terraform.tfvars`, which Windsor generates from the inputs of the blueprint's [component](../components/terraform.md) for the module
+2. `contexts/<context>/terraform/<module>.tfvars` (or `.tfvars.json`), written by you
+
+Your file comes last, so your values win. Windsor skips a file that does not exist, and a module that no component uses gets only your file.
+
+Windsor also writes a `backend_override.tf` and adds it to `terraform/.gitignore`, so a hand-run `terraform init` uses the configured Terraform backend. See [State backend](../provisioning/state-backend.md#bootstrap) for how `bootstrap` creates that backend.
 
 ## Reference
 
-For every variable Windsor sets per tool, run [`windsor env`](https://www.windsorcli.dev/reference/cli/commands/env) in the context you care about.
+To see every variable Windsor sets for a context, run [`windsor env`](https://www.windsorcli.dev/reference/cli/commands/env).
 
 - [`windsor env`](https://www.windsorcli.dev/reference/cli/commands/env), [`windsor exec`](https://www.windsorcli.dev/reference/cli/commands/exec), [`windsor hook`](https://www.windsorcli.dev/reference/cli/commands/hook)
 - [Trusted folders](trusted-folders.md)

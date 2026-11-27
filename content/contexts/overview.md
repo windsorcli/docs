@@ -3,7 +3,7 @@ title: Overview
 description: A context is a named environment (local, staging, production) with its own blueprint, values, and credentials, and Windsor tracks which one is active.
 ---
 
-One project usually deploys to more than one place. You run a cluster on your laptop while you work, and the same platform runs on AWS for real traffic. The two must not share a kubeconfig, a cloud profile, or Terraform state, or a command meant for your laptop lands on production. A *context* is a named environment inside a project, such as `local` or `production`. It has its own blueprint, its own values, and its own credentials. Windsor tracks one *active context*, and every command acts on it.
+One project often deploys to more than one place. You may work across development, staging, and production environments. Or you may spin up ephemeral environments for QA and testing. Each of these environments may need its own kubeconfig, a cloud profile, or Terraform state. A *context* is a named environment inside a project, such as `local` or `production`. It has its own blueprint, its own values, and its own credentials. Windsor tracks one *active context*. Your CLI tools are dynamically configured to use settings and credentials specific to the active context.
 
 The examples in this section follow one project with two contexts. `local` runs on Docker Desktop on your workstation. `production` runs on AWS in `us-east-1`. Both use the [`core`](https://github.com/windsorcli/core) blueprint.
 
@@ -37,7 +37,7 @@ error: the following required values are not set in values.yaml:
 
 `init` switches the active context and writes `contexts/production/values.yaml` before it checks the values. After the error, `production` is still the active context, with a partial `values.yaml`. Add the region to that file, or rerun `init` with `--set`.
 
-## What a context holds
+## A context's folder structure
 
 Windsor keeps each context's files in `contexts/<context>/` under the project root. This listing shows the project after `init` for both contexts and a first `windsor up` in `local`.
 
@@ -58,7 +58,7 @@ contexts/
 └── contexts/local/              Terraform module shims and workstation config
 ```
 
-`values.yaml` holds the context's *values*, the settings the blueprint reads. `init` writes the ones it can work out. For `production` they are the platform, the region, and a state backend:
+`values.yaml` holds the context's *values*, the settings the blueprint reads. `init` writes default values and those you pass with `--set`. For `production` these include the platform, the region, and a state backend:
 
 ```yaml
 # contexts/production/values.yaml
@@ -72,7 +72,7 @@ aws:
   region: us-east-1
 ```
 
-You add other files as you need them: `terraform/<module>.tfvars` for your own Terraform modules, `patches/` for Kustomize patches, `.env` and `secrets.enc.yaml` for secrets. The [contexts reference](https://www.windsorcli.dev/reference/cli/contexts) lists every file.
+You add other files as you need them, including `terraform/<module>.tfvars` for your own Terraform modules, `patches/` for Kustomize patches, and `.env` and `secrets.enc.yaml` for secrets. The [contexts reference](https://www.windsorcli.dev/reference/cli/contexts) outlines each file in greater detail.
 
 ## Switch contexts
 
