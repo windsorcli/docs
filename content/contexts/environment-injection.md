@@ -179,7 +179,7 @@ Windsor passes the `-var-file` arguments in this order. Terraform reads them in 
 
 Your file comes last, so your values win. Windsor skips a file that does not exist, and a module that no component uses gets only your file.
 
-Windsor also writes a `backend_override.tf` and adds it to `terraform/.gitignore`, so a hand-run `terraform init` uses the configured Terraform backend. See [State backend](../provisioning/state-backend.md#bootstrap) for how `bootstrap` creates that backend.
+For a module that a component uses, Windsor also writes a `backend_override.tf` and adds it to `terraform/.gitignore`, so a hand-run `terraform init` uses the configured Terraform backend. See [State backend](../provisioning/state-backend.md#bootstrap) for how `bootstrap` creates that backend.
 
 ## Reference
 
