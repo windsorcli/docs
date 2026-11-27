@@ -3,81 +3,136 @@ title: Overview
 description: A context is a named environment (local, staging, production) with its own blueprint, values, and credentials, and Windsor tracks which one is active.
 ---
 
-A context is a named environment, such as `local`, `staging`, or `production`. Each context has a blueprint, a `values.yaml`, and its own credentials and kubeconfig. Windsor tracks which one is active. Commands act on the active context, and [environment injection](environment-injection.md) points `kubectl`, `terraform`, and the cloud CLIs at it.
+One project often deploys to more than one place. You may work across development, staging, and production environments. Or you may spin up ephemeral environments for QA and testing. Each of these environments may need its own kubeconfig, a cloud profile, or Terraform state. A *context* is a named environment inside a project, such as `local` or `production`. It has its own blueprint, its own values, and its own credentials. Windsor tracks one *active context*. Your CLI tools are dynamically configured to use settings and credentials specific to the active context.
 
-Contexts usually map to a stage (`development`, `staging`, `production`), a slice of infrastructure (`admin`, `web`, `observability`), or both, like `web-staging`. Contexts can share infrastructure code and still keep separate credentials, endpoints, and input values.
-
-Windsor keeps a context's files under `contexts/<context-name>/` in the project root.
-
-```text
-windsor.yaml                     project root; a version stamp
-contexts/
-├── local/
-│   ├── blueprint.yaml           this context's blueprint
-│   ├── values.yaml              values that feed the schema
-│   ├── .gitignore               keeps sensitive context files out of commits
-│   ├── secrets.enc.yaml         SOPS-encrypted secrets, safe to commit
-│   ├── .env                     git-ignored environment variables
-│   ├── terraform/               <component>.tfvars overrides for terraform components
-│   ├── patches/                 <component>/patch.yaml patches for kustomize components
-│   ├── .kube/config             kubeconfig, written by windsor up
-│   └── .talos/config            talosconfig, written by windsor up
-├── staging/                     another context, with its own copy of these files
-└── production/
-.windsor/
-├── context                      the active context name; Windsor assumes `local` when it is absent
-└── contexts/local/              generated Terraform module shims, workstation config, and the stack lock
-```
+The examples in this section follow one project with two contexts. `local` runs on Docker Desktop on your workstation. `production` runs on AWS in `us-east-1`. Both use the [`core`](https://github.com/windsorcli/core) blueprint.
 
 ## Create a context
 
-In a git repository, `windsor init` creates the project: a `windsor.yaml` at the root on the first run, and a `local` context with a starter `blueprint.yaml` and `values.yaml`:
+In a git repository, `windsor init` creates the project and its first context:
 
 ```bash
 windsor init
 ```
 
-To add another context, give it a name and a platform. AWS needs a region, so pass one with `--set`:
+```text
+Initialization successful
+```
+
+On the first run, `init` writes `windsor.yaml` in the current directory and creates `contexts/local/`. It also adds the project to your [trusted folders](trusted-folders.md). With no context name, `init` uses the active context, and `local` when none is set. `init` refuses to run outside a git repository.
+
+To add `production`, give `init` a name and a platform. AWS needs a region, so pass it with `--set`:
 
 ```bash
 windsor init production --platform aws --set aws.region=us-east-1
 ```
 
-This creates `contexts/production/` with its own `blueprint.yaml` and `values.yaml`, and makes it the active context. If you leave out the region, `init` exits with an error.
+`init` creates `contexts/production/` and makes `production` the active context. Without the region, `init` stops and lists the missing value:
+
+```text
+error: the following required values are not set in values.yaml:
+
+  - aws.region
+```
+
+`init` switches the active context and writes `contexts/production/values.yaml` before it checks the values. After the error, `production` is still the active context, with a partial `values.yaml`. Add the region to that file, or rerun `init` with `--set`.
+
+## A context's folder structure
+
+Windsor keeps each context's files in `contexts/<context>/` under the project root. This listing shows the project after `init` for both contexts and a first `windsor up` in `local`.
+
+```text
+windsor.yaml                     version: v1alpha2
+contexts/
+├── local/
+│   ├── blueprint.yaml           the context's blueprint
+│   ├── values.yaml              the context's values
+│   ├── .gitignore               keeps credentials and kubeconfig out of commits
+│   ├── .kube/config             kubeconfig, written by windsor up
+│   └── .talos/config            talosconfig, written by windsor up
+└── production/
+    ├── blueprint.yaml
+    └── values.yaml
+.windsor/                        generated files; git-ignored
+├── context                      the active context name
+└── contexts/local/              Terraform module shims and workstation config
+```
+
+`values.yaml` holds the context's *values*, the settings the blueprint reads. `init` writes default values and those you pass with `--set`. For `production` these include the platform, the region, and a state backend:
+
+```yaml
+# contexts/production/values.yaml
+id: w6hcydi7
+platform: aws
+terraform:
+  backend:
+    type: s3
+    auto_prefix: true
+aws:
+  region: us-east-1
+```
+
+You add other files as you need them, including `terraform/<module>.tfvars` for your own Terraform modules, `patches/` for Kustomize patches, and `.env` and `secrets.enc.yaml` for secrets. The [contexts reference](https://www.windsorcli.dev/reference/cli/contexts) outlines each file in greater detail.
 
 ## Switch contexts
 
-Set the active context, then check it:
+[`windsor set context`](https://www.windsorcli.dev/reference/cli/commands/set-context) changes the active context, and [`windsor get context`](https://www.windsorcli.dev/reference/cli/commands/get-context) prints it:
 
 ```bash
-windsor set context <context-name>
+windsor set context local
 windsor get context
 ```
 
-`windsor set context` writes the context name to `.windsor/context` and sets `WINDSOR_CONTEXT` for the current process. The command fails for a context that doesn't exist, so create it with `windsor init <name>` first. By your next prompt, the shell hook has refreshed the per-context environment, including kubeconfig and the cloud profile. See [Environment injection](environment-injection.md).
+```text
+local
+```
+
+`set context` writes the name to `.windsor/context`. When that file is absent, Windsor reads `WINDSOR_CONTEXT` from the environment, then falls back to `local`. The context must already exist:
+
+```text
+error: context "staging" not found
+hint: Run windsor init staging to create it.
+```
+
+[`windsor get contexts`](https://www.windsorcli.dev/reference/cli/commands/get-contexts) lists every context and marks the active one:
+
+```text
+NAME        PROVIDER  BACKEND  CURRENT
+local       docker    local    *
+production  aws       s3
+```
+
+After a switch, the shell hook moves `KUBECONFIG`, the cloud profile, and the context's other variables to the new context at your next prompt. See [Environment injection](environment-injection.md).
 
 ## Context ID
 
-A context's name can change. Each context also has an `id` in its `values.yaml` that stays the same. `windsor init` generates one, such as `wrk3va8i`: a `w` and 7 random lowercase letters and digits. To use your own `id`, set it before the first deploy:
+A context's name can change. Its *id* does not. `init` writes a random `id` into `values.yaml`, such as `w6hcydi7`: a `w` and 7 lowercase letters and digits. The `core` Terraform modules use the `id` in the names of the resources they create, such as the S3 state bucket `terraform-state-<id>`.
+
+To choose the `id`, set it before the first deploy:
 
 ```yaml
-# contexts/staging/values.yaml
-id: web-staging
+# contexts/production/values.yaml
+id: web-production
 ```
 
-An `id` is a DNS label. It has 1 to 63 characters, starts with a lowercase letter, and contains only lowercase letters, digits, and single hyphens. It does not end with a hyphen. Windsor rejects any other value when it loads the context.
+An `id` is a DNS label. It has 1 to 63 characters and starts with a lowercase letter. It contains only lowercase letters, digits, and hyphens, never two hyphens in a row, and does not end with a hyphen. `init` and `up` reject any other value:
 
-The `core` Terraform modules use the `id` in the names of the resources they create, such as the S3 state bucket `terraform-state-<id>`. Many cloud names have a limit shorter than 63 characters. When the `id` is too long for a name, the module truncates the `id` and adds the first 6 hex characters of its SHA-256 hash, so the name stays unique. The README of each [`core` Terraform module](https://github.com/windsorcli/core/tree/main/terraform) lists its limits in a "Context id" section.
+```text
+error: Context id "Web_Production" must start with a lowercase letter (a-z).
+hint: Change id in values.yaml or in the --set flag, or remove it so that windsor generates one.
+```
+
+Many cloud names allow fewer than 63 characters. When the `id` is too long for a name, the `core` module shortens it and appends the first 6 hex characters of its SHA-256 hash, so the name stays unique. The README of each [`core` Terraform module](https://github.com/windsorcli/core/tree/main/terraform) lists its limits in a "Context id" section.
 
 ## Workstation vs. deployed contexts
 
-A workstation context, named `local` or starting with `local-`, runs a Kubernetes cluster on your machine. Windsor starts and stops the VM or container runtime it runs in. Every other context, like `staging` or `production`, is deployed. It targets a cloud, a hypervisor, or bare metal, and Windsor provisions the infrastructure directly.
+A *workstation context* runs its cluster on your machine, and Windsor starts and stops the container runtime or VM it runs in. `init` makes a context named `local`, or starting with `local-`, a workstation context and records `dev: true` in its `values.yaml`. Every other context is *deployed*: it targets a cloud, a hypervisor, or bare metal, and Windsor provisions that infrastructure.
 
-|                 | Workstation                                                                                          | Deployed                                                                           |
-| --------------- | ---------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
-| Cluster runs on | Your machine                                                                                         | A cloud, hypervisor, or bare metal                                                 |
-| First run       | [`windsor up`](https://www.windsorcli.dev/reference/cli/commands/up)                                 | [`windsor bootstrap`](https://www.windsorcli.dev/reference/cli/commands/bootstrap) |
-| Tear down       | [`windsor down`](https://www.windsorcli.dev/reference/cli/commands/down)                             | [`windsor destroy`](https://www.windsorcli.dev/reference/cli/commands/destroy)     |
+|                 | Workstation                                                              | Deployed                                                                           |
+| --------------- | ------------------------------------------------------------------------ | ---------------------------------------------------------------------------------- |
+| Cluster runs on | Your machine                                                             | A cloud, hypervisor, or bare metal                                                 |
+| First run       | [`windsor up`](https://www.windsorcli.dev/reference/cli/commands/up)     | [`windsor bootstrap`](https://www.windsorcli.dev/reference/cli/commands/bootstrap) |
+| Tear down       | [`windsor down`](https://www.windsorcli.dev/reference/cli/commands/down) | [`windsor destroy`](https://www.windsorcli.dev/reference/cli/commands/destroy)     |
 
 See the [workstation overview](../workstation/overview.md) and the [provisioning lifecycle](../provisioning/overview.md).
 
@@ -88,6 +143,6 @@ See the [workstation overview](../workstation/overview.md) and the [provisioning
 
 ## Reference
 
-- [`windsor init`](https://www.windsorcli.dev/reference/cli/commands/init), [`windsor set`](https://www.windsorcli.dev/reference/cli/commands/set), [`windsor get`](https://www.windsorcli.dev/reference/cli/commands/get)
-- [Contexts reference](https://www.windsorcli.dev/reference/cli/contexts): on-disk layout of `contexts/`, including what lives in each context's `values.yaml`
-- [Configuration reference](https://www.windsorcli.dev/reference/cli/configuration): full schema for values a context accepts
+- [`windsor init`](https://www.windsorcli.dev/reference/cli/commands/init), [`windsor set context`](https://www.windsorcli.dev/reference/cli/commands/set-context), [`windsor get context`](https://www.windsorcli.dev/reference/cli/commands/get-context)
+- [Contexts reference](https://www.windsorcli.dev/reference/cli/contexts): on-disk layout of `contexts/`
+- [Configuration reference](https://www.windsorcli.dev/reference/cli/configuration): every value a context accepts

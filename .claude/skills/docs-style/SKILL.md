@@ -287,6 +287,49 @@ sight:
   In **YAML frontmatter** use a comma or parentheses, never a colon —
   an unquoted `key: value` colon breaks the parse.
 
+### What the docs owner cuts from a draft
+
+The docs owner rewrote the Contexts rough drafts. These are the changes
+the owner made over and over. Draft against them. Vale's
+`Windsor.DraftTells` catches the fixed phrases.
+
+<!-- vale Windsor.DraftTells = NO -->
+
+- **Justifying a fact the page already states.** "`ONLY_LOCAL` is
+  gone, because `production` does not define it" became "`ONLY_LOCAL`
+  is gone." Cut the "because" clause when the setup paragraph already
+  gave the reason.
+- **Selling the fact after stating it.** "Nothing carries over from one
+  context to the next." and "That makes the file the place for
+  credentials that Terraform needs and nothing else should see." were
+  both cut. The paragraph before each one already said it.
+- **Correcting a mistake nobody made.** "the directory that holds
+  `windsor.yaml`, not the directory you ran the command in" became "the
+  directory that holds `windsor.yaml`."
+<!-- vale Windsor.DraftTells = YES -->
+
+- **Stakes in the lead.** "or a command meant for your laptop lands on
+  production" was replaced with the environments a reader actually runs:
+  development, staging, production, and ephemeral QA.
+- **Exit codes and exact counts in prose.** "prints the same two lines
+  and exits 1" became "prints an error and exits." The listing already
+  shows the lines. Put an exit code in prose only when the reader
+  scripts against it.
+- **Internal jargon.** "gated" became "blocked" or "protected" for
+  trust. Use the word the reader would use.
+- **Vague verbs.** "keeps them current at every prompt" became "injects
+  context variables into every prompt." "the ones it can work out"
+  became "default values and those you pass with `--set`."
+- **"What …" headings for a task.** "What changes when you switch"
+  became "Switch contexts to change environment variables." Existing
+  headings stay as they are, because their anchors are public.
+- **Precedence in a sentence.** An ordered override chain is a numbered
+  list, lowest first, after a lead sentence that says a later item wins.
+  A table is too heavy for two or three items.
+- **Reader motive first.** "To remove trust, delete …" and "To see
+  every variable Windsor sets for a context, run …" start with what the
+  reader wants.
+
 The point isn't a banned-word list — it's that this register is vague
 and unearned, the opposite of the specific, calm voice above.
 [Wikipedia's "Signs of AI writing"](https://en.wikipedia.org/wiki/Wikipedia:Signs_of_AI_writing)
@@ -326,11 +369,13 @@ not the content. The overview lead below is the docs owner's own
 writing — when a generated draft and these samples disagree, the
 owner's prose wins.
 
-These samples calibrate the sentence. None of them shows a whole
-section in the [textbook register](#the-textbook-register) yet; the
-first section the docs owner approves in that register goes here as
-the fourth sample. Until then, check section structure against the
-register's rules, not against these excerpts.
+These samples calibrate the sentence. For whole sections, read the
+Contexts chapter: [`contexts/overview.md`](../../../content/contexts/overview.md),
+[`contexts/environment-injection.md`](../../../content/contexts/environment-injection.md),
+and [`contexts/trusted-folders.md`](../../../content/contexts/trusted-folders.md).
+The docs owner authored it in the
+[textbook register](#the-textbook-register), and it is the voice
+sample for every drafting session. Read it before you draft a chapter.
 
 ### Guide tier (how-to) — [`contexts/lifecycle.md`](../../../content/contexts/lifecycle.md)
 
@@ -348,24 +393,25 @@ Why it works:
   on its own" pre-empts "why doesn't `up` just do it?" without a
   digression.
 
-### Under the hood (explanation) — [`contexts/environment-injection.md`](../../../content/contexts/environment-injection.md)
+### Under the hood (explanation) — [`contexts/trusted-folders.md`](../../../content/contexts/trusted-folders.md)
 
-> To choose project or global mode, Windsor walks up from the current
-> directory looking for `windsor.yaml`. If it finds one, that
-> directory is the project root and the shell is in project mode. If
-> it finds none, Windsor falls back to `~/.config/windsor` and runs in
-> global mode.
+> Before a protected command reads the project, Windsor finds the
+> project root by walking up from the current directory, up to 10
+> levels, looking for `windsor.yaml` or `windsor.yml`. The project is
+> trusted when its root, or a directory above it, is in the trust file.
+> Windsor compares whole path components, so a listed `/work/proj` does
+> not trust `/work/proj-other`.
 
 Why it works:
 
 - **Mechanism first, third person about the system.** The subject is
-  Windsor and the verb is what it does: "walks up," "falls back." No
+  Windsor and the verb is what it does: "finds," "compares." No
   second-person hand-holding.
-- **Plain words for a precise idea.** "Walks up… looking for" beats
+- **Plain words for a precise idea.** "Walking up… looking for" beats
   "performs an upward traversal in search of."
-- **Sentence structure mirrors the logic.** "If it finds one… / If it
-  finds none…": the parallel structure carries the branch so the
-  reader doesn't have to reconstruct it.
+- **A real limit and a real counterexample.** "Up to 10 levels" and
+  "`/work/proj` does not trust `/work/proj-other`" answer the two
+  questions a careful reader asks next.
 
 ### Section / overview lead (explanation) — [`components/terraform.md`](../../../content/components/terraform.md)
 
