@@ -53,7 +53,13 @@ flowchart TB
 
 The shell hook exports `KUBECONFIG` and `DOCKER_HOST` on every prompt, so plain `kubectl` and `docker` commands point to the local workstation. Without the hook, run commands through [`windsor exec --`](https://www.windsorcli.dev/reference/cli/commands/exec). See [Environment injection](../contexts/environment-injection.md).
 
-[`windsor configure network`](https://www.windsorcli.dev/reference/cli/commands/configure-network) adds a DNS resolver entry that sends the `test` domain to `dns.test`.
+[`windsor configure network`](https://www.windsorcli.dev/reference/cli/commands/configure-network) adds a DNS resolver entry that sends the `test` domain to `dns.test`. The entry covers only that domain and leaves the rest of the host's DNS alone:
+
+- macOS: a file at `/etc/resolver/test`
+- Linux: a systemd-resolved drop-in at `/etc/systemd/resolved.conf.d/dns-override-test.conf`
+- Windows: a Name Resolution Policy Table (NRPT) rule for `.test`
+
+On Docker Desktop the entry points at `127.0.0.1`, where the cluster's DNS port is published. On Colima the command also adds a host route to the VM's network and persists it across reboots. The command asks for sudo on macOS and Linux and must run from an Administrator PowerShell on Windows. `windsor configure network --dry-run` previews the changes, and `--revert` removes them.
 
 When you save project files locally, they mirror through the local `git.test` livereload service as a git endpoint. Your local cluster actively resolves this code, providing a responsive environment for developing against gitops based setups.
 
