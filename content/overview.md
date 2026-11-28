@@ -5,13 +5,13 @@ description: What Windsor is, and how to find your way through this guide.
 
 ## What Windsor is
 
-Windsor is a framework for building and distributing self-hosted infrastructure. Leveraging open-source, industry-standard tooling, you can quickly launch complete stacks to a variety of compute platforms. A stack, or [_blueprint_](blueprints/overview.md), can deploy directly to mini-PCs, datacenters, or public clouds with minimal prerequisites.
+Windsor is a framework for building and distributing self-hosted infrastructure. Leveraging open-source, industry-standard tooling, you can quickly launch complete stacks to a variety of compute platforms. A stack, or [blueprint](blueprints/overview.md), can deploy directly to mini-PCs, datacenters, or public clouds with minimal prerequisites.
 
 As a complete SDK, Windsor makes it possible to run a blueprint on your local machine using Docker or native virtualization. A CLI written in Go runs on Windows, macOS, and Linux. No accounts or sign-ups are involved other than a public cloud account. If you build directly on your own hardware, no third-party services are required at all.
 
 Blueprints are defined using conventional [Terraform](components/terraform.md) and [Kustomize](components/kustomize.md). A [core](https://www.windsorcli.dev/catalog/core) blueprint is provided with most of the basic adapters, connectors, and system services required to operate a standard runtime on top of your chosen compute platform. Applications you write on top of these blueprints may likewise be deployed to any compute platform supported by Windsor.
 
-You can build your own blueprint on top of _core_. Any blueprint you build can in turn be distributed to others as an [OCI artifact](blueprints/sharing.md). Blueprints are deployed using a single command, such as:
+You can build your own blueprint on top of [core](https://www.windsorcli.dev/catalog/core). Any blueprint you build can in turn be distributed to others as an [OCI artifact](blueprints/sharing.md). Blueprints are deployed using a single command, such as:
 
 ```bash
 windsor bootstrap production --platform aws --set aws.region=us-east-1 \
