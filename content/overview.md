@@ -5,7 +5,7 @@ description: What Windsor is, and how to find your way through this guide.
 
 ## What Windsor is
 
-Windsor is a framework for building and distributing self-hosted infrastructure. Leveraging open-source, industry-standard tooling, you can quickly launch complete stacks to a variety of compute platforms. A stack, or [blueprint](blueprints/overview.md), can deploy directly to mini-PCs, datacenters, or public clouds with minimal prerequisites.
+Windsor is a framework for building and distributing self-hosted infrastructure. Leveraging open-source, industry-standard tooling, you can quickly launch complete stacks to a variety of compute platforms. A stack, or [blueprint](blueprints/overview.md), can deploy directly to mini-PCs, single-board machines (Raspberry Pi), datacenters, or public clouds with minimal prerequisites.
 
 As a complete SDK, Windsor makes it possible to run a blueprint on your local machine using Docker or native virtualization. A CLI written in Go runs on Windows, macOS, and Linux. No accounts or sign-ups are involved other than a public cloud account. If you build directly on your own hardware, no third-party services are required at all.
 
@@ -20,7 +20,7 @@ windsor bootstrap production --platform aws --set aws.region=us-east-1 \
 
 ## How to use this guide
 
-The documentation has been written in the style of a textbook. You can read it through end to end, or dive into specific reference material. If you're using an AI coding agent, you can point it at these pages and ask it to set up your project using Windsor.
+The guide has been written in the style of a textbook. You can read it through end to end, or dive into specific reference material. If you're using an AI coding agent, you can point it at these pages and ask it to set up your project using Windsor.
 
 The guide has three parts.
 
